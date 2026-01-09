@@ -31,7 +31,6 @@ public class BookStoreApp {
             System.out.println("Kết nối thành công!");
             try {
                 conn.close();
-                System.out.println("Đã đóng kết nối database");
             } catch (SQLException e) {
                 e.printStackTrace();
             }
