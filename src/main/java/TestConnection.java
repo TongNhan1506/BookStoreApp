@@ -1,4 +1,4 @@
-import com.bookstore.util.DatabaseConnection; // Nhớ import class kết nối của bạn
+import com.bookstore.util.DatabaseConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 
