@@ -1,134 +1,178 @@
-DROP DATABASE IF EXISTS bookstore_db;
-CREATE DATABASE bookstore_db;
-USE bookstore_db;
+drop database if exists bookstore_db;
+create database bookstore_db character set utf8mb4 collate utf8mb4_unicode_ci;
 
-CREATE TABLE role (
-    role_id INT AUTO_INCREMENT PRIMARY KEY,
-    role_name VARCHAR(50) NOT NULL UNIQUE
+use bookstore_db;
+
+create table membership_rank (
+	rank_id int auto_increment primary key,
+    rank_name varchar(50) not null,
+    min_point int default 0,
+    discount_percent decimal(5, 2) default 0
 );
 
-CREATE TABLE author (
-    author_id INT AUTO_INCREMENT PRIMARY KEY,
-    author_name VARCHAR(100) NOT NULL,
-    nationality VARCHAR(100)
+create table role (
+	role_id int auto_increment primary key,
+    role_name varchar(50) not null unique
 );
 
-CREATE TABLE category (
-    category_id INT AUTO_INCREMENT PRIMARY KEY,
-    category_name VARCHAR(100) NOT NULL UNIQUE
+create table action (
+	action_id int auto_increment primary key,
+    action_code varchar(50) not null unique,
+    action_name varchar(100) not null
 );
 
-CREATE TABLE supplier (
-    supplier_id INT AUTO_INCREMENT PRIMARY KEY,
-    supplier_name VARCHAR(100) NOT NULL,
-    supplier_address VARCHAR(255),
-    supplier_phone VARCHAR(20)
+create table category (
+	category_id int auto_increment primary key,
+    category_name varchar(100) not null
 );
 
-CREATE TABLE customer (
-    customer_id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_name VARCHAR(100) NOT NULL,
-    customer_phone VARCHAR(20),
-    customer_member_rank VARCHAR(20) DEFAULT 'Member',
-    customer_member_point INT DEFAULT 0
+create table author (
+	author_id int auto_increment primary key,
+    author_name varchar(100) not null,
+    nationality varchar(100)
 );
 
-CREATE TABLE payment_method (
-    payment_method_id INT AUTO_INCREMENT PRIMARY KEY,
-    payment_method_name VARCHAR(50) NOT NULL
+create table supplier (
+	supplier_id int auto_increment primary key,
+    supplier_name varchar(100) not null,
+    supplier_address varchar(255),
+    supplier_phone varchar(20),
+    status int default 1
 );
 
-CREATE TABLE employee (
-    employee_id INT AUTO_INCREMENT PRIMARY KEY,
-    employee_name VARCHAR(100) NOT NULL,
-    employee_phone VARCHAR(20),
-    base_salary DECIMAL(15, 2), 
-    salary_factor FLOAT DEFAULT 1.0,
-    day_in DATE,
-    role_id INT,
-    FOREIGN KEY (role_id) REFERENCES role(role_id)
+create table payment_method (
+	payment_method_id int auto_increment primary key,
+    payment_method_name varchar(50) not null
 );
 
-CREATE TABLE account (
-    username VARCHAR(50) PRIMARY KEY,
-    password VARCHAR(255) NOT NULL,
-    employee_id INT UNIQUE,
-    FOREIGN KEY (employee_id) REFERENCES employee(employee_id) ON DELETE CASCADE
+create table employee (
+	employee_id int auto_increment primary key,
+    employee_name varchar(100) not null,
+    employee_phone varchar(20) not null,
+    birthday date,
+    base_salary decimal(15, 0) default 0,
+    salary_factor decimal(5, 2) default 1,
+    day_in date,
+    status bit default 1,
+    role_id int not null,
+    foreign key (role_id) references role(role_id)
 );
 
-CREATE TABLE book (
-    book_id INT AUTO_INCREMENT PRIMARY KEY,
-    book_name VARCHAR(255) NOT NULL,
-    category_id INT,
-    supplier_id INT,
-    selling_price DECIMAL(15, 2) NOT NULL,
-    import_price DECIMAL(15, 2) NOT NULL,
-    quantity INT DEFAULT 0,
-    FOREIGN KEY (category_id) REFERENCES category(category_id),
-    FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id)
+create table account (
+	username varchar(50) primary key,
+    password varchar(255) not null,
+    employee_id int not null unique,
+    foreign key (employee_id) references employee(employee_id),
+    status int default 1
 );
 
-CREATE TABLE book_author (
-    book_id INT,
-    author_id INT,
-    PRIMARY KEY (book_id, author_id),
-    FOREIGN KEY (book_id) REFERENCES book(book_id),
-    FOREIGN KEY (author_id) REFERENCES author(author_id)
+create table permission (
+	permission_id int auto_increment primary key,
+    role_id int not null,
+    action_id int not null,
+    is_view bit default 1,
+    is_action bit default 1,
+    foreign key (role_id) references role(role_id),
+    foreign key (action_id) references action(action_id)
 );
 
-CREATE TABLE discount (
-    discount_id INT AUTO_INCREMENT PRIMARY KEY,
-    book_id INT,
-    percent FLOAT NOT NULL, -- Ví dụ: 0.1 là giảm 10%
-    start_date DATE,
-    end_date DATE,
-    FOREIGN KEY (book_id) REFERENCES book(book_id)
+create table customer (
+	customer_id int auto_increment primary key,
+    customer_name varchar(100) not null,
+    customer_phone varchar(20) not null,
+    point int default 0,
+    rank_id int default 1,
+    foreign key (rank_id) references membership_rank(rank_id)
 );
 
-CREATE TABLE import_ticket (
-    import_ticket_id INT AUTO_INCREMENT PRIMARY KEY,
-    supplier_id INT,
-    employee_id INT,
-    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    total_price DECIMAL(15, 2),
-    FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id),
-    FOREIGN KEY (employee_id) REFERENCES employee(employee_id)
+create table book (
+	book_id int auto_increment primary key,
+    book_name varchar(255) not null,
+    selling_price decimal(15, 0) default 0,
+    import_price decimal(15, 0) default 0,
+    image varchar(255),
+    description text,
+    status bit default 1,
+    category_id int not null,
+    supplier_id int not null,
+    foreign key (category_id) references category(category_id),
+    foreign key (supplier_id) references supplier(supplier_id)
 );
 
-CREATE TABLE import_ticket_detail (
-    import_ticket_id INT,
-    book_id INT,
-    import_quantity INT NOT NULL,
-    import_price DECIMAL(15, 2),
-    PRIMARY KEY (import_ticket_id, book_id),
-    FOREIGN KEY (import_ticket_id) REFERENCES import_ticket(import_ticket_id),
-    FOREIGN KEY (book_id) REFERENCES book(book_id)
+create table book_author (
+	book_id int not null,
+    author_id int not null,
+    primary key (book_id, author_id),
+    foreign key (book_id) references book(book_id),
+    foreign key (author_id) references author(author_id)
 );
 
-CREATE TABLE bill (
-    bill_id INT AUTO_INCREMENT PRIMARY KEY,
-    employee_id INT,
-    customer_id INT,
-    payment_method_id INT,
-    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    total_price DECIMAL(15, 2),
-    tax FLOAT DEFAULT 0.1,
-    FOREIGN KEY (employee_id) REFERENCES employee(employee_id),
-    FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
-    FOREIGN KEY (payment_method_id) REFERENCES payment_method(payment_method_id)
+create table discount (
+	discount_id int auto_increment primary key,
+    percent decimal(2, 1) not null,
+    start_date datetime not null,
+    end_date datetime not null,
+    status int default 1,
+    book_id int not null,
+    foreign key (book_id) references book(book_id)
 );
 
-CREATE TABLE bill_detail (
-    bill_id INT,
-    book_id INT,
-    quantity INT NOT NULL,
-    unit_price DECIMAL(15, 2),
-    PRIMARY KEY (bill_id, book_id),
-    FOREIGN KEY (bill_id) REFERENCES bill(bill_id),
-    FOREIGN KEY (book_id) REFERENCES book(book_id)
+create table inventory_log (
+	log_id int auto_increment primary key,
+    action varchar(50) not null,
+    change_quantity int not null,
+    remain_quantity int not null,
+    reference_id varchar(50),
+    created_date datetime default current_timestamp,
+    book_id int not null,
+    foreign key (book_id) references book(book_id)
 );
 
--- Vài dữ liệu mẫu để test
-INSERT INTO role (role_name) VALUES ('MANAGER'), ('STAFF');
-INSERT INTO employee (employee_name, role_id) VALUES ('Admin Default', 1); 
-INSERT INTO account (username, password, employee_id) VALUES ('admin', 'admin', 1);
+create table bill (
+	bill_id int auto_increment primary key,
+    created_date datetime default current_timestamp,
+    total_bill_price decimal(15, 0),
+    tax decimal(2,2) default 0,
+    employee_id int not null,
+    customer_id int,
+    payment_method_id int not null,
+    foreign key (employee_id) references employee(employee_id),
+    foreign key (customer_id) references customer(customer_id),
+    foreign key (payment_method_id) references payment_method(payment_method_id)
+);
+
+create table bill_detail (
+	bill_id int not null,
+    book_id int not null,
+    quantity int not null,
+    unit_price decimal(15, 0),
+    primary key (bill_id, book_id),
+    foreign key (bill_id) references bill(bill_id) on delete cascade,
+    foreign key (book_id) references book(book_id)
+);
+
+create table import_ticket (
+	import_ticket_id int auto_increment primary key,
+    created_date datetime default current_timestamp,
+    total_import_quantity int default 0,
+    total_import_price decimal(15, 0),
+    status int default 1, -- 0: đã hủy, 1: chờ duyệt, 2: đã nhập
+    employee_id int not null,
+    supplier_id int not null,
+    foreign key (employee_id) references employee(employee_id),
+    foreign key (supplier_id) references supplier(supplier_id)
+);
+
+create table import_ticket_detail (
+	import_ticket_id int not null,
+    book_id int not null,
+    import_quantity int not null,
+    import_price decimal(15, 0),
+    primary key (import_ticket_id, book_id),
+    foreign key (import_ticket_id) references import_ticket(import_ticket_id) on delete cascade,
+    foreign key (book_id) references book(book_id)
+);
+
+create index idx_inventory_date on inventory_log(created_date);
+create index idx_inventory_book on inventory_log(book_id);
+create index idx_bill_date on bill(created_date);
