@@ -89,7 +89,7 @@ create table book (
 	book_id int auto_increment primary key,
     book_name varchar(255) not null,
     selling_price decimal(15, 0) default 0,
-    import_price decimal(15, 0) default 0,
+    quantity int default 0,
     image varchar(255),
     description text,
     status bit default 1,
@@ -109,7 +109,7 @@ create table book_author (
 
 create table discount (
 	discount_id int auto_increment primary key,
-    percent decimal(2, 1) not null,
+    percent decimal(3, 2) not null,
     start_date datetime not null,
     end_date datetime not null,
     status int default 1,
