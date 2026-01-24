@@ -1,4 +1,4 @@
-package com.bookstore.util.gui;
+package com.bookstore.gui;
 
 public class testGUI {
 }
