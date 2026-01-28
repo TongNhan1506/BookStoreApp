@@ -95,7 +95,6 @@ create table book (
     description text,
     status bit default 1,
     supplier_id int not null,
-    foreign key (category_id) references category(category_id),
     foreign key (supplier_id) references supplier(supplier_id)
 );
 
@@ -113,7 +112,7 @@ create table book_category (
     primary key (book_id, category_id),
     foreign key (book_id) references book(book_id),
     foreign key (category_id) references category(category_id)
-)
+);
 
 create table discount (
 	discount_id int auto_increment primary key,
@@ -193,7 +192,6 @@ create index idx_inventory_book on inventory_log(book_id);
 create index idx_bill_date on bill(created_date);
 
 
-
 insert into role (role_name) values ('Quản lý'),('Nhân viên bán hàng');
 
 insert into employee (employee_name, employee_phone, birthday, base_salary, day_in, role_id) values
@@ -232,15 +230,6 @@ insert into supplier (supplier_name, supplier_address, supplier_phone) values
 ('NXB Kim Đồng', 'Hà Nội', '02439434730'),
 ('NXB Trẻ', 'TP.HCM', '02839316289'),
 ('Alpha Books', 'Hà Nội', '0901234567');
-
-insert into book (book_name, selling_price, quantity, translator, image, description, category_id, supplier_id) values
-('Mắt Biếc', 120000, 50, null, 'matbiec.jpg', 'Truyện dài về tình yêu thanh thiếu niên', 2, 2),
-('Harry Potter và Hòn đá phù thủy', 250000, 20, 'Lý Lan', 'harrypotter1.jpg', 'Phần 1 bộ truyện Harry Potter', 2, 2),
-('Clean Code', 450000, 10, 'Nhiều dịch giả', 'cleancode.jpg', 'Sách gối đầu giường cho Dev', 4, 3);
-
-insert into book_author (book_id, author_id) values(1, 1), (2, 2);
-
-
 
 insert into customer (customer_name, customer_phone, point, rank_id) values
 ('Trần Anh Khoa', '0912487648', 0, 1),
