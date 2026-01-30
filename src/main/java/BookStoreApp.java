@@ -1,4 +1,4 @@
-import com.bookstore.gui.LoginFrame;
+import com.bookstore.gui.main.LoginFrame;
 import com.formdev.flatlaf.FlatLightLaf;
 
 import javax.swing.*;

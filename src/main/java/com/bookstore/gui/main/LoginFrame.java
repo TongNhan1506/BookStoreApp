@@ -1,4 +1,4 @@
-package com.bookstore.gui;
+package com.bookstore.gui.main;
 
 import com.bookstore.bus.AccountBUS;
 import com.bookstore.dto.EmployeeDTO;
@@ -24,7 +24,7 @@ public class LoginFrame extends JFrame {
 
     private void initComponents() {
         JPanel mainPanel = new JPanel(new GridBagLayout());
-        mainPanel.setBackground(new Color(152, 185, 255));
+        mainPanel.setBackground(Color.decode("#062D1E"));
         add(mainPanel);
 
         JPanel loginCard = new JPanel();
@@ -125,8 +125,8 @@ public class LoginFrame extends JFrame {
             EmployeeDTO employee = accountBUS.login(username, password);
             JOptionPane.showMessageDialog(this, "Xin chào " + employee.getEmployeeName() + "!",
                     "Thành công", JOptionPane.INFORMATION_MESSAGE);
-//            this.dispose();
-//            new MainFrame().setVisible(true);
+            this.dispose();
+            new MainFrame().setVisible(true);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, e.getMessage(),
                     "Đăng nhập thất bại", JOptionPane.ERROR_MESSAGE);
