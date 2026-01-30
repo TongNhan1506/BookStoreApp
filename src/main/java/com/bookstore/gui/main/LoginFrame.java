@@ -51,7 +51,7 @@ public class LoginFrame extends JFrame {
         btnLogin.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnLogin.setFocusPainted(false);
         btnLogin.putClientProperty(FlatClientProperties.STYLE,
-                "background: #ff7777;" +
+                "background: #00A364;" +
                 "foreground: #FFFFFF;" +
                 "font: bold 16;" +
                 "borderWidth: 0;" +
