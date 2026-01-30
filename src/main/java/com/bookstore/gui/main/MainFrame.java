@@ -1,19 +1,25 @@
 package com.bookstore.gui.main;
 
+import com.bookstore.dto.EmployeeDTO;
+import com.bookstore.gui.panel.SellingPanel;
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-
 import javax.swing.*;
 import java.awt.*;
 
 public class MainFrame extends JFrame {
     private CardLayout cardLayout;
-    private JPanel mainContentPanel;
+    private JPanel mainContentPanel, sidebarPanel;
     private JButton btnLogout, btnSelling, btnProduct, btnPrice, btnImport, btnInventory, btnBill, btnEmployee, btnStats, btnAccount;
     private JPanel welcomePanel;
+    private EmployeeDTO employee;
 
-    public MainFrame() {
+    public MainFrame(EmployeeDTO employee) {
+        this.employee = employee;
         initUI();
+
+        applyAuthorization();
     }
 
     private void initUI() {
@@ -24,7 +30,7 @@ public class MainFrame extends JFrame {
         setResizable(false);
         setLayout(new BorderLayout());
 
-        JPanel sidebarPanel = createSidebar();
+        sidebarPanel = createSidebar();
         add(sidebarPanel, BorderLayout.WEST);
 
         cardLayout = new CardLayout();
@@ -33,7 +39,7 @@ public class MainFrame extends JFrame {
 
         welcomePanel = createWelcomePanel();
         mainContentPanel.add(welcomePanel, "WELCOME");
-        mainContentPanel.add(createDummyPanel("Bán Hàng"), "SELLING");
+        mainContentPanel.add(new SellingPanel(), "SELLING");
         mainContentPanel.add(createDummyPanel("Sản Phẩm"), "PRODUCT");
         mainContentPanel.add(createDummyPanel("Giá Bán"), "PRICE");
         mainContentPanel.add(createDummyPanel("Phiếu Nhập"), "IMPORT");
@@ -63,7 +69,7 @@ public class MainFrame extends JFrame {
 
         gbc.gridy++;
 
-        String username = "Admin";
+        String username = employee.getEmployeeName();
         JLabel lbWelcome2 = new JLabel("Xin chào, " + username + "!");
         lbWelcome2.setFont(new Font("Segoe UI", Font.PLAIN, 28));
         lbWelcome2.setForeground(Color.GRAY);
@@ -96,7 +102,7 @@ public class MainFrame extends JFrame {
         sidebar.add(Box.createVerticalStrut(20));
         JSeparator separator1 = new JSeparator();
         separator1.setMaximumSize(new Dimension(160, 1));
-        separator1.setForeground(new Color(255, 255, 255, 60));
+        separator1.setForeground(Color.GRAY);
         separator1.setAlignmentX(Component.CENTER_ALIGNMENT);
         sidebar.add(separator1);
         sidebar.add(Box.createVerticalStrut(20));
@@ -110,7 +116,8 @@ public class MainFrame extends JFrame {
         btnEmployee = createMenuButton("Nhân Viên", "employee_icon.svg");
         btnStats = createMenuButton("Thống Kê", "stats_icon.svg");
         btnAccount = createMenuButton("Tài Khoản", "account_icon.svg");
-        JButton btnLogout = new JButton("Đăng xuất");
+
+        btnLogout = new JButton("Đăng xuất");
         btnLogout.setFont(new Font("Segoe UI", Font.BOLD, 16));
         btnLogout.setForeground(Color.WHITE);
         btnLogout.setBackground(Color.decode("#062D1E"));
@@ -130,7 +137,6 @@ public class MainFrame extends JFrame {
         btnLogout.setHorizontalAlignment(SwingConstants.LEFT);
         btnLogout.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnLogout.setFocusPainted(false);
-
         btnLogout.putClientProperty(FlatClientProperties.STYLE,
                 "hoverBackground: #ff4f4f;"
         );
@@ -170,11 +176,10 @@ public class MainFrame extends JFrame {
         sidebar.add(Box.createVerticalGlue());
         JSeparator separator2 = new JSeparator();
         separator2.setMaximumSize(new Dimension(160, 1));
-        separator2.setForeground(new Color(255, 255, 255, 60));
+        separator2.setForeground(Color.GRAY);
         separator2.setAlignmentX(Component.CENTER_ALIGNMENT);
         sidebar.add(separator2);
         sidebar.add(Box.createVerticalStrut(10));
-
         sidebar.add(btnLogout);
 
         return sidebar;
@@ -216,5 +221,26 @@ public class MainFrame extends JFrame {
         lb.setForeground(Color.LIGHT_GRAY);
         p.add(lb);
         return p;
+    }
+
+    private void applyAuthorization() {
+        if (employee == null) return;
+
+        int roleId = employee.getRoleId();
+
+        if (roleId == 2) {
+            btnProduct.setVisible(false);
+            btnEmployee.setVisible(false);
+            btnStats.setVisible(false);
+            btnImport.setVisible(false);
+            btnAccount.setVisible(false);
+        }
+    }
+
+    public static void main(String[] args) {
+        FlatLightLaf.setup();
+        EmployeeDTO employeeDTO = new EmployeeDTO();
+        employeeDTO.setEmployeeName("Tester");
+        new MainFrame(employeeDTO).setVisible(true);
     }
 }

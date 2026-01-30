@@ -126,7 +126,7 @@ public class LoginFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Xin chào " + employee.getEmployeeName() + "!",
                     "Thành công", JOptionPane.INFORMATION_MESSAGE);
             this.dispose();
-            new MainFrame().setVisible(true);
+            new MainFrame(employee).setVisible(true);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, e.getMessage(),
                     "Đăng nhập thất bại", JOptionPane.ERROR_MESSAGE);
