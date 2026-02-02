@@ -23,7 +23,8 @@ create table action (
 
 create table category (
 	category_id int auto_increment primary key,
-    category_name varchar(100) not null
+    category_name varchar(100) unique not null,
+    description varchar(255)
 );
 
 create table author (
@@ -94,24 +95,18 @@ create table book (
     image varchar(255),
     description text,
     status bit default 1,
+    category_id int not null,
     supplier_id int not null,
+    foreign key (category_id) references category(category_id),
     foreign key (supplier_id) references supplier(supplier_id)
 );
 
 create table book_author (
-	book_id int not null,
+	book_id int auto_increment not null,
     author_id int not null,
     primary key (book_id, author_id),
     foreign key (book_id) references book(book_id),
     foreign key (author_id) references author(author_id)
-);
-
-create table book_category (
-    book_id int not null,
-    category_id int not null,
-    primary key (book_id, category_id),
-    foreign key (book_id) references book(book_id),
-    foreign key (category_id) references category(category_id)
 );
 
 create table discount (
@@ -191,7 +186,7 @@ create index idx_inventory_date on inventory_log(created_date);
 create index idx_inventory_book on inventory_log(book_id);
 create index idx_bill_date on bill(created_date);
 
-
+-- Khởi tạo vài dữ liệu mẫu --
 insert into role (role_name) values ('Quản lý'),('Nhân viên bán hàng');
 
 insert into employee (employee_name, employee_phone, birthday, base_salary, day_in, role_id) values
@@ -201,39 +196,3 @@ insert into employee (employee_name, employee_phone, birthday, base_salary, day_
 insert into account (username, password, employee_id) values
 ('admin', 'admin', 1),
 ('banhang', 'banhang', 2);
-
-insert into membership_rank (rank_name, min_point, discount_percent) values
-('Thành Viên', 0, 0),
-('Vàng', 1000, 5),
-('Bạch Kim', 3000, 10),
-('Kim Cương', 10000, 15);
-
-insert into payment_method (payment_method_name) values
-('Tiền mặt'),
-('Chuyển khoản ngân hàng'),
-('Ví điện tử (Momo/ZaloPay)');
-
-insert into category (category_name) values
-('Sách Giáo Khoa'),
-('Tiểu Thuyết'),
-('Kinh Tế'),
-('Công Nghệ Thông Tin'),
-('Truyện Tranh');
-
-insert into author (author_name, nationality) values
-('Nguyễn Nhật Ánh', 'Việt Nam'),
-('J.K. Rowling', 'Anh'),
-('Haruki Murakami', 'Nhật Bản'),
-('Robert Kiyosaki', 'Mỹ');
-
-insert into supplier (supplier_name, supplier_address, supplier_phone) values
-('NXB Kim Đồng', 'Hà Nội', '02439434730'),
-('NXB Trẻ', 'TP.HCM', '02839316289'),
-('Alpha Books', 'Hà Nội', '0901234567');
-
-insert into customer (customer_name, customer_phone, point, rank_id) values
-('Trần Anh Khoa', '0912487648', 0, 1),
-('Nguyễn Ngọc Thành', '0987654321', 1200, 2);
-
-insert into system_parameter (param_key, param_value, description) values
-('POINTS_PER_10K', '100', 'Số điểm thưởng nhận được cho mỗi 10.000 VNĐ chi tiêu');
