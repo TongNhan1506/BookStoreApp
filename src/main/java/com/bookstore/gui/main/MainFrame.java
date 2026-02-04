@@ -1,8 +1,9 @@
 package com.bookstore.gui.main;
 
 import com.bookstore.dto.EmployeeDTO;
-import com.bookstore.gui.panel.SellingPanel;
+import com.bookstore.gui.panel.SellingTab;
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import javax.swing.*;
 import java.awt.*;
@@ -38,7 +39,7 @@ public class MainFrame extends JFrame {
 
         welcomePanel = createWelcomePanel();
         mainContentPanel.add(welcomePanel, "WELCOME");
-        mainContentPanel.add(new SellingPanel(), "SELLING");
+        mainContentPanel.add(new SellingTab(), "SELLING");
         mainContentPanel.add(createDummyPanel("Sản Phẩm"), "PRODUCT");
         mainContentPanel.add(createDummyPanel("Giá Bán"), "PRICE");
         mainContentPanel.add(createDummyPanel("Phiếu Nhập"), "IMPORT");
@@ -63,7 +64,7 @@ public class MainFrame extends JFrame {
 
         JLabel lbWelcome1 = new JLabel("Chào Mừng Trở Lại Hệ Thống");
         lbWelcome1.setFont(new Font("Segoe UI", Font.BOLD, 40));
-        lbWelcome1.setForeground(Color.decode("#062D1E"));
+        lbWelcome1.setForeground(Color.decode("#114732"));
         panel.add(lbWelcome1, gbc);
 
         gbc.gridy++;
@@ -80,7 +81,7 @@ public class MainFrame extends JFrame {
     private JPanel createSidebar() {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setBackground(Color.decode("#062D1E"));
+        sidebar.setBackground(Color.decode("#114732"));
         sidebar.setPreferredSize(new Dimension(200, getHeight()));
         sidebar.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
 
@@ -119,7 +120,7 @@ public class MainFrame extends JFrame {
         btnLogout = new JButton("Đăng xuất");
         btnLogout.setFont(new Font("Segoe UI", Font.BOLD, 16));
         btnLogout.setForeground(Color.WHITE);
-        btnLogout.setBackground(Color.decode("#062D1E"));
+        btnLogout.setBackground(Color.decode("#114732"));
         btnLogout.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         btnLogout.setMaximumSize(new Dimension(200, 70));
         btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -188,7 +189,7 @@ public class MainFrame extends JFrame {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
         btn.setForeground(Color.WHITE);
-        btn.setBackground(Color.decode("#062D1E"));
+        btn.setBackground(Color.decode("#114732"));
         btn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         btn.setMaximumSize(new Dimension(200, 70));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -234,5 +235,11 @@ public class MainFrame extends JFrame {
             btnImport.setVisible(false);
             btnAccount.setVisible(false);
         }
+    }
+
+    public static void main(String[] args) {
+        EmployeeDTO employee = new EmployeeDTO();
+        FlatLightLaf.setup();
+        new MainFrame(employee).setVisible(true);
     }
 }

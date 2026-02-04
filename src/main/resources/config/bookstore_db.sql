@@ -187,12 +187,60 @@ create index idx_inventory_book on inventory_log(book_id);
 create index idx_bill_date on bill(created_date);
 
 -- Khởi tạo vài dữ liệu mẫu --
-insert into role (role_name) values ('Quản lý'),('Nhân viên bán hàng');
+INSERT INTO system_parameter (param_key, param_value, description) VALUES
+('REWARD_POINTS_PER_10K', '100', 'Tỷ lệ đổi điểm: 10.000 VNĐ = 100 điểm');
 
-insert into employee (employee_name, employee_phone, birthday, base_salary, day_in, role_id) values
-('Quản lý mẫu', '0914349584', '1999-04-15', 12000000, '2025-11-23', 1),
-('Nhân viên bán hàng mẫu', '0934129959', '2004-06-18', 7000000, '2025-12-11', 2);
+INSERT INTO membership_rank (rank_name, min_point, discount_percent) VALUES
+('Thành Viên', 0, 0),
+('Bạc', 2000, 5),
+('Vàng', 5000, 10),
+('Bạch Kim', 10000, 15);
 
-insert into account (username, password, employee_id) values
+INSERT INTO role (role_name) VALUES
+('Quản Lý Cửa Hàng'),
+('Nhân Viên Bán Hàng'),
+('Nhân Viên Kho');
+
+INSERT INTO payment_method (payment_method_name) VALUES
+('Tiền mặt'),
+('Chuyển khoản QR'),
+('Thẻ tín dụng');
+
+INSERT INTO employee (employee_name, employee_phone, birthday, base_salary, role_id) VALUES
+('Lê Ngọc Quý', '0901234567', '1990-01-01', 15000000, 1),
+('Nguyễn Cao Tòng Nhân', '0909999888', '2000-05-15', 7000000, 2);
+
+INSERT INTO account (username, password, employee_id) VALUES
 ('admin', 'admin', 1),
-('banhang', 'banhang', 2);
+('staff', 'staff', 2);
+
+INSERT INTO category (category_name) VALUES
+('Tiểu Thuyết'),
+('Kinh Tế'),
+('Công Nghệ Thông Tin'),
+('Truyện Tranh');
+
+INSERT INTO author (author_name, nationality) VALUES
+('J.K. Rowling', 'Anh'),
+('Nguyễn Nhật Ánh', 'Việt Nam'),
+('Robert C. Martin', 'Mỹ');
+
+INSERT INTO supplier (supplier_name, supplier_address, supplier_phone) VALUES
+('NXB Kim Đồng', 'Hà Nội', '0241111222'),
+('NXB Trẻ', 'TP.HCM', '0283333444'),
+('Alpha Books', 'Hà Nội', '0905555666');
+
+INSERT INTO book (book_name, selling_price, quantity, translator, image, description, category_id, supplier_id) VALUES
+('Harry Potter và Hòn Đá Phù Thủy', 150000, 100, 'Lý Lan', 'harry_potter_1.jpg', 'Tập 1 bộ truyện Harry Potter', 1, 1),
+('Mắt Biếc', 110000, 50, NULL, 'mat_biec.jpg', 'Truyện dài về tình yêu', 1, 2),
+('Clean Code', 450000, 20, 'Nhiều dịch giả', 'clean_code.jpg', 'Sách gối đầu giường cho Developer', 3, 3),
+('Doraemon Tập 1', 25000, 200, 'Kim Đồng', 'doraemon_1.jpg', 'Mèo máy đến từ tương lai', 4, 1);
+
+INSERT INTO book_author (book_id, author_id) VALUES
+(1, 1),
+(2, 2),
+(3, 3);
+
+INSERT INTO customer (customer_name, customer_phone, point, rank_id) VALUES
+('Khách Vãng Lai', '0000000000', 0, 1),
+('Lê Văn Giàu', '0912345678', 3500, 3);
