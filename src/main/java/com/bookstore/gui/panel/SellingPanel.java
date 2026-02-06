@@ -153,14 +153,14 @@ public class SellingPanel extends JPanel {
         btnViewBookDetail = new JButton("Xem chi tiết");
         btnViewBookDetail.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 15));
         btnViewBookDetail.setForeground(Color.WHITE);
-        btnViewBookDetail.setBackground(Color.decode("#114732"));
+        btnViewBookDetail.setBackground(Color.decode(AppConstant.GREEN_COLOR_CODE));
         btnViewBookDetail.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnViewBookDetail.putClientProperty(FlatClientProperties.STYLE, "arc: 10; hoverBackground: #00A364;");
 
         btnAddToCart = new JButton("Thêm vào hóa đơn");
         btnAddToCart.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 15));
         btnAddToCart.setForeground(Color.WHITE);
-        btnAddToCart.setBackground(Color.decode("#114732"));
+        btnAddToCart.setBackground(Color.decode(AppConstant.GREEN_COLOR_CODE));
         btnAddToCart.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnAddToCart.putClientProperty(FlatClientProperties.STYLE, "arc: 10; hoverBackground: #00A364;");
 
@@ -215,7 +215,7 @@ public class SellingPanel extends JPanel {
         JPanel pActions = new JPanel(new GridLayout(1, 3, 10, 0));
         pActions.setOpaque(false);
 
-        btnRefresh = createActionButton("Làm mới", "#114732");
+        btnRefresh = createActionButton("Làm mới", AppConstant.GREEN_COLOR_CODE);
         btnRefresh.putClientProperty(FlatClientProperties.STYLE, "hoverBackground: #00A364;");
         btnDelete = createActionButton("Xóa", "#E53935");
         btnDelete.putClientProperty(FlatClientProperties.STYLE, "hoverBackground: #ff5a5a;");
@@ -262,7 +262,7 @@ public class SellingPanel extends JPanel {
         btnPay = new JButton("Hoàn thành");
         btnPay.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 18));
         btnPay.setForeground(Color.WHITE);
-        btnPay.setBackground(Color.decode("#114732"));
+        btnPay.setBackground(Color.decode(AppConstant.GREEN_COLOR_CODE));
         btnPay.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnPay.putClientProperty(FlatClientProperties.STYLE, "arc: 10; hoverBackground: #00A364;");
         btnPay.setPreferredSize(new Dimension(0, 50));
@@ -323,7 +323,7 @@ public class SellingPanel extends JPanel {
 
     private void styleTable(JTable table) {
         JTableHeader header = table.getTableHeader();
-        header.setBackground(Color.decode("#114732"));
+        header.setBackground(Color.decode(AppConstant.GREEN_COLOR_CODE));
         header.setForeground(Color.WHITE);
         header.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 15));
         header.setPreferredSize(new Dimension(header.getWidth(), 40));
