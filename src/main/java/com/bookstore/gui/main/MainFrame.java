@@ -64,7 +64,7 @@ public class MainFrame extends JFrame {
 
         JLabel lbWelcome1 = new JLabel("Chào Mừng Trở Lại Hệ Thống");
         lbWelcome1.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 40));
-        lbWelcome1.setForeground(Color.decode("#062D1E"));
+        lbWelcome1.setForeground(Color.decode(AppConstant.GREEN_COLOR_CODE));
         panel.add(lbWelcome1, gbc);
 
         gbc.gridy++;
@@ -81,7 +81,7 @@ public class MainFrame extends JFrame {
     private JPanel createSidebar() {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setBackground(Color.decode("#062D1E"));
+        sidebar.setBackground(Color.decode(AppConstant.GREEN_COLOR_CODE));
         sidebar.setPreferredSize(new Dimension(200, getHeight()));
         sidebar.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
 
@@ -120,7 +120,7 @@ public class MainFrame extends JFrame {
         btnLogout = new JButton("Đăng xuất");
         btnLogout.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
         btnLogout.setForeground(Color.WHITE);
-        btnLogout.setBackground(Color.decode("#062D1E"));
+        btnLogout.setBackground(Color.decode(AppConstant.GREEN_COLOR_CODE));
         btnLogout.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         btnLogout.setMaximumSize(new Dimension(200, 70));
         btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -189,7 +189,7 @@ public class MainFrame extends JFrame {
         JButton btn = new JButton(text);
         btn.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
         btn.setForeground(Color.WHITE);
-        btn.setBackground(Color.decode("#062D1E"));
+        btn.setBackground(Color.decode(AppConstant.GREEN_COLOR_CODE));
         btn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         btn.setMaximumSize(new Dimension(200, 70));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));

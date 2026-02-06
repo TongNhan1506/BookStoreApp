@@ -25,7 +25,7 @@ public class LoginFrame extends JFrame {
 
     private void initComponents() {
         JPanel mainPanel = new JPanel(new GridBagLayout());
-        mainPanel.setBackground(Color.decode("#062D1E"));
+        mainPanel.setBackground(Color.decode(AppConstant.GREEN_COLOR_CODE));
         add(mainPanel);
 
         JPanel loginCard = new JPanel();
