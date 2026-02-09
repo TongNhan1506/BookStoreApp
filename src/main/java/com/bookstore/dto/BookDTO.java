@@ -14,13 +14,12 @@ public class BookDTO {
     private String description;
     private int status;
     private int categoryId;
-    private String categoryName;
     private String tagDetail;
     private int supplierId;
 
     public BookDTO() {}
 
-    public BookDTO(int bookId, String bookName, double sellingPrice, int quantity, String translator, String image, String description, int status, int categoryId, String categoryName, String tagDetail, int supplierId) {
+    public BookDTO(int bookId, String bookName, double sellingPrice, int quantity, String translator, String image, String description, int status, int categoryId, String tagDetail, int supplierId) {
         this.bookId = bookId;
         this.bookName = bookName;
         this.sellingPrice = sellingPrice;
@@ -30,7 +29,6 @@ public class BookDTO {
         this.description = description;
         this.status = status;
         this.categoryId = categoryId;
-        this.categoryName = categoryName;
         this.tagDetail = tagDetail;
         this.supplierId = supplierId;
     }
@@ -124,14 +122,6 @@ public class BookDTO {
 
     public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
-    }
-
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
     }
 
     public String getTagDetail() {

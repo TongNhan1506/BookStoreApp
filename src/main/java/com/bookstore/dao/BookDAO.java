@@ -34,7 +34,6 @@ public class BookDAO {
                         rs.getString("description"),
                         rs.getInt("status"),
                         rs.getInt("category_id"),
-                        rs.getString("category_name"),
                         rs.getString("tag_detail"),
                         rs.getInt("supplier_id")
                 );
@@ -51,7 +50,7 @@ public class BookDAO {
     String sql = "INSERT INTO book(book_name, selling_price, quantity, translator, image, description, status, category_id, tag_detail, supplier_id) " +
                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     try (Connection c = DatabaseConnection.getConnection();
-         PreparedStatement ps = c.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {  // ← THÊM RETURN_GENERATED_KEYS
+         PreparedStatement ps = c.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);) {
 
         ps.setString(1, book.getBookName());
         ps.setDouble(2, book.getSellingPrice());
@@ -84,7 +83,7 @@ public class BookDAO {
         String sql = "UPDATE book SET book_name = ?, selling_price = ?, quantity = ?, translator = ?, image = ?, description = ?, status = ?, category_id = ?, tag_detail = ?, supplier_id = ? " +
                      "WHERE book_id = ?";
         try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);) {
+             PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setString(1, book.getBookName());
             ps.setDouble(2, book.getSellingPrice());
@@ -122,6 +121,81 @@ public class BookDAO {
         return false;
     }
 
+    public List <BookDTO> searchByName(String bookname){
+        List<BookDTO> list = new ArrayList<>();
+        String sql = "SELECT b.*, c.category_name," +
+                "GROUP_CONCAT(ba.author_id) as author_ids_list " +
+                "FROM book b " +
+                "JOIN category c ON b.category_id = c.category_id " +
+                "LEFT JOIN book_author ba ON b.book_id = ba.book_id " +
+                "WHERE b.book_name LIKE ? " +
+                "GROUP BY b.book_id";
+
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);) {
+
+            ps.setString(1, "%" + bookname + "%");
+            try (ResultSet rs = ps.executeQuery();) {
+                while (rs.next()) {
+                    BookDTO book = new BookDTO(
+                            rs.getInt("book_id"),
+                            rs.getString("book_name"),
+                            rs.getDouble("selling_price"),
+                            rs.getInt("quantity"),
+                            rs.getString("translator"),
+                            rs.getString("image"),
+                            rs.getString("description"),
+                            rs.getInt("status"),
+                            rs.getInt("category_id"),
+                            rs.getString("tag_detail"),
+                            rs.getInt("supplier_id")
+                    );
+                    book.setAuthorIdsFromString(rs.getString("author_ids_list"));
+                    list.add(book);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+    }
+    return list;
+}
 
 
+    public BookDTO getBookbyId(int bookId) {
+    // Sử dụng JOIN và GROUP_CONCAT để lấy danh sách ID tác giả cùng lúc
+    String sql = "SELECT b.*, GROUP_CONCAT(ba.author_id) as author_ids_list " +
+                 "FROM book b " +
+                 "LEFT JOIN book_author ba ON b.book_id = ba.book_id " +
+                 "WHERE b.book_id = ? " +
+                 "GROUP BY b.book_id";
+                 
+    try (Connection c = DatabaseConnection.getConnection();
+         PreparedStatement ps = c.prepareStatement(sql)) {
+
+        ps.setInt(1, bookId);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                BookDTO book = new BookDTO(
+                        rs.getInt("book_id"),
+                        rs.getString("book_name"),
+                        rs.getDouble("selling_price"),
+                        rs.getInt("quantity"),
+                        rs.getString("translator"),
+                        rs.getString("image"),
+                        rs.getString("description"),
+                        rs.getInt("status"),
+                        rs.getInt("category_id"),
+                        rs.getString("tag_detail"),
+                        rs.getInt("supplier_id")
+                );
+                // Đừng quên dòng này để chuyển chuỗi "1,2,3" thành List<Integer>
+                book.setAuthorIdsFromString(rs.getString("author_ids_list"));
+                return book;
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null;
+}  
 }
