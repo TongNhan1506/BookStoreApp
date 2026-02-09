@@ -2,6 +2,7 @@ package com.bookstore.gui.main;
 
 import com.bookstore.dto.EmployeeDTO;
 import com.bookstore.gui.panel.SellingPanel;
+import com.bookstore.gui.panel.ProductTab.ProductTab;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import javax.swing.*;
@@ -39,7 +40,7 @@ public class MainFrame extends JFrame {
         welcomePanel = createWelcomePanel();
         mainContentPanel.add(welcomePanel, "WELCOME");
         mainContentPanel.add(new SellingPanel(), "SELLING");
-        mainContentPanel.add(createDummyPanel("Sản Phẩm"), "PRODUCT");
+        mainContentPanel.add(new ProductTab(), "PRODUCT");
         mainContentPanel.add(createDummyPanel("Giá Bán"), "PRICE");
         mainContentPanel.add(createDummyPanel("Phiếu Nhập"), "IMPORT");
         mainContentPanel.add(createDummyPanel("Tồn Kho"), "INVENTORY");
