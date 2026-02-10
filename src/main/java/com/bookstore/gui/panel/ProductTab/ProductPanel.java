@@ -8,6 +8,10 @@ import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 
+import com.bookstore.bus.*;
+import com.bookstore.dto.*;
+import com.bookstore.dao.BookAuthorDAO;
+
 public class ProductPanel extends JPanel {
     // Colors
     private static final Color HEADER_COLOR = Color.decode("#062d1e");
@@ -25,7 +29,12 @@ public class ProductPanel extends JPanel {
     private DefaultTableModel tableModel;
     private Set<String> selectedTags = new HashSet<>();
     private JButton tagFilterButton;
-    
+    private BookBUS bookBUS;
+    private AuthorBUS authorBUS;
+    private CategoryBUS categoryBUS;
+    private SupplierBUS supplierBUS;
+    private BookAuthorDAO bookAuthorDAO;
+
     // Mock Data
     private List<Book> allBooks;
     private List<Author> authors;
@@ -34,97 +43,86 @@ public class ProductPanel extends JPanel {
     private Set<String> allTags;
 
     public ProductPanel() {
-        initMockData();
+        // Khởi tạo BUS
+        bookBUS = new BookBUS();
+        authorBUS = new AuthorBUS();
+        categoryBUS = new CategoryBUS();
+        supplierBUS = new SupplierBUS();
+        bookAuthorDAO = new BookAuthorDAO();
+        
+        loadDataFromDatabase();
+        
         initUI();
         loadTableData();
     }
 
-    private void initMockData() {
-        // Authors
-        authors = Arrays.asList(
-            new Author(1, "Nguyễn Nhật Ánh"),
-            new Author(2, "Tô Hoài"),
-            new Author(3, "Nam Cao"),
-            new Author(4, "Ngô Tất Tố"),
-            new Author(5, "Paulo Coelho"),
-            new Author(6, "J.K. Rowling"),
-            new Author(7, "Haruki Murakami")
-        );
-        
-        // Categories
-        categories = Arrays.asList(
-            new Category(1, "Văn học"),
-            new Category(2, "Thiếu nhi"),
-            new Category(3, "Kinh tế"),
-            new Category(4, "Tâm lý - Kỹ năng"),
-            new Category(5, "Ngoại ngữ")
-        );
-        
-        // Suppliers
-        suppliers = Arrays.asList(
-            new Supplier(1, "Kim Đồng"),
-            new Supplier(2, "Nhà xuất bản Trẻ"),
-            new Supplier(3, "Alphabooks")
-        );
-        
-        // All tags
-        allTags = new HashSet<>(Arrays.asList(
-            "Truyện dài", "Tình bạn", "Thiếu nhi", "Nguyễn Nhật Ánh",
-            "Văn học Việt Nam", "Bestseller", "Tâm lý", "Phiêu lưu",
-            "Tiểu thuyết", "Kinh điển", "Dịch giả", "Mới phát hành"
-        ));
-        
-        // Books - Use ArrayList instead of Arrays.asList to allow adding/removing
-        allBooks = new ArrayList<>();
-        allBooks.add(new Book(1, "Bàn Có Năm Chỗ Ngồi", 55000, 150, null, null,
-                "Bàn có năm chỗ ngồi xoay quanh câu chuyện tình bạn giữa 5 người bạn. Đó là Huy, Hiền, Quang, Đại, Bảy – họ là năm người bạn với năm cá tính và hoàn cảnh khác nhau cùng chung trong một lớp học.",
-                1, 1, 1, "Truyện dài,Tình bạn,Thiếu nhi,Nguyễn Nhật Ánh",
-                Arrays.asList(1)));
-        
-        allBooks.add(new Book(2, "Mắt Biếc", 89000, 200, null, null,
-                "Mắt biếc là một truyện dài của nhà văn Nguyễn Nhật Ánh. Tác phẩm được viết trong 10 năm (1990-2000) và được xuất bản lần đầu năm 2007.",
-                1, 1, 2, "Văn học Việt Nam,Bestseller,Nguyễn Nhật Ánh,Tình cảm",
-                Arrays.asList(1)));
-        
-        allBooks.add(new Book(3, "Dế Mèn Phiêu Lưu Ký", 45000, 80, null, null,
-                "Dế Mèn phiêu lưu ký là tác phẩm văn xuôi dành cho lứa tuổi thiếu nhi của nhà văn Tô Hoài.",
-                1, 2, 1, "Thiếu nhi,Văn học Việt Nam,Kinh điển,Phiêu lưu",
-                Arrays.asList(2)));
-        
-        allBooks.add(new Book(4, "Harry Potter và Hòn Đá Phù Thủy", 150000, 50, "Lý Lan", null,
-                "Cuốn sách mở đầu bộ truyện Harry Potter nổi tiếng toàn cầu của tác giả J.K. Rowling.",
-                1, 2, 3, "Thiếu nhi,Phiêu lưu,Bestseller,Dịch giả",
-                Arrays.asList(6)));
-        
-        allBooks.add(new Book(5, "Nhà Giả Kim", 79000, 120, "Lê Chu Cầu", null,
-                "Nhà giả kim là tiểu thuyết được xuất bản lần đầu tiên tại Brazil năm 1988 của nhà văn Paulo Coelho.",
-                1, 1, 2, "Tiểu thuyết,Bestseller,Tâm lý,Dịch giả",
-                Arrays.asList(5)));
-        
-        allBooks.add(new Book(6, "Lão Hạc", 35000, 0, null, null,
-                "Lão Hạc là một truyện ngắn nổi tiếng của nhà văn Nam Cao, được viết năm 1943.",
-                0, 1, 1, "Văn học Việt Nam,Kinh điển,Tiểu thuyết",
-                Arrays.asList(3)));
-        
-        allBooks.add(new Book(7, "Tắt Đèn", 42000, 90, null, null,
-                "Tắt đèn là một tiểu thuyết của nhà văn Ngô Tất Tố, được viết từ năm 1937 đến năm 1939.",
-                1, 1, 2, "Văn học Việt Nam,Kinh điển,Tiểu thuyết",
-                Arrays.asList(4)));
-        
-        allBooks.add(new Book(8, "Kafka Bên Bờ Biển", 125000, 60, "Dương Tường", null,
-                "Kafka Bên Bờ Biển là một tiểu thuyết của nhà văn Nhật Bản Haruki Murakami.",
-                1, 1, 3, "Tiểu thuyết,Bestseller,Dịch giả,Văn học Nhật",
-                Arrays.asList(7)));
-        
-        allBooks.add(new Book(9, "Chú Bé Rồng", 68000, 110, null, null,
-                "Một câu chuyện phiêu lưu kỳ thú dành cho thiếu nhi.",
-                1, 2, 1, "Thiếu nhi,Phiêu lưu,Mới phát hành",
-                Arrays.asList(1, 2)));
-        
-        allBooks.add(new Book(10, "Đời Thừa", 52000, 75, null, null,
-                "Đời thừa là tác phẩm nổi tiếng của nhà văn Nam Cao.",
-                1, 1, 2, "Văn học Việt Nam,Kinh điển",
-                Arrays.asList(3)));
+    private void loadDataFromDatabase() {
+        try {
+            // 1. Load Authors
+            List<AuthorDTO> authorsFromDB = authorBUS.selectAll();
+            authors = new ArrayList<>();
+            for (AuthorDTO a : authorsFromDB) {
+                authors.add(new Author(a.getAuthorId(), a.getAuthorName()));
+            }
+            
+            // 2. Load Categories
+            List<CategoryDTO> categoriesFromDB = categoryBUS.selectAll();
+            categories = new ArrayList<>();
+            for (CategoryDTO c : categoriesFromDB) {
+                categories.add(new Category(c.getCategoryId(), c.getCategoryName()));
+            }
+            
+            // 3. Load Suppliers
+            List<SupplierDTO> suppliersFromDB = supplierBUS.selectAll();
+            suppliers = new ArrayList<>();
+            for (SupplierDTO s : suppliersFromDB) {
+                suppliers.add(new Supplier(s.getSupplierId(), s.getSupplierName()));
+            }
+            
+            // 4. Load Books
+            List<BookDTO> booksFromDB = bookBUS.selectAll();
+            allBooks = new ArrayList<>();
+            for (BookDTO b : booksFromDB) {
+                allBooks.add(new Book(
+                    b.getBookId(),
+                    b.getBookName(),
+                    b.getSellingPrice(),
+                    b.getQuantity(),
+                    b.getTranslator(),
+                    b.getImage(),
+                    b.getDescription(),
+                    b.getStatus(),
+                    b.getCategoryId(),
+                    b.getSupplierId(),
+                    b.getTagDetail(),
+                    new ArrayList<>(b.getAuthorIdsList())
+                ));
+            }
+            
+            // 5. Load all tags từ books
+            allTags = new HashSet<>();
+            for (BookDTO book : booksFromDB) {
+                if (book.getTagDetail() != null && !book.getTagDetail().isEmpty()) {
+                    String[] tags = book.getTagDetail().split(",");
+                    for (String tag : tags) {
+                        allTags.add(tag.trim());
+                    }
+                }
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, 
+                "Lỗi khi load dữ liệu từ database: " + e.getMessage(),
+                "Lỗi", JOptionPane.ERROR_MESSAGE);
+            
+            // Fallback to empty lists
+            authors = new ArrayList<>();
+            categories = new ArrayList<>();
+            suppliers = new ArrayList<>();
+            allBooks = new ArrayList<>();
+            allTags = new HashSet<>();
+        }
     }
 
     private void initUI() {
@@ -566,119 +564,160 @@ public class ProductPanel extends JPanel {
     }
 
     private void showAddBookDialog() {
-        BookFormDialog dialog = new BookFormDialog((Frame) SwingUtilities.getWindowAncestor(this), 
-            "Thêm sách mới", null);
-        dialog.setVisible(true);
+    BookFormDialog dialog = new BookFormDialog(
+        (Frame) SwingUtilities.getWindowAncestor(this), 
+        "Thêm sách mới", 
+        null,
+        authors, categories, suppliers, allTags
+    );
+    dialog.setVisible(true);
+    
+    if (dialog.isSaved()) {
+        Book newBook = dialog.getBook();
         
-        if (dialog.isSaved()) {
-            Book newBook = dialog.getBook();
-            // Check duplicate
-            for (Book b : allBooks) {
-                if (b.bookName.equalsIgnoreCase(newBook.bookName)) {
-                    JOptionPane.showMessageDialog(this, 
-                        "Sách \"" + newBook.bookName + "\" đã tồn tại!", 
-                        "Lỗi", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
+        try {
+            // Tạo DTO
+            BookDTO bookDTO = new BookDTO();
+            bookDTO.setBookName(newBook.bookName);
+            bookDTO.setSellingPrice(newBook.sellingPrice);
+            bookDTO.setQuantity(newBook.quantity);
+            bookDTO.setTranslator(newBook.translator);
+            bookDTO.setImage(newBook.image);
+            bookDTO.setDescription(newBook.description);
+            bookDTO.setStatus(newBook.status);
+            bookDTO.setCategoryId(newBook.categoryId);
+            bookDTO.setSupplierId(newBook.supplierId);
+            bookDTO.setTagDetail(newBook.tagDetail);
+            if (newBook.authorIds != null) {
+                bookDTO.getAuthorIdsList().addAll(newBook.authorIds);
             }
-            newBook.bookId = allBooks.size() + 1;
-            allBooks.add(newBook);
-            filterBooks();
-            JOptionPane.showMessageDialog(this, "Thêm sách thành công!", 
-                "Thành công", JOptionPane.INFORMATION_MESSAGE);
+            
+            // Thêm vào DB qua BUS
+            String result = bookBUS.addBook(bookDTO);
+            
+            if (result.contains("thành công")) {
+                // Thêm tác giả
+                if (newBook.authorIds != null && !newBook.authorIds.isEmpty()) {
+                    bookAuthorDAO.addAuthorsToBook(bookDTO.getBookId(), newBook.authorIds);
+                }
+                loadDataFromDatabase();
+                filterBooks();
+                
+                JOptionPane.showMessageDialog(this, result, 
+                    "Thành công", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, result, 
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, 
+                "Lỗi: " + e.getMessage(), 
+                "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
+}
 
     private void showEditBookDialog(Book book) {
-        BookFormDialog dialog = new BookFormDialog((Frame) SwingUtilities.getWindowAncestor(this), 
-            "Chỉnh sửa sách", book);
-        dialog.setVisible(true);
+    BookFormDialog dialog = new BookFormDialog(
+        (Frame) SwingUtilities.getWindowAncestor(this), 
+        "Chỉnh sửa sách", 
+        book,
+        authors, categories, suppliers, allTags
+    );
+    dialog.setVisible(true);
+    
+    if (dialog.isSaved()) {
+        Book updatedBook = dialog.getBook();
         
-        if (dialog.isSaved()) {
-            Book updatedBook = dialog.getBook();
-            // Update book in list
-            for (int i = 0; i < allBooks.size(); i++) {
-                if (allBooks.get(i).bookId == book.bookId) {
-                    updatedBook.bookId = book.bookId;
-                    allBooks.set(i, updatedBook);
-                    break;
-                }
+        try {
+            // Tạo DTO
+            BookDTO bookDTO = new BookDTO();
+            bookDTO.setBookId(book.bookId);
+            bookDTO.setBookName(updatedBook.bookName);
+            bookDTO.setSellingPrice(updatedBook.sellingPrice);
+            bookDTO.setQuantity(updatedBook.quantity);
+            bookDTO.setTranslator(updatedBook.translator);
+            bookDTO.setImage(updatedBook.image);
+            bookDTO.setDescription(updatedBook.description);
+            bookDTO.setStatus(updatedBook.status);
+            bookDTO.setCategoryId(updatedBook.categoryId);
+            bookDTO.setSupplierId(updatedBook.supplierId);
+            bookDTO.setTagDetail(updatedBook.tagDetail);
+            if (updatedBook.authorIds != null) {
+                bookDTO.getAuthorIdsList().addAll(updatedBook.authorIds);
             }
-            filterBooks();
-            JOptionPane.showMessageDialog(this, "Cập nhật sách thành công!", 
-                "Thành công", JOptionPane.INFORMATION_MESSAGE);
+            
+            // Update trong DB
+            String result = bookBUS.updateBook(bookDTO);
+            
+            if (result.contains("thành công")) {
+                // Update tác giả
+                bookAuthorDAO.removeAllAuthorsFromBook(book.bookId);
+                if (updatedBook.authorIds != null && !updatedBook.authorIds.isEmpty()) {
+                    bookAuthorDAO.addAuthorsToBook(book.bookId, updatedBook.authorIds);
+                }
+                
+                // Reload data
+                loadDataFromDatabase();
+                filterBooks();
+                
+                JOptionPane.showMessageDialog(this, result, 
+                    "Thành công", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, result, 
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, 
+                "Lỗi: " + e.getMessage(), 
+                "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
+    }
     }
 
     private void showBookDetail(Book book) {
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), 
-            "Chi tiết sách", true);
-        dialog.setLayout(new BorderLayout());
-        dialog.setSize(600, 500);
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Chi tiết sách", true);
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(520, 420);
         dialog.setLocationRelativeTo(this);
-        
-        JPanel contentPanel = new JPanel(new BorderLayout(15, 15));
-        contentPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        contentPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
         contentPanel.setBackground(BG_COLOR);
-        
-        // Image
-        JPanel imagePanel = new JPanel(new BorderLayout());
-        imagePanel.setBackground(BG_COLOR);
-        JLabel imageLabel = new JLabel();
-        imageLabel.setPreferredSize(new Dimension(150, 200));
-        imageLabel.setHorizontalAlignment(JLabel.CENTER);
-        imageLabel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
-        imageLabel.setOpaque(true);
-        imageLabel.setBackground(Color.decode("#F5F5F5"));
-        
-        // Draw placeholder
-        imageLabel.setIcon(new ImageIcon(createBookPlaceholder(150, 200)));
-        imagePanel.add(imageLabel, BorderLayout.CENTER);
-        
-        contentPanel.add(imagePanel, BorderLayout.WEST);
-        
-        // Info panel
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-        infoPanel.setBackground(BG_COLOR);
-        
-        addDetailRow(infoPanel, "Tên sách:", book.bookName);
-        addDetailRow(infoPanel, "Tác giả:", getAuthorNamesForBook(book));
-        addDetailRow(infoPanel, "Thể loại:", getCategoryName(book.categoryId));
-        addDetailRow(infoPanel, "Người dịch:", book.translator != null ? book.translator : "Không có");
-        addDetailRow(infoPanel, "Nhà cung cấp:", getSupplierName(book.supplierId));
-        addDetailRow(infoPanel, "Trạng thái:", book.status == 1 ? "Đang bán" : "Ngừng bán");
-        addDetailRow(infoPanel, "Tags:", book.tagDetail != null ? book.tagDetail.replace(",", ", ") : "Không có");
-        
-        // Description
-        infoPanel.add(Box.createVerticalStrut(10));
-        JLabel descLabel = new JLabel("Mô tả:");
-        descLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        descLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        infoPanel.add(descLabel);
-        
-        JTextArea descArea = new JTextArea(book.description != null ? book.description : "Không có mô tả");
-        descArea.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        descArea.setLineWrap(true);
-        descArea.setWrapStyleWord(true);
-        descArea.setEditable(false);
-        descArea.setBackground(BG_COLOR);
-        JScrollPane descScroll = new JScrollPane(descArea);
-        descScroll.setPreferredSize(new Dimension(350, 100));
-        descScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
-        infoPanel.add(descScroll);
-        
-        contentPanel.add(infoPanel, BorderLayout.CENTER);
-        
-        // Close button
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.setBackground(BG_COLOR);
-        JButton closeButton = createStyledButton("Đóng", Color.decode("#757575"));
+
+        JLabel title = new JLabel(book.bookName);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        contentPanel.add(title, BorderLayout.NORTH);
+
+        JPanel detailsPanel = new JPanel();
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
+        detailsPanel.setBackground(BG_COLOR);
+
+        addDetailRow(detailsPanel, "Tác giả", getAuthorNamesForBook(book));
+        addDetailRow(detailsPanel, "Thể loại", getCategoryName(book.categoryId));
+        addDetailRow(detailsPanel, "Nhà cung cấp", getSupplierName(book.supplierId));
+        addDetailRow(detailsPanel, "Giá bán", String.valueOf(book.sellingPrice));
+        addDetailRow(detailsPanel, "Số lượng", String.valueOf(book.quantity));
+        addDetailRow(detailsPanel, "Trạng thái", book.status == 1 ? "Đang bán" : "Ngừng bán");
+        addDetailRow(detailsPanel, "Dịch giả", book.translator == null ? "" : book.translator);
+        addDetailRow(detailsPanel, "Tags", book.tagDetail == null ? "" : book.tagDetail);
+
+        JScrollPane scrollPane = new JScrollPane(detailsPanel);
+        scrollPane.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+
+        JButton closeButton = createStyledButton("Đóng", PRIMARY_GREEN);
         closeButton.addActionListener(e -> dialog.dispose());
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        buttonPanel.setBackground(BG_COLOR);
         buttonPanel.add(closeButton);
-        
         contentPanel.add(buttonPanel, BorderLayout.SOUTH);
-        
+
         dialog.add(contentPanel);
         dialog.setVisible(true);
     }

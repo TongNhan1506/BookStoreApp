@@ -34,54 +34,28 @@ public class BookFormDialog extends JDialog {
     private Set<Integer> selectedAuthorIds = new HashSet<>();
     private Set<String> selectedTags = new HashSet<>();
     
-    public BookFormDialog(Frame parent, String title, ProductPanel.Book book) {
-        super(parent, title, true);
-        this.book = book;
-        
-        // Initialize mock data (same as ProductPanel)
-        initMockData();
-        
-        initUI();
-        
-        if (book != null) {
-            loadBookData();
-        }
-        
-        setSize(900, 650);
-        setLocationRelativeTo(parent);
+    public BookFormDialog(Frame parent, String title, ProductPanel.Book book,
+        List<ProductPanel.Author> authors,
+        List<ProductPanel.Category> categories,
+        List<ProductPanel.Supplier> suppliers,
+        Set<String> allTags) {
+    super(parent, title, true);
+    this.book = book;
+    this.authors = authors;
+    this.categories = categories;
+    this.suppliers = suppliers;
+    this.allTags = allTags;
+    
+    initUI();
+    
+    if (book != null) {
+        loadBookData();
     }
     
-    private void initMockData() {
-        authors = Arrays.asList(
-            new ProductPanel.Author(1, "Nguyễn Nhật Ánh"),
-            new ProductPanel.Author(2, "Tô Hoài"),
-            new ProductPanel.Author(3, "Nam Cao"),
-            new ProductPanel.Author(4, "Ngô Tất Tố"),
-            new ProductPanel.Author(5, "Paulo Coelho"),
-            new ProductPanel.Author(6, "J.K. Rowling"),
-            new ProductPanel.Author(7, "Haruki Murakami")
-        );
-        
-        categories = Arrays.asList(
-            new ProductPanel.Category(1, "Văn học"),
-            new ProductPanel.Category(2, "Thiếu nhi"),
-            new ProductPanel.Category(3, "Kinh tế"),
-            new ProductPanel.Category(4, "Tâm lý - Kỹ năng"),
-            new ProductPanel.Category(5, "Ngoại ngữ")
-        );
-        
-        suppliers = Arrays.asList(
-            new ProductPanel.Supplier(1, "Kim Đồng"),
-            new ProductPanel.Supplier(2, "Nhà xuất bản Trẻ"),
-            new ProductPanel.Supplier(3, "Alphabooks")
-        );
-        
-        allTags = new HashSet<>(Arrays.asList(
-            "Truyện dài", "Tình bạn", "Thiếu nhi", "Nguyễn Nhật Ánh",
-            "Văn học Việt Nam", "Bestseller", "Tâm lý", "Phiêu lưu",
-            "Tiểu thuyết", "Kinh điển", "Dịch giả", "Mới phát hành"
-        ));
+    setSize(900, 650);
+    setLocationRelativeTo(parent);
     }
+    
     
     private void initUI() {
         setLayout(new BorderLayout());
