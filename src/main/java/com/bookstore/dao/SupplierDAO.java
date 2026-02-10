@@ -148,14 +148,3 @@ public class SupplierDAO {
         return null;
     }
 }
-
-
-// Đây là toàn bộ DAO và DTO. Bạn giúp tôi việc sau:
-
-// 1.  Kiểm tra giúp tôi những hàm này có sai gì ko, có thiếu hàm nào ko, có dư hàm nào ko, có gì ko hợp lý ko, có bị xung đột ko
-
-// 2. Tôi có cần làm Book_Author DTO hay DAO ko?
-
-// 3. Tôi có cần làm BUS của những cái này luôn ko?
-
-// 4.  Hiện tại tôi vẫn  chưa sửa ProductPanel cho nên tôi vẫn để tự do tên các hàm bạn kêu tôii sửa như selectall hay searchbyname đúng ko?

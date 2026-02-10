@@ -68,6 +68,7 @@ public class AuthorDAO {
             PreparedStatement ps = c.prepareStatement(sql);){
                 ps.setString(1, author.getAuthorName());
                 ps.setString(2, author.getNationality());
+                ps.setInt(3, author.getAuthorId());
 
                 int rowsAffected = ps.executeUpdate();
                 return rowsAffected >0;

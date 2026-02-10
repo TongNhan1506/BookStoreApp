@@ -58,6 +58,7 @@ public class CategoryDAO {
         try (Connection c = DatabaseConnection.getConnection();
             PreparedStatement  ps = c.prepareStatement(sql)){
                 ps.setString(1,category.getCategoryName());
+                ps.setInt(2, category.getCategoryId());
 
                 int rowsAffected =  ps.executeUpdate();
                     return rowsAffected>0;
@@ -69,7 +70,7 @@ public class CategoryDAO {
 
 
     public boolean exists(String categoryname){
-        String sql = "SELECT * FROM category WHERE category_ = ? ";
+        String sql = "SELECT * FROM category WHERE category_name = ? ";
         try(Connection c = DatabaseConnection.getConnection();
             PreparedStatement ps = c.prepareStatement(sql);){
                 ps.setString(1,categoryname);
