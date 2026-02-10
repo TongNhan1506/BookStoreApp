@@ -6,7 +6,6 @@ import com.bookstore.util.DatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -157,7 +156,7 @@ public class AuthorDAO {
                 );
                 authors.add(author);
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return authors;
