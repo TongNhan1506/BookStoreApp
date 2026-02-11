@@ -8,6 +8,7 @@ import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 
+import com.bookstore.util.AppConstant;
 import com.bookstore.util.SearchableComboBox;
 import com.bookstore.bus.*;
 import com.bookstore.dto.*;
@@ -15,16 +16,15 @@ import com.bookstore.dao.BookAuthorDAO;
 
 public class ProductPanel extends JPanel {
     // Colors
-    private static final Color HEADER_COLOR = Color.decode("#062d1e");
-    private static final Color PRIMARY_GREEN = Color.decode("#4CAF50");
-    private static final Color BG_COLOR = Color.WHITE;
+    private static final Color MAIN_COLOR = Color.decode(AppConstant.GREEN_COLOR_CODE);
+    private static final Color BUTTON_COLOR = Color.decode(AppConstant.BUTTON_COLOR);
     private static final Color BORDER_COLOR = Color.decode("#E0E0E0");
     
     // Components
     private JTextField searchField;
-    private SearchableComboBox<AuthorDTO> authorCombo;
-    private SearchableComboBox<CategoryDTO> categoryCombo;
-    private SearchableComboBox<SupplierDTO> supplierCombo;
+    private SearchableComboBox<String> authorCombo;
+    private SearchableComboBox<String> categoryCombo;
+    private SearchableComboBox<String> supplierCombo;
     private JComboBox<String> statusCombo;
     private JTable bookTable;
     private DefaultTableModel tableModel;
@@ -36,7 +36,7 @@ public class ProductPanel extends JPanel {
     private SupplierBUS supplierBUS;
     private BookAuthorDAO bookAuthorDAO;
 
-    // Mock Data
+    // Data
     private List<Book> allBooks;
     private List<Author> authors;
     private List<Category> categories;
@@ -128,11 +128,9 @@ public class ProductPanel extends JPanel {
 
     private void initUI() {
         setLayout(new BorderLayout(0, 0));
-        setBackground(BG_COLOR);
         
         // Main content panel
         JPanel contentPanel = new JPanel(new BorderLayout(0, 15));
-        contentPanel.setBackground(BG_COLOR);
         contentPanel.setBorder(new EmptyBorder(20, 25, 20, 25));
         
         // Top panel (Search + Filters + Add button)
@@ -148,11 +146,9 @@ public class ProductPanel extends JPanel {
 
     private JPanel createTopPanel() {
         JPanel topPanel = new JPanel(new BorderLayout(0, 15));
-        topPanel.setBackground(BG_COLOR);
         
         // Search and Add button row
         JPanel searchRow = new JPanel(new BorderLayout(15, 0));
-        searchRow.setBackground(BG_COLOR);
         
         // Search field
         searchField = new JTextField();
@@ -169,7 +165,6 @@ public class ProductPanel extends JPanel {
         });
         
         JPanel searchPanel = new JPanel(new BorderLayout(10, 0));
-        searchPanel.setBackground(BG_COLOR);
         JLabel searchIcon = new JLabel("🔍");
         searchIcon.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         searchPanel.add(searchIcon, BorderLayout.WEST);
@@ -178,7 +173,7 @@ public class ProductPanel extends JPanel {
         searchRow.add(searchPanel, BorderLayout.CENTER);
         
         // Add book button
-        JButton addButton = createStyledButton("+ THÊM SÁCH", PRIMARY_GREEN);
+        JButton addButton = createStyledButton("+ THÊM SÁCH", BUTTON_COLOR);
         addButton.setPreferredSize(new Dimension(160, 38));
         addButton.addActionListener(e -> showAddBookDialog());
         searchRow.add(addButton, BorderLayout.EAST);
@@ -195,11 +190,9 @@ public class ProductPanel extends JPanel {
     private JPanel createFiltersPanel() {
         JPanel filtersPanel = new JPanel();
         filtersPanel.setLayout(new BoxLayout(filtersPanel, BoxLayout.Y_AXIS));
-        filtersPanel.setBackground(BG_COLOR);
         
         // Main grid panel for 2x2 filters
         JPanel gridPanel = new JPanel(new GridBagLayout());
-        gridPanel.setBackground(BG_COLOR);
         gridPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         GridBagConstraints gbc = new GridBagConstraints();
@@ -215,7 +208,7 @@ public class ProductPanel extends JPanel {
         // Row 0, Col 1: Author ComboBox
         gbc.gridx = 1;
         gbc.weightx = 1;
-        authorCombo = new SearchableComboBox<>(getAuthorNames());
+        authorCombo = new SearchableComboBox<>(getAuthorNamesList());
         authorCombo.setPreferredSize(new Dimension(220, 35));
         authorCombo.addActionListener(e -> filterBooks());
         gridPanel.add(authorCombo, gbc);
@@ -228,7 +221,7 @@ public class ProductPanel extends JPanel {
         // Row 0, Col 3: Category ComboBox
         gbc.gridx = 3;
         gbc.weightx = 1;
-        categoryCombo = new SearchableComboBox<>(getCategoryNames());
+        categoryCombo = new SearchableComboBox<>(getCategoryNamesList());
         categoryCombo.setPreferredSize(new Dimension(220, 35));
         categoryCombo.addActionListener(e -> filterBooks());
         gridPanel.add(categoryCombo, gbc);
@@ -242,7 +235,7 @@ public class ProductPanel extends JPanel {
         // Row 1, Col 1: Supplier ComboBox
         gbc.gridx = 1;
         gbc.weightx = 1;
-        supplierCombo = new SearchableComboBox<>(getSupplierNames());
+        supplierCombo = new SearchableComboBox<>(getSupplierNamesList());
         supplierCombo.setPreferredSize(new Dimension(220, 35));
         supplierCombo.addActionListener(e -> filterBooks());
         gridPanel.add(supplierCombo, gbc);
@@ -267,16 +260,14 @@ public class ProductPanel extends JPanel {
         
         // Row for Tag filter and Reset button
         JPanel buttonRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        buttonRow.setBackground(BG_COLOR);
         buttonRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         // Tag filter button
         tagFilterButton = new JButton("Tags +");
         tagFilterButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        tagFilterButton.setForeground(PRIMARY_GREEN);
-        tagFilterButton.setBackground(BG_COLOR);
+        tagFilterButton.setForeground(BUTTON_COLOR);
         tagFilterButton.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(PRIMARY_GREEN, 2),
+            BorderFactory.createLineBorder(BUTTON_COLOR, 2),
             BorderFactory.createEmptyBorder(7, 18, 7, 18)
         ));
         tagFilterButton.setFocusPainted(false);
@@ -288,7 +279,6 @@ public class ProductPanel extends JPanel {
         JButton resetButton = new JButton("✖ Xóa bộ lọc");
         resetButton.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         resetButton.setForeground(Color.decode("#666666"));
-        resetButton.setBackground(BG_COLOR);
         resetButton.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(BORDER_COLOR, 1),
             BorderFactory.createEmptyBorder(7, 15, 7, 15)
@@ -312,7 +302,6 @@ public class ProductPanel extends JPanel {
 
     private JPanel createTablePanel() {
         JPanel tablePanel = new JPanel(new BorderLayout());
-        tablePanel.setBackground(BG_COLOR);
         tablePanel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
         
         // Table
@@ -333,25 +322,24 @@ public class ProductPanel extends JPanel {
         bookTable.setSelectionBackground(Color.decode("#E8F5E9"));
         bookTable.setSelectionForeground(Color.BLACK);
         
-        // Disable column reordering and resizing
         bookTable.getTableHeader().setReorderingAllowed(false);
         bookTable.getTableHeader().setResizingAllowed(false);
         
         // Custom header
         JTableHeader header = bookTable.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        header.setBackground(HEADER_COLOR);
+        header.setBackground(MAIN_COLOR);
         header.setForeground(Color.WHITE);
         header.setPreferredSize(new Dimension(header.getWidth(), 45));
         ((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
         
         // Column widths
-        bookTable.getColumnModel().getColumn(0).setPreferredWidth(250); // Sách
-        bookTable.getColumnModel().getColumn(1).setPreferredWidth(180); // Tác giả
-        bookTable.getColumnModel().getColumn(2).setPreferredWidth(150); // Thể loại
-        bookTable.getColumnModel().getColumn(3).setPreferredWidth(150); // NCC
-        bookTable.getColumnModel().getColumn(4).setPreferredWidth(120); // Trạng thái
-        bookTable.getColumnModel().getColumn(5).setPreferredWidth(180); // Thao tác
+        bookTable.getColumnModel().getColumn(0).setPreferredWidth(250);
+        bookTable.getColumnModel().getColumn(1).setPreferredWidth(180);
+        bookTable.getColumnModel().getColumn(2).setPreferredWidth(150);
+        bookTable.getColumnModel().getColumn(3).setPreferredWidth(150);
+        bookTable.getColumnModel().getColumn(4).setPreferredWidth(120);
+        bookTable.getColumnModel().getColumn(5).setPreferredWidth(180);
         
         // Custom renderers
         bookTable.getColumnModel().getColumn(0).setCellRenderer(new BookCellRenderer());
@@ -368,7 +356,6 @@ public class ProductPanel extends JPanel {
         
         JScrollPane scrollPane = new JScrollPane(bookTable);
         scrollPane.setBorder(null);
-        scrollPane.getViewport().setBackground(BG_COLOR);
         
         tablePanel.add(scrollPane, BorderLayout.CENTER);
         
@@ -383,22 +370,26 @@ public class ProductPanel extends JPanel {
         tableModel.setRowCount(0);
         for (Book book : books) {
             Object[] row = new Object[6];
-            row[0] = book; // Will be rendered by BookCellRenderer
+            row[0] = book;
             row[1] = getAuthorNamesForBook(book);
             row[2] = getCategoryName(book.categoryId);
             row[3] = getSupplierName(book.supplierId);
             row[4] = book.status == 1 ? "Đang bán" : "Ngừng bán";
-            row[5] = book; // For action buttons
+            row[5] = book;
             tableModel.addRow(row);
         }
     }
 
     private void filterBooks() {
         String searchText = searchField.getText().toLowerCase().trim();
-        String selectedAuthor = (String) authorCombo.getSelectedItem();
-        String selectedCategory = (String) categoryCombo.getSelectedItem();
-        String selectedSupplier = (String) supplierCombo.getSelectedItem();
+        Object selectedAuthorObj = authorCombo.getSelectedItem();
+        Object selectedCategoryObj = categoryCombo.getSelectedItem();
+        Object selectedSupplierObj = supplierCombo.getSelectedItem();
         String selectedStatus = (String) statusCombo.getSelectedItem();
+        
+        String selectedAuthor = selectedAuthorObj != null ? selectedAuthorObj.toString() : "";
+        String selectedCategory = selectedCategoryObj != null ? selectedCategoryObj.toString() : "";
+        String selectedSupplier = selectedSupplierObj != null ? selectedSupplierObj.toString() : "";
         
         List<Book> filtered = new ArrayList<>();
         
@@ -409,7 +400,7 @@ public class ProductPanel extends JPanel {
             }
             
             // Author filter
-            if (selectedAuthor != null && !selectedAuthor.equals("Tất cả tác giả")) {
+            if (!selectedAuthor.isEmpty() && !selectedAuthor.equals("Tất cả tác giả")) {
                 String authorNames = getAuthorNamesForBook(book);
                 if (!authorNames.contains(selectedAuthor)) {
                     continue;
@@ -417,14 +408,14 @@ public class ProductPanel extends JPanel {
             }
             
             // Category filter
-            if (selectedCategory != null && !selectedCategory.equals("Tất cả thể loại")) {
+            if (!selectedCategory.isEmpty() && !selectedCategory.equals("Tất cả thể loại")) {
                 if (!getCategoryName(book.categoryId).equals(selectedCategory)) {
                     continue;
                 }
             }
             
             // Supplier filter
-            if (selectedSupplier != null && !selectedSupplier.equals("Tất cả nhà cung cấp")) {
+            if (!selectedSupplier.isEmpty() && !selectedSupplier.equals("Tất cả nhà cung cấp")) {
                 if (!getSupplierName(book.supplierId).equals(selectedSupplier)) {
                     continue;
                 }
@@ -469,16 +460,12 @@ public class ProductPanel extends JPanel {
         
         JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
         contentPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
-        contentPanel.setBackground(BG_COLOR);
         
-        // Title
         JLabel title = new JLabel("Chọn Tags để lọc");
         title.setFont(new Font("Segoe UI", Font.BOLD, 16));
         contentPanel.add(title, BorderLayout.NORTH);
         
-        // Tag chips panel
         JPanel chipsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
-        chipsPanel.setBackground(BG_COLOR);
         
         for (String tag : allTags) {
             JToggleButton chip = createTagChip(tag);
@@ -491,14 +478,12 @@ public class ProductPanel extends JPanel {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         contentPanel.add(scrollPane, BorderLayout.CENTER);
         
-        // Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        buttonPanel.setBackground(BG_COLOR);
         
         JButton cancelButton = createStyledButton("Hủy", Color.decode("#757575"));
         cancelButton.addActionListener(e -> dialog.dispose());
         
-        JButton applyButton = createStyledButton("Áp dụng", PRIMARY_GREEN);
+        JButton applyButton = createStyledButton("Áp dụng", BUTTON_COLOR);
         applyButton.addActionListener(e -> {
             selectedTags.clear();
             for (Component comp : chipsPanel.getComponents()) {
@@ -534,7 +519,7 @@ public class ProductPanel extends JPanel {
         
         chip.addItemListener(e -> {
             if (chip.isSelected()) {
-                chip.setBackground(PRIMARY_GREEN);
+                chip.setBackground(BUTTON_COLOR);
                 chip.setForeground(Color.WHITE);
             } else {
                 chip.setBackground(Color.decode("#F5F5F5"));
@@ -555,9 +540,15 @@ public class ProductPanel extends JPanel {
 
     private void resetFilters() {
         searchField.setText("");
-        authorCombo.setSelectedIndex(0);
-        categoryCombo.setSelectedIndex(0);
-        supplierCombo.setSelectedIndex(0);
+        if (authorCombo.getItemCount() > 0) {
+            authorCombo.setSelectedIndex(0);
+        }
+        if (categoryCombo.getItemCount() > 0) {
+            categoryCombo.setSelectedIndex(0);
+        }
+        if (supplierCombo.getItemCount() > 0) {
+            supplierCombo.setSelectedIndex(0);
+        }
         statusCombo.setSelectedIndex(0);
         selectedTags.clear();
         updateTagButtonText();
@@ -565,119 +556,112 @@ public class ProductPanel extends JPanel {
     }
 
     private void showAddBookDialog() {
-    BookFormDialog dialog = new BookFormDialog(
-        (Frame) SwingUtilities.getWindowAncestor(this), 
-        "Thêm sách mới", 
-        null,
-        authors, categories, suppliers, allTags
-    );
-    dialog.setVisible(true);
-    
-    if (dialog.isSaved()) {
-        Book newBook = dialog.getBook();
+        BookFormDialog dialog = new BookFormDialog(
+            (Frame) SwingUtilities.getWindowAncestor(this), 
+            "Thêm sách mới", 
+            null,
+            authors, categories, suppliers, allTags
+        );
+        dialog.setVisible(true);
         
-        try {
-            // Tạo DTO
-            BookDTO bookDTO = new BookDTO();
-            bookDTO.setBookName(newBook.bookName);
-            bookDTO.setSellingPrice(newBook.sellingPrice);
-            bookDTO.setQuantity(newBook.quantity);
-            bookDTO.setTranslator(newBook.translator);
-            bookDTO.setImage(newBook.image);
-            bookDTO.setDescription(newBook.description);
-            bookDTO.setStatus(newBook.status);
-            bookDTO.setCategoryId(newBook.categoryId);
-            bookDTO.setSupplierId(newBook.supplierId);
-            bookDTO.setTagDetail(newBook.tagDetail);
-            if (newBook.authorIds != null) {
-                bookDTO.getAuthorIdsList().addAll(newBook.authorIds);
-            }
+        if (dialog.isSaved()) {
+            Book newBook = dialog.getBook();
             
-            // Thêm vào DB qua BUS
-            String result = bookBUS.addBook(bookDTO);
-            
-            if (result.contains("thành công")) {
-                // Thêm tác giả
-                if (newBook.authorIds != null && !newBook.authorIds.isEmpty()) {
-                    bookAuthorDAO.addAuthorsToBook(bookDTO.getBookId(), newBook.authorIds);
+            try {
+                BookDTO bookDTO = new BookDTO();
+                bookDTO.setBookName(newBook.bookName);
+                bookDTO.setSellingPrice(newBook.sellingPrice);
+                bookDTO.setQuantity(newBook.quantity);
+                bookDTO.setTranslator(newBook.translator);
+                bookDTO.setImage(newBook.image);
+                bookDTO.setDescription(newBook.description);
+                bookDTO.setStatus(newBook.status);
+                bookDTO.setCategoryId(newBook.categoryId);
+                bookDTO.setSupplierId(newBook.supplierId);
+                bookDTO.setTagDetail(newBook.tagDetail);
+                if (newBook.authorIds != null) {
+                    bookDTO.getAuthorIdsList().addAll(newBook.authorIds);
                 }
-                loadDataFromDatabase();
-                filterBooks();
                 
-                JOptionPane.showMessageDialog(this, result, 
-                    "Thành công", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, result, 
+                String result = bookBUS.addBook(bookDTO);
+                
+                if (result.contains("thành công")) {
+                    if (newBook.authorIds != null && !newBook.authorIds.isEmpty()) {
+                        bookAuthorDAO.addAuthorsToBook(bookDTO.getBookId(), newBook.authorIds);
+                    }
+                    loadDataFromDatabase();
+                    filterBooks();
+                    
+                    JOptionPane.showMessageDialog(this, result, 
+                        "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, result, 
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, 
+                    "Lỗi: " + e.getMessage(), 
                     "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, 
-                "Lỗi: " + e.getMessage(), 
-                "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
-}
 
     private void showEditBookDialog(Book book) {
-    BookFormDialog dialog = new BookFormDialog(
-        (Frame) SwingUtilities.getWindowAncestor(this), 
-        "Chỉnh sửa sách", 
-        book,
-        authors, categories, suppliers, allTags
-    );
-    dialog.setVisible(true);
-    
-    if (dialog.isSaved()) {
-        Book updatedBook = dialog.getBook();
+        BookFormDialog dialog = new BookFormDialog(
+            (Frame) SwingUtilities.getWindowAncestor(this), 
+            "Chỉnh sửa sách", 
+            book,
+            authors, categories, suppliers, allTags
+        );
+        dialog.setVisible(true);
         
-        try {
-            // Tạo DTO
-            BookDTO bookDTO = new BookDTO();
-            bookDTO.setBookId(book.bookId);
-            bookDTO.setBookName(updatedBook.bookName);
-            bookDTO.setSellingPrice(updatedBook.sellingPrice);
-            bookDTO.setQuantity(updatedBook.quantity);
-            bookDTO.setTranslator(updatedBook.translator);
-            bookDTO.setImage(updatedBook.image);
-            bookDTO.setDescription(updatedBook.description);
-            bookDTO.setStatus(updatedBook.status);
-            bookDTO.setCategoryId(updatedBook.categoryId);
-            bookDTO.setSupplierId(updatedBook.supplierId);
-            bookDTO.setTagDetail(updatedBook.tagDetail);
-            if (updatedBook.authorIds != null) {
-                bookDTO.getAuthorIdsList().addAll(updatedBook.authorIds);
-            }
+        if (dialog.isSaved()) {
+            Book updatedBook = dialog.getBook();
             
-            // Update trong DB
-            String result = bookBUS.updateBook(bookDTO);
-            
-            if (result.contains("thành công")) {
-                // Update tác giả
-                bookAuthorDAO.removeAllAuthorsFromBook(book.bookId);
-                if (updatedBook.authorIds != null && !updatedBook.authorIds.isEmpty()) {
-                    bookAuthorDAO.addAuthorsToBook(book.bookId, updatedBook.authorIds);
+            try {
+                BookDTO bookDTO = new BookDTO();
+                bookDTO.setBookId(book.bookId);
+                bookDTO.setBookName(updatedBook.bookName);
+                bookDTO.setSellingPrice(updatedBook.sellingPrice);
+                bookDTO.setQuantity(updatedBook.quantity);
+                bookDTO.setTranslator(updatedBook.translator);
+                bookDTO.setImage(updatedBook.image);
+                bookDTO.setDescription(updatedBook.description);
+                bookDTO.setStatus(updatedBook.status);
+                bookDTO.setCategoryId(updatedBook.categoryId);
+                bookDTO.setSupplierId(updatedBook.supplierId);
+                bookDTO.setTagDetail(updatedBook.tagDetail);
+                if (updatedBook.authorIds != null) {
+                    bookDTO.getAuthorIdsList().addAll(updatedBook.authorIds);
                 }
                 
-                // Reload data
-                loadDataFromDatabase();
-                filterBooks();
+                String result = bookBUS.updateBook(bookDTO);
                 
-                JOptionPane.showMessageDialog(this, result, 
-                    "Thành công", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, result, 
+                if (result.contains("thành công")) {
+                    bookAuthorDAO.removeAllAuthorsFromBook(book.bookId);
+                    if (updatedBook.authorIds != null && !updatedBook.authorIds.isEmpty()) {
+                        bookAuthorDAO.addAuthorsToBook(book.bookId, updatedBook.authorIds);
+                    }
+                    
+                    loadDataFromDatabase();
+                    filterBooks();
+                    
+                    JOptionPane.showMessageDialog(this, result, 
+                        "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, result, 
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, 
+                    "Lỗi: " + e.getMessage(), 
                     "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, 
-                "Lỗi: " + e.getMessage(), 
-                "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
-    }
     }
 
     private void showBookDetail(Book book) {
@@ -688,7 +672,6 @@ public class ProductPanel extends JPanel {
 
         JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
         contentPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
-        contentPanel.setBackground(BG_COLOR);
 
         JLabel title = new JLabel(book.bookName);
         title.setFont(new Font("Segoe UI", Font.BOLD, 16));
@@ -696,7 +679,6 @@ public class ProductPanel extends JPanel {
 
         JPanel detailsPanel = new JPanel();
         detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
-        detailsPanel.setBackground(BG_COLOR);
 
         addDetailRow(detailsPanel, "Tác giả", getAuthorNamesForBook(book));
         addDetailRow(detailsPanel, "Thể loại", getCategoryName(book.categoryId));
@@ -711,11 +693,10 @@ public class ProductPanel extends JPanel {
         scrollPane.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
         contentPanel.add(scrollPane, BorderLayout.CENTER);
 
-        JButton closeButton = createStyledButton("Đóng", PRIMARY_GREEN);
+        JButton closeButton = createStyledButton("Đóng", BUTTON_COLOR);
         closeButton.addActionListener(e -> dialog.dispose());
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        buttonPanel.setBackground(BG_COLOR);
         buttonPanel.add(closeButton);
         contentPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -725,7 +706,6 @@ public class ProductPanel extends JPanel {
 
     private void addDetailRow(JPanel panel, String label, String value) {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
-        row.setBackground(BG_COLOR);
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         JLabel lblLabel = new JLabel(label);
@@ -749,7 +729,6 @@ public class ProductPanel extends JPanel {
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
-        // Hover effect
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -765,29 +744,30 @@ public class ProductPanel extends JPanel {
         return button;
     }
 
-    private String[] getAuthorNames() {
-        String[] names = new String[authors.size() + 1];
-        names[0] = "Tất cả tác giả";
-        for (int i = 0; i < authors.size(); i++) {
-            names[i + 1] = authors.get(i).name;
+    // THAY ĐỔI: Trả về List<String> thay vì String[]
+    private List<String> getAuthorNamesList() {
+        List<String> names = new ArrayList<>();
+        names.add("Tất cả tác giả");
+        for (Author author : authors) {
+            names.add(author.name);
         }
         return names;
     }
 
-    private String[] getCategoryNames() {
-        String[] names = new String[categories.size() + 1];
-        names[0] = "Tất cả thể loại";
-        for (int i = 0; i < categories.size(); i++) {
-            names[i + 1] = categories.get(i).name;
+    private List<String> getCategoryNamesList() {
+        List<String> names = new ArrayList<>();
+        names.add("Tất cả thể loại");
+        for (Category category : categories) {
+            names.add(category.name);
         }
         return names;
     }
 
-    private String[] getSupplierNames() {
-        String[] names = new String[suppliers.size() + 1];
-        names[0] = "Tất cả nhà cung cấp";
-        for (int i = 0; i < suppliers.size(); i++) {
-            names[i + 1] = suppliers.get(i).name;
+    private List<String> getSupplierNamesList() {
+        List<String> names = new ArrayList<>();
+        names.add("Tất cả nhà cung cấp");
+        for (Supplier supplier : suppliers) {
+            names.add(supplier.name);
         }
         return names;
     }
@@ -835,15 +815,12 @@ public class ProductPanel extends JPanel {
             width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = img.createGraphics();
         
-        // Background
         g2d.setColor(Color.decode("#E0E0E0"));
         g2d.fillRect(0, 0, width, height);
         
-        // Border
         g2d.setColor(Color.decode("#BDBDBD"));
         g2d.drawRect(0, 0, width - 1, height - 1);
         
-        // Icon
         g2d.setColor(Color.decode("#9E9E9E"));
         g2d.setFont(new Font("Segoe UI", Font.PLAIN, 40));
         String text = "📖";
@@ -856,7 +833,7 @@ public class ProductPanel extends JPanel {
         return img;
     }
 
-    // Inner classes for cell renderers
+    // Cell renderers
     class BookCellRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
@@ -874,7 +851,6 @@ public class ProductPanel extends JPanel {
                 panel.setBackground(table.getBackground());
             }
             
-            // Image
             JLabel imageLabel = new JLabel();
             imageLabel.setPreferredSize(new Dimension(50, 70));
             imageLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -885,7 +861,6 @@ public class ProductPanel extends JPanel {
             
             panel.add(imageLabel, BorderLayout.WEST);
             
-            // Book name
             JLabel nameLabel = new JLabel("<html><b>" + book.bookName + "</b></html>");
             nameLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
             panel.add(nameLabel, BorderLayout.CENTER);
@@ -926,7 +901,7 @@ public class ProductPanel extends JPanel {
         private JButton viewButton;
         
         public ActionCellRenderer() {
-            setLayout(new FlowLayout(FlowLayout.CENTER, 5, 20)); // Changed vertical gap to 20 for vertical centering
+            setLayout(new FlowLayout(FlowLayout.CENTER, 5, 20));
             setOpaque(true);
             
             editButton = new JButton("Sửa");
@@ -1020,7 +995,7 @@ public class ProductPanel extends JPanel {
         String translator;
         String image;
         String description;
-        int status;  // 0 = Ngừng bán, 1 = Đang bán
+        int status;
         int categoryId;
         int supplierId;
         String tagDetail;

@@ -2,11 +2,8 @@ package com.bookstore.gui.main;
 
 import com.bookstore.dto.EmployeeDTO;
 import com.bookstore.gui.panel.SellingPanel;
-<<<<<<< HEAD
 import com.bookstore.gui.panel.ProductTab.ProductTab;
-=======
 import com.bookstore.util.AppConstant;
->>>>>>> c9f576da359d5b47073f51647c636eda55f9d418
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import javax.swing.*;
