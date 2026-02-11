@@ -3,6 +3,9 @@ package com.bookstore.gui.panel.ProductTab;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.io.File;
+import java.awt.image.BufferedImage;
 import java.awt.event.*;
 import java.util.*;
 import java.util.List;
@@ -28,6 +31,7 @@ public class BookFormDialog extends JDialog {
     private JRadioButton inactiveRadio;
     private JPanel tagPanel;
     private JLabel imageLabel;
+        private String selectedImagePath;
     
     private BookDTO book;
     private boolean saved = false;
@@ -88,7 +92,7 @@ public class BookFormDialog extends JDialog {
     private JPanel createImagePanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(BG_COLOR);
-        panel.setPreferredSize(new Dimension(200, 0));
+        panel.setPreferredSize(new Dimension(220, 0));
         
         // Image display
         imageLabel = new JLabel();
@@ -99,26 +103,61 @@ public class BookFormDialog extends JDialog {
         imageLabel.setOpaque(true);
         imageLabel.setBackground(Color.decode("#F5F5F5"));
         
-        // Placeholder
         imageLabel.setIcon(new ImageIcon(createBookPlaceholder(180, 250)));
-        
+        imageLabel.setText("Kéo và thả ảnh vào đây");
+        imageLabel.setHorizontalTextPosition(JLabel.CENTER);
+        imageLabel.setVerticalTextPosition(JLabel.BOTTOM);
+        imageLabel.setForeground(Color.decode("#757575"));
+
+        imageLabel.setTransferHandler(new TransferHandler() {
+            @Override
+            public boolean canImport(TransferSupport support) {
+                return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+            }
+
+            @Override
+            public boolean importData(TransferSupport support) {
+                if (!canImport(support)) {
+                    return false;
+                }
+                try {
+                    @SuppressWarnings("unchecked")
+                    java.util.List<File> files = (java.util.List<File>) support.getTransferable()
+                        .getTransferData(DataFlavor.javaFileListFlavor);
+                    if (!files.isEmpty()) {
+                        return setSelectedImage(files.get(0));
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(BookFormDialog.this,
+                        "Không thể đọc file ảnh đã kéo thả.",
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+                return false;
+            }
+        });
         panel.add(imageLabel, BorderLayout.CENTER);
         
+        JLabel helperLabel = new JLabel("Định dạng: .jpg, .jpeg, .png, .webp", JLabel.CENTER);
+        helperLabel.setFont(new Font("Segoe UI", Font.ITALIC, 11));
+        helperLabel.setForeground(Color.decode("#777777"));
+
         // Upload button
-        JButton uploadButton = new JButton("Chọn ảnh");
+        JButton uploadButton = new JButton("Browse ảnh");
         uploadButton.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         uploadButton.setBackground(Color.decode("#E0E0E0"));
         uploadButton.setForeground(Color.decode("#333333"));
         uploadButton.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
         uploadButton.setFocusPainted(false);
         uploadButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        uploadButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, 
-                "Chức năng upload ảnh đang được phát triển", 
-                "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-        });
-        
-        panel.add(uploadButton, BorderLayout.SOUTH);
+        uploadButton.addActionListener(e -> openImageChooser());
+
+        JPanel actionPanel = new JPanel(new BorderLayout(0, 8));
+        actionPanel.setBackground(BG_COLOR);
+        actionPanel.add(helperLabel, BorderLayout.NORTH);
+        actionPanel.add(uploadButton, BorderLayout.SOUTH);
+
+        panel.add(actionPanel, BorderLayout.SOUTH);
+
         
         return panel;
     }
@@ -488,6 +527,51 @@ public class BookFormDialog extends JDialog {
         return chip;
     }
     
+    private void openImageChooser() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Chọn ảnh bìa sách");
+        chooser.setAcceptAllFileFilterUsed(false);
+        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+            "Image files (*.jpg, *.jpeg, *.png, *.webp)", "jpg", "jpeg", "png", "webp"));
+
+        int result = chooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            setSelectedImage(chooser.getSelectedFile());
+        }
+    }
+
+    private boolean setSelectedImage(File file) {
+        if (file == null || !file.exists()) {
+            return false;
+        }
+
+        if (!isAllowedImage(file)) {
+            JOptionPane.showMessageDialog(this,
+                "Chỉ chấp nhận định dạng ảnh: .jpg, .jpeg, .png, .webp",
+                "Định dạng không hợp lệ", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+
+        ImageIcon icon = new ImageIcon(file.getAbsolutePath());
+        if (icon.getIconWidth() <= 0 || icon.getIconHeight() <= 0) {
+            JOptionPane.showMessageDialog(this,
+                "Không thể đọc file ảnh đã chọn.",
+                "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        selectedImagePath = file.getAbsolutePath();
+        Image preview = icon.getImage().getScaledInstance(180, 250, Image.SCALE_SMOOTH);
+        imageLabel.setIcon(new ImageIcon(preview));
+        imageLabel.setText("");
+        return true;
+    }
+
+    private boolean isAllowedImage(File file) {
+        String name = file.getName().toLowerCase();
+        return name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".webp");
+    }
+
     private void addFormField(JPanel parent, String labelText, Component field, boolean required) {
         JPanel row = new JPanel(new BorderLayout(10, 5));
         row.setBackground(BG_COLOR);
@@ -602,8 +686,9 @@ public class BookFormDialog extends JDialog {
             book.setSellingPrice(0);
             book.setQuantity(0);
             book.setTranslator(translatorField.getText().trim().isEmpty() ? null : translatorField.getText().trim());
-            book.setImage(null);
+            book.setImage(selectedImagePath);
             book.setDescription(descriptionArea.getText().trim().isEmpty() ? null : descriptionArea.getText().trim());
+            book.setImage(selectedImagePath);
             book.setStatus(activeRadio.isSelected() ? 1 : 0);
             book.setCategoryId(categories.get(categoryCombo.getSelectedIndex() - 1).getCategoryId());
             book.setSupplierId(suppliers.get(supplierCombo.getSelectedIndex() - 1).getSupplierId());
@@ -629,7 +714,14 @@ public class BookFormDialog extends JDialog {
         nameField.setText(book.getBookName());
         translatorField.setText(book.getTranslator() != null ? book.getTranslator() : "");
         descriptionArea.setText(book.getDescription() != null ? book.getDescription() : "");
-        
+        if (book.getImage() != null && !book.getImage().trim().isEmpty()) {
+            File imageFile = new File(book.getImage());
+            if (imageFile.exists()) {
+                selectedImagePath = imageFile.getAbsolutePath();
+                setSelectedImage(imageFile);
+            }
+        }
+
         // Authors
         if (book.getAuthorIdsList() != null) {
             selectedAuthorIds.addAll(book.getAuthorIdsList());
@@ -715,8 +807,7 @@ public class BookFormDialog extends JDialog {
     }
     
     private Image createBookPlaceholder(int width, int height) {
-        java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(
-            width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = img.createGraphics();
         
         g2d.setColor(Color.decode("#E0E0E0"));

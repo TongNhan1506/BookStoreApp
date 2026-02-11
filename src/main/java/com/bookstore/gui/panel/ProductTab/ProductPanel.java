@@ -5,6 +5,8 @@ import javax.swing.border.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.*;
 import java.util.List;
 
@@ -437,8 +439,7 @@ public class ProductPanel extends JPanel {
         title.setFont(new Font("Segoe UI", Font.BOLD, 16));
         contentPanel.add(title, BorderLayout.NORTH);
         
-        JPanel chipsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
-        
+        JPanel chipsPanel = new JPanel(new GridLayout(0, 3, 8, 8));        
         for (String tag : allTags) {
             JToggleButton chip = createTagChip(tag);
             chip.setSelected(selectedTags.contains(tag));
@@ -639,7 +640,7 @@ public class ProductPanel extends JPanel {
     private void showBookDetail(BookDTO book) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Chi tiết sách", true);
         dialog.setLayout(new BorderLayout(10, 10));
-        dialog.setSize(520, 420);
+        dialog.setSize(620, 450);
         dialog.setLocationRelativeTo(this);
 
         JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
@@ -651,12 +652,17 @@ public class ProductPanel extends JPanel {
 
         JPanel detailsPanel = new JPanel();
         detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
-
+        JLabel imageLabel = new JLabel();
+        imageLabel.setPreferredSize(new Dimension(140, 200));
+        imageLabel.setMaximumSize(new Dimension(140, 200));
+        imageLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        imageLabel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
+        imageLabel.setIcon(new ImageIcon(getBookCoverImage(book, 140, 200)));
+        detailsPanel.add(imageLabel);
+        detailsPanel.add(Box.createVerticalStrut(10));
         addDetailRow(detailsPanel, "Tác giả", getAuthorNamesForBook(book));
         addDetailRow(detailsPanel, "Thể loại", getCategoryName(book.getCategoryId()));
         addDetailRow(detailsPanel, "Nhà cung cấp", getSupplierName(book.getSupplierId()));
-        addDetailRow(detailsPanel, "Giá bán", String.valueOf(book.getSellingPrice()));
-        addDetailRow(detailsPanel, "Số lượng", String.valueOf(book.getQuantity()));
         addDetailRow(detailsPanel, "Trạng thái", book.getStatus() == 1 ? "Đang bán" : "Ngừng bán");
         addDetailRow(detailsPanel, "Dịch giả", book.getTranslator() == null ? "" : book.getTranslator());
         addDetailRow(detailsPanel, "Tags", book.getTagDetail() == null ? "" : book.getTagDetail());
@@ -783,8 +789,7 @@ public class ProductPanel extends JPanel {
     }
 
     private Image createBookPlaceholder(int width, int height) {
-        java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(
-            width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = img.createGraphics();
         
         g2d.setColor(Color.decode("#E0E0E0"));
@@ -804,6 +809,74 @@ public class ProductPanel extends JPanel {
         g2d.dispose();
         return img;
     }
+
+    private Image getBookCoverImage(BookDTO book, int width, int height) {
+        if (book != null && book.getImage() != null && !book.getImage().trim().isEmpty()) {
+            File imageFile = new File(book.getImage());
+            if (imageFile.exists()) {
+                ImageIcon icon = new ImageIcon(book.getImage());
+                if (icon.getIconWidth() > 0 && icon.getIconHeight() > 0) {
+                    return icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                }
+            }
+        }
+        return createBookPlaceholder(width, height);
+    }
+
+    private String truncateToMaxLines(String text, Font font, int maxWidth, int maxLines, Graphics graphics) {
+        if (text == null || text.trim().isEmpty()) {
+            return "";
+        }
+
+        FontMetrics fm = graphics != null ? graphics.getFontMetrics(font) : getFontMetrics(font);
+        List<String> lines = new ArrayList<>();
+        StringBuilder currentLine = new StringBuilder();
+
+        for (String word : text.split("\\s+")) {
+            String candidate = currentLine.length() == 0 ? word : currentLine + " " + word;
+            if (fm.stringWidth(candidate) <= maxWidth) {
+                currentLine = new StringBuilder(candidate);
+            } else {
+                if (currentLine.length() > 0) {
+                    lines.add(currentLine.toString());
+                    currentLine = new StringBuilder(word);
+                } else {
+                    lines.add(appendEllipsis(word, fm, maxWidth));
+                    currentLine = new StringBuilder();
+                }
+
+                if (lines.size() == maxLines) {
+                    return lines.get(0) + "<br>" + appendEllipsis(lines.get(1), fm, maxWidth);
+                }
+            }
+        }
+
+        if (currentLine.length() > 0) {
+            lines.add(currentLine.toString());
+        }
+
+        if (maxLines == 1 || lines.size() <= 1) {
+            return lines.isEmpty() ? "" : lines.get(0);
+        }
+        if (lines.size() == maxLines) {
+            return lines.get(0) + "<br>" + lines.get(1);
+        }
+        return lines.get(0) + "<br>" + appendEllipsis(lines.get(1), fm, maxWidth);
+    }
+
+    private String appendEllipsis(String text, FontMetrics fm, int maxWidth) {
+        String ellipsis = "...";
+        if (fm.stringWidth(text) <= maxWidth && !text.endsWith(ellipsis)) {
+            return text;
+        }
+
+        String result = text;
+        while (!result.isEmpty() && fm.stringWidth(result + ellipsis) > maxWidth) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result + ellipsis;
+    }
+
 
     // Cell renderers
     class BookCellRenderer extends DefaultTableCellRenderer {
@@ -829,11 +902,12 @@ public class ProductPanel extends JPanel {
             imageLabel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
             imageLabel.setOpaque(true);
             imageLabel.setBackground(Color.decode("#F5F5F5"));
-            imageLabel.setIcon(new ImageIcon(createBookPlaceholder(50, 70)));
+            imageLabel.setIcon(new ImageIcon(getBookCoverImage(book, 50, 70)));
             
             panel.add(imageLabel, BorderLayout.WEST);
             
-            JLabel nameLabel = new JLabel("<html><b>" + book.getBookName() + "</b></html>");
+            String truncatedName = truncateToMaxLines(book.getBookName(), new Font("Segoe UI", Font.BOLD, 13), 170, 2, table.getGraphics());
+            JLabel nameLabel = new JLabel("<html><b>" + truncatedName + "</b></html>");
             nameLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
             panel.add(nameLabel, BorderLayout.CENTER);
             
@@ -873,7 +947,7 @@ public class ProductPanel extends JPanel {
         private JButton viewButton;
         
         public ActionCellRenderer() {
-            setLayout(new FlowLayout(FlowLayout.CENTER, 5, 20));
+            setLayout(new FlowLayout(FlowLayout.CENTER, 8, 20));
             setOpaque(true);
             
             editButton = new JButton("Sửa");
