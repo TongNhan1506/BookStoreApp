@@ -13,8 +13,8 @@ public class BookDAO {
     public List<BookDTO> selectAllBooks() {
         List<BookDTO> list = new ArrayList<>();
         String sql = "SELECT b.*, c.category_name, " +
-                "GROUP_CONCAT(DISTINCT a.author_name SEPARATOR ', ') as author_names, " + // Lấy tên: "Nguyễn Nhật Ánh, Tô Hoài"
-                "GROUP_CONCAT(DISTINCT ba.author_id SEPARATOR ',') as author_ids " +      // Lấy ID: "1,2"
+                "GROUP_CONCAT(DISTINCT a.author_name SEPARATOR ', ') as author_names, " +
+                "GROUP_CONCAT(DISTINCT ba.author_id SEPARATOR ',') as author_ids " +
                 "FROM book b " +
                 "JOIN category c ON b.category_id = c.category_id " +
                 "LEFT JOIN book_author ba ON b.book_id = ba.book_id " +
@@ -52,17 +52,16 @@ public class BookDAO {
     }
 
     public boolean decreaseQuantity(int bookId, int quantitySold) {
-        // Câu lệnh SQL: Lấy số lượng hiện tại TRỪ đi số lượng bán
         String sql = "UPDATE book SET quantity = quantity - ? WHERE book_id = ?";
 
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
 
-            ps.setInt(1, quantitySold); // Tham số 1: Số lượng bán
-            ps.setInt(2, bookId);       // Tham số 2: ID sách
+            ps.setInt(1, quantitySold);
+            ps.setInt(2, bookId);
 
             int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0; // Trả về true nếu update thành công
+            return rowsAffected > 0;
 
         } catch (Exception e) {
             e.printStackTrace();

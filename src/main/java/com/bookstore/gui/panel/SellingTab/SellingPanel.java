@@ -40,11 +40,9 @@ public class SellingPanel extends JPanel {
     private CategoryBUS categoryBUS = new CategoryBUS();
     private AuthorBUS authorBUS = new AuthorBUS();
     private BookBUS bookBUS = new BookBUS();
-    private CustomerBUS customerBUS = new CustomerBUS();
     private PromotionBUS promotionBUS = new PromotionBUS();
 
     private List<BookDTO> listBooks = new ArrayList<>();
-    private List<CustomerDTO> listCustomers = new ArrayList<>();
     private CustomerDTO currentCustomer = null;
 
     public SellingPanel() {
@@ -279,12 +277,12 @@ public class SellingPanel extends JPanel {
         lbFinalTotal.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
         lbFinalTotal.setForeground(Color.RED);
 
-        pSummary.add(createSummaryLabel("Tổng tiền hàng:", lbSubTotal)); // Tổng giá gốc
-        pSummary.add(createSummaryLabel("Giảm giá sách:", lbDiscountPromo)); // Tổng tiền được giảm do CTKM
+        pSummary.add(createSummaryLabel("Tổng tiền hàng:", lbSubTotal));
+        pSummary.add(createSummaryLabel("Giảm giá sách:", lbDiscountPromo));
         pSummary.add(createSummaryLabel("Giảm giá thành viên:", lbDiscountMember));
 
         JPanel pFinal = createSummaryLabel("CÒN LẠI: ", lbFinalTotal);
-        JLabel lbTitleFinal = (JLabel) pFinal.getComponent(0); // Lấy label title
+        JLabel lbTitleFinal = (JLabel) pFinal.getComponent(0);
         lbTitleFinal.setForeground(Color.RED);
         pSummary.add(pFinal);
 
@@ -520,22 +518,15 @@ public class SellingPanel extends JPanel {
     }
 
     private void calculateTotal() {
-        double totalOriginal = 0; // Tổng tiền gốc (chưa giảm)
-        double totalCart = 0;     // Tổng tiền sau khi giảm giá sách (giá trên bảng)
+        double totalOriginal = 0;
+        double totalCart = 0;
         boolean hasPromotion = false;
 
-        // 1. Duyệt bảng tính tiền
         for (int i = 0; i < cartModel.getRowCount(); i++) {
-            // Lấy số lượng
             int quantity = Integer.parseInt(cartModel.getValueAt(i, 2).toString());
-
-            // Lấy đơn giá gốc (Cột 3) - Cần parse từ chuỗi "50.000đ" -> 50000.0
             double originalPrice = MoneyFormatter.toDouble(cartModel.getValueAt(i, 3).toString());
-
-            // Lấy thành tiền đã giảm (Cột 5)
             double discountedTotalRow = MoneyFormatter.toDouble(cartModel.getValueAt(i, 5).toString());
 
-            // Cộng dồn
             totalOriginal += (originalPrice * quantity);
             totalCart += discountedTotalRow;
 
@@ -543,7 +534,9 @@ public class SellingPanel extends JPanel {
             int percent = 0;
             try {
                 percent = Integer.parseInt(percentStr);
-            } catch (Exception e) { percent = 0; }
+            } catch (Exception e) {
+
+            }
 
             if (percent > 0) {
                 hasPromotion = true;
@@ -560,16 +553,12 @@ public class SellingPanel extends JPanel {
             txtPromo.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 14));
         }
 
-        // 2. Tính giảm giá CTKM (Chênh lệch giữa giá gốc và giá thực bán)
         double discountPromo = totalOriginal - totalCart;
-
-        // 3. Tính giảm giá Thành viên (Áp dụng trên totalCart)
         double discountMember = 0;
         if (currentCustomer != null) {
             int point = currentCustomer.getPoint();
             double memberPercent = 0;
 
-            // Logic hạng thành viên (ví dụ)
             if (point >= 10000) memberPercent = 15;
             else if (point >= 5000) memberPercent = 10;
             else if (point >= 2000) memberPercent = 5;
@@ -577,10 +566,8 @@ public class SellingPanel extends JPanel {
             discountMember = totalCart * (memberPercent / 100.0);
         }
 
-        // 4. Tổng cuối cùng
         double finalTotal = totalCart - discountMember;
 
-        // 5. Cập nhật lên giao diện
         lbSubTotal.setText(MoneyFormatter.toVND(totalOriginal));
         lbDiscountPromo.setText(MoneyFormatter.toVND(discountPromo));
         lbDiscountMember.setText(MoneyFormatter.toVND(discountMember));
@@ -683,10 +670,9 @@ public class SellingPanel extends JPanel {
                 "Xác nhận", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            cartModel.setRowCount(0); // Xóa hết dòng trong bảng
-            calculateTotal(); // Tính lại tổng tiền (về 0)
+            cartModel.setRowCount(0);
+            calculateTotal();
 
-            // Reset text thông báo khuyến mãi
             txtPromo.setText("Không có CTKM nào áp dụng");
             txtPromo.setForeground(Color.GRAY);
             txtPromo.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 14));
@@ -700,10 +686,7 @@ public class SellingPanel extends JPanel {
             return;
         }
 
-        // Xóa dòng đang chọn
         cartModel.removeRow(selectedRow);
-
-        // Tính lại tổng tiền sau khi xóa
         calculateTotal();
     }
 
@@ -714,41 +697,32 @@ public class SellingPanel extends JPanel {
             return;
         }
 
-        // A. Lấy dữ liệu hiện tại của dòng đó
-        // Cột 0 là ID sách (ẩn hoặc hiện tùy cấu hình trước đó) -> Lấy ID để check tồn kho
         int bookId = Integer.parseInt(cartModel.getValueAt(selectedRow, 0).toString());
         int currentQty = Integer.parseInt(cartModel.getValueAt(selectedRow, 2).toString());
-
-        // Lấy giá gốc (Cột 3)
         double oldPrice = MoneyFormatter.toDouble(cartModel.getValueAt(selectedRow, 3).toString());
-
-        // Lấy % giảm giá (Cột 4) để tính ra Giá thực bán
         String percentStr = cartModel.getValueAt(selectedRow, 4).toString().replace("%", "").trim();
         int promoPercent = 0;
-        try { promoPercent = Integer.parseInt(percentStr); } catch (Exception ex) {}
+        try {
+            promoPercent = Integer.parseInt(percentStr);
+        } catch (Exception ex) {
 
-        // Giá thực bán = Giá gốc * (1 - %giảm)
+        }
         double actualPrice = oldPrice * (1 - promoPercent / 100.0);
 
-        // B. Tìm sách trong listBooks để lấy tồn kho thực tế
         BookDTO book = listBooks.stream()
                 .filter(b -> b.getBookId() == bookId)
                 .findFirst()
                 .orElse(null);
 
-        if (book == null) return; // Trường hợp hiếm gặp
-
-        // C. Hiển thị Dialog nhập số lượng mới
         String input = JOptionPane.showInputDialog(this,
                 "Cập nhật số lượng cho: " + book.getBookName() + "\n(Tồn kho: " + book.getQuantity() + ")",
                 currentQty);
 
-        if (input == null) return; // Người dùng bấm Cancel
+        if (input == null) return;
 
         try {
             int newQty = Integer.parseInt(input);
 
-            // Validate số lượng
             if (newQty <= 0) {
                 JOptionPane.showMessageDialog(this, "Số lượng phải lớn hơn 0!");
                 return;
@@ -760,14 +734,11 @@ public class SellingPanel extends JPanel {
                 return;
             }
 
-            // D. Cập nhật lại bảng
-            cartModel.setValueAt(newQty, selectedRow, 2); // Cập nhật cột Số lượng
+            cartModel.setValueAt(newQty, selectedRow, 2);
 
-            // Tính lại Thành tiền mới (SL mới * Giá thực bán)
             double newTotal = newQty * actualPrice;
-            cartModel.setValueAt(MoneyFormatter.toVND(newTotal), selectedRow, 5); // Cập nhật cột Thành tiền
+            cartModel.setValueAt(MoneyFormatter.toVND(newTotal), selectedRow, 5);
 
-            // E. Tính lại tổng bill toàn cục
             calculateTotal();
 
         } catch (NumberFormatException ex) {
@@ -776,23 +747,20 @@ public class SellingPanel extends JPanel {
     }
 
     private void createNewBill() {
-        // 1. Kiểm tra giỏ hàng
         if (cartModel.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "Giỏ hàng đang trống!");
             return;
         }
 
-        // 2. Chọn phương thức thanh toán
         String[] options = {"Tiền mặt", "Chuyển khoản", "Thẻ tín dụng"};
         int paymentChoice = JOptionPane.showOptionDialog(this,
                 "Chọn phương thức thanh toán:", "Thanh toán",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
-        if (paymentChoice == -1) return; // Người dùng đóng dialog
+        if (paymentChoice == -1) return;
 
-        int paymentMethodId = paymentChoice + 1; // 1: Tiền mặt, 2: CK, 3: Thẻ (Tương ứng DB)
+        int paymentMethodId = paymentChoice + 1;
 
-        // 3. Chuẩn bị dữ liệu BillDTO
         double finalTotal = MoneyFormatter.toDouble(lbFinalTotal.getText());
         int employeeId = SharedData.currentUser != null ? SharedData.currentUser.getEmployeeId() : 1;
 
@@ -801,7 +769,6 @@ public class SellingPanel extends JPanel {
             customerId = currentCustomer.getCustomerId();
         }
 
-        // Tính điểm thưởng (Ví dụ: 10.000đ = 1 điểm)
         int earnedPoints = 0;
         if (customerId > 0) {
             earnedPoints = (int) (finalTotal / 10000);
@@ -809,21 +776,17 @@ public class SellingPanel extends JPanel {
 
         BillDTO bill = new BillDTO(0, null, finalTotal, 0.08, employeeId, customerId, paymentMethodId, earnedPoints);
 
-        // 4. Chuẩn bị dữ liệu List<BillDetailDTO>
         List<BillDetailDTO> details = new ArrayList<>();
         for (int i = 0; i < cartModel.getRowCount(); i++) {
             int bookId = Integer.parseInt(cartModel.getValueAt(i, 0).toString());
             int quantity = Integer.parseInt(cartModel.getValueAt(i, 2).toString());
 
-            // Lưu ý: Giá lưu vào BillDetail phải là giá ĐÃ GIẢM (Thực tế bán)
-            // Lấy từ cột "Thành tiền" chia cho "Số lượng" để ra đơn giá thực tế
             double totalRow = MoneyFormatter.toDouble(cartModel.getValueAt(i, 5).toString());
             double unitPrice = totalRow / quantity;
 
             details.add(new BillDetailDTO(0, bookId, quantity, unitPrice));
         }
 
-        // 5. Gọi BUS để lưu xuống Database
         BillBUS billBUS = new BillBUS();
         boolean success = billBUS.createBill(bill, details);
 
@@ -832,7 +795,6 @@ public class SellingPanel extends JPanel {
                     "Thanh toán thành công!\nTổng tiền: " + MoneyFormatter.toVND(finalTotal) +
                             "\nĐiểm tích lũy: " + earnedPoints);
 
-            // 6. Reset giao diện để bán đơn mới
             resetSellingPanel();
         } else {
             JOptionPane.showMessageDialog(this, "Có lỗi xảy ra khi tạo hóa đơn!", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -847,10 +809,9 @@ public class SellingPanel extends JPanel {
         txtPromo.setText("Không có CTKM nào áp dụng");
         txtPromo.setForeground(Color.GRAY);
 
-        calculateTotal(); // Về 0
+        calculateTotal();
 
-        // Reset bảng sản phẩm để cập nhật lại số lượng tồn kho mới
-        listBooks = bookBUS.selectAllBooks(); // Load lại từ DB
+        listBooks = bookBUS.selectAllBooks();
         updateProductTable(listBooks);
     }
 

@@ -39,12 +39,6 @@ public class PromotionDAO {
 
     public double getPromotionPercentByBook(int bookId) {
         double percent = 0;
-
-        // SQL: Join 2 bảng để tìm khuyến mãi
-        // 1. pd.book_id = ?: Tìm sách này trong bảng chi tiết
-        // 2. p.status = 1: Chương trình phải đang hoạt động
-        // 3. NOW() BETWEEN...: Thời gian hiện tại phải nằm trong hạn
-        // 4. ORDER BY... DESC LIMIT 1: Nếu có nhiều KM trùng nhau, lấy cái giảm sâu nhất
         String sql = "SELECT p.percent FROM promotion p " +
                 "JOIN promotion_detail pd ON p.promotion_id = pd.promotion_id " +
                 "WHERE pd.book_id = ? " +

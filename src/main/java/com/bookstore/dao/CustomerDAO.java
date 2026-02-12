@@ -34,19 +34,15 @@ public class CustomerDAO {
     }
 
     public boolean addPoint(int customerId, int pointsToAdd) {
-        // Câu lệnh SQL: Lấy điểm hiện tại CỘNG thêm điểm mới
         String sql = "UPDATE customer SET point = point + ? WHERE customer_id = ?";
 
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
 
-            ps.setInt(1, pointsToAdd); // Tham số 1: Điểm cộng thêm
-            ps.setInt(2, customerId);  // Tham số 2: ID khách
+            ps.setInt(1, pointsToAdd);
+            ps.setInt(2, customerId);
 
             int rowsAffected = ps.executeUpdate();
-
-            // --- BONUS: TỰ ĐỘNG CẬP NHẬT HẠNG THÀNH VIÊN ---
-            // Sau khi cộng điểm, nên kiểm tra để nâng hạng luôn (nếu bạn muốn làm kỹ)
             if (rowsAffected > 0) {
                 updateCustomerRank(customerId);
             }
@@ -60,13 +56,6 @@ public class CustomerDAO {
     }
 
     private void updateCustomerRank(int customerId) {
-        // Logic:
-        // < 2000: Thành viên (1)
-        // >= 2000: Bạc (2)
-        // >= 5000: Vàng (3)
-        // >= 10000: Bạch kim (4)
-        // (ID hạng tùy thuộc database của bạn, đây là ví dụ theo data mẫu trước đó)
-
         String sql = "UPDATE customer SET rank_id = CASE " +
                 "WHEN point >= 10000 THEN 4 " +
                 "WHEN point >= 5000 THEN 3 " +
