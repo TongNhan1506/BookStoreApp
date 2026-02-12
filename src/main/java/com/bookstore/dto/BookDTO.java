@@ -33,6 +33,26 @@ public class BookDTO {
         this.supplierId = supplierId;
     }
 
+    public BookDTO(BookDTO other) {
+        if (other == null) {
+            return;
+        }
+
+        this.bookId = other.bookId;
+        this.bookName = other.bookName;
+        this.sellingPrice = other.sellingPrice;
+        this.quantity = other.quantity;
+        this.authorIdsList = new ArrayList<>(other.authorIdsList);
+        this.translator = other.translator;
+        this.image = other.image;
+        this.description = other.description;
+        this.status = other.status;
+        this.categoryId = other.categoryId;
+        this.tagDetail = other.tagDetail;
+        this.supplierId = other.supplierId;
+    }
+
+
     public int getBookId() {
         return bookId;
     }

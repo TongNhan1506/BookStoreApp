@@ -50,7 +50,7 @@ public class BookFormDialog extends JDialog {
         List<SupplierDTO> suppliers,
         Set<String> allTags) {
     super(parent, title, true);
-    this.book = book;
+    this.book = book == null ? null : new BookDTO(book);
     this.authors = authors;
     this.categories = categories;
     this.suppliers = suppliers;
