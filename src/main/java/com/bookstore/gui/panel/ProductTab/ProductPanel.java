@@ -287,7 +287,7 @@ public class ProductPanel extends JPanel {
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 5; // Only action column editable
+                return column == 5; 
             }
         };
         
@@ -299,8 +299,6 @@ public class ProductPanel extends JPanel {
         bookTable.setGridColor(BORDER_COLOR);
         bookTable.setSelectionBackground(Color.decode("#E8F5E9"));
         bookTable.setSelectionForeground(Color.BLACK);
-        
-        // Fix: Ensure row is selected immediately on first click
         bookTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -323,9 +321,8 @@ public class ProductPanel extends JPanel {
         header.setPreferredSize(new Dimension(header.getWidth(), 45));
         ((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
         
-        // Column widths - Make action column smaller
-        bookTable.getColumnModel().getColumn(0).setPreferredWidth(280);
-        bookTable.getColumnModel().getColumn(1).setPreferredWidth(180);
+        bookTable.getColumnModel().getColumn(0).setPreferredWidth(250);
+        bookTable.getColumnModel().getColumn(1).setPreferredWidth(150);
         bookTable.getColumnModel().getColumn(2).setPreferredWidth(150);
         bookTable.getColumnModel().getColumn(3).setPreferredWidth(150);
         bookTable.getColumnModel().getColumn(4).setPreferredWidth(120);
@@ -806,7 +803,6 @@ public class ProductPanel extends JPanel {
         return button;
     }
 
-    // THAY ĐỔI: Trả về List<String> thay vì String[]
     private List<String> getAuthorNamesList() {
         List<String> names = new ArrayList<>();
         names.add("Tất cả tác giả");
@@ -1107,32 +1103,28 @@ public class ProductPanel extends JPanel {
         private JButton viewButton;
         
         public ActionCellRenderer() {
-            setLayout(new GridBagLayout());
+            setLayout(new GridLayout(1, 2, 0, 0));
             setOpaque(true);
             setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
-
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            gbc.insets = new Insets(0, 4, 0, 4);
             
             editButton = new JButton("Sửa");
-            editButton.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            editButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
             editButton.setForeground(Color.WHITE);
-            editButton.setBackground(Color.decode("#2196F3"));
-            editButton.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
+            editButton.setBackground(BUTTON_COLOR);
+            editButton.setBorder(BorderFactory.createMatteBorder(8, 8, 8, 4, getBackground()));
             editButton.setFocusPainted(false);
+            editButton.setOpaque(true);
             
             viewButton = new JButton("Xem");
-            viewButton.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            viewButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
             viewButton.setForeground(Color.WHITE);
-            viewButton.setBackground(Color.decode("#757575"));
-            viewButton.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
+            viewButton.setBackground(Color.decode("#616161"));
+            viewButton.setBorder(BorderFactory.createMatteBorder(8, 4, 8, 8, getBackground()));
             viewButton.setFocusPainted(false);
+            viewButton.setOpaque(true);
             
-            add(editButton, gbc);
-            gbc.gridx = 1;
-            add(viewButton, gbc);
+            add(editButton);
+            add(viewButton);
         }
         
         @Override
@@ -1156,19 +1148,14 @@ public class ProductPanel extends JPanel {
         private BookDTO currentBook;
         
         public ActionCellEditor() {
-            panel = new JPanel(new GridBagLayout());
+            panel = new JPanel(new GridLayout(1, 2, 0, 0));
             panel.setOpaque(true);
             
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            gbc.insets = new Insets(0, 4, 0, 4);
-            
             editButton = new JButton("Sửa");
-            editButton.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            editButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
             editButton.setForeground(Color.WHITE);
-            editButton.setBackground(Color.decode("#2196F3"));
-            editButton.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
+            editButton.setBackground(BUTTON_COLOR);
+            editButton.setBorder(BorderFactory.createMatteBorder(8, 8, 8, 4, getBackground()));
             editButton.setFocusPainted(false);
             editButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             editButton.addActionListener(e -> {
@@ -1177,10 +1164,10 @@ public class ProductPanel extends JPanel {
             });
             
             viewButton = new JButton("Xem");
-            viewButton.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            viewButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
             viewButton.setForeground(Color.WHITE);
-            viewButton.setBackground(Color.decode("#757575"));
-            viewButton.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
+            viewButton.setBackground(Color.decode("#616161"));
+            viewButton.setBorder(BorderFactory.createMatteBorder(8, 4, 8, 8, getBackground()));
             viewButton.setFocusPainted(false);
             viewButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             viewButton.addActionListener(e -> {
@@ -1189,9 +1176,8 @@ public class ProductPanel extends JPanel {
                 SwingUtilities.invokeLater(() -> showBookDetail(currentBook));
             });
             
-            panel.add(editButton, gbc);
-            gbc.gridx = 1;
-            panel.add(viewButton, gbc);
+            panel.add(editButton);
+            panel.add(viewButton);
         }
         
         @Override
