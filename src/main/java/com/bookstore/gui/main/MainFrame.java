@@ -2,6 +2,7 @@ package com.bookstore.gui.main;
 
 import com.bookstore.dto.EmployeeDTO;
 import com.bookstore.gui.panel.SellingPanel;
+import com.bookstore.gui.panel.BillPanel;
 import com.bookstore.util.AppConstant;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -44,7 +45,7 @@ public class MainFrame extends JFrame {
         mainContentPanel.add(createDummyPanel("Giá Bán"), "PRICE");
         mainContentPanel.add(createDummyPanel("Phiếu Nhập"), "IMPORT");
         mainContentPanel.add(createDummyPanel("Tồn Kho"), "INVENTORY");
-        mainContentPanel.add(createDummyPanel("Hóa Đơn"), "BILL");
+        mainContentPanel.add(new BillPanel(), "BILL");
         mainContentPanel.add(createDummyPanel("Nhân Viên"), "EMPLOYEE");
         mainContentPanel.add(createDummyPanel("Thống Kê"), "STATS");
         mainContentPanel.add(createDummyPanel("Tài Khoản"), "ACCOUNT");
