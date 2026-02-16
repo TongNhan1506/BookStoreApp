@@ -1,6 +1,7 @@
 package com.bookstore.gui.main;
 
 import com.bookstore.dto.EmployeeDTO;
+import com.bookstore.gui.panel.ProductTab.ProductTabbedPane;
 import com.bookstore.gui.panel.SellingTab.SellingTabbedPane;
 import com.bookstore.util.AppConstant;
 import com.bookstore.util.SharedData;
@@ -40,7 +41,7 @@ public class MainFrame extends JFrame {
         welcomePanel = createWelcomePanel();
         mainContentPanel.add(welcomePanel, "WELCOME");
         mainContentPanel.add(new SellingTabbedPane(), "SELLING");
-        mainContentPanel.add(createDummyPanel("Sản Phẩm"), "PRODUCT");
+        mainContentPanel.add(new ProductTabbedPane(), "PRODUCT");
         mainContentPanel.add(createDummyPanel("Giá Bán"), "PRICE");
         mainContentPanel.add(createDummyPanel("Phiếu Nhập"), "IMPORT");
         mainContentPanel.add(createDummyPanel("Tồn Kho"), "INVENTORY");

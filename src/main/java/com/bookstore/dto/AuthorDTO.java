@@ -5,6 +5,8 @@ public class AuthorDTO {
     private String authorName;
     private String nationality;
 
+    public AuthorDTO() {}
+
     public AuthorDTO(int authorId, String authorName, String nationality) {
         this.authorId = authorId;
         this.authorName = authorName;
