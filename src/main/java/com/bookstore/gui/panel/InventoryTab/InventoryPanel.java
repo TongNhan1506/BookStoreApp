@@ -1,4 +1,4 @@
-package com.bookstore.gui.panel.ImportTab;
+package com.bookstore.gui.panel.InventoryTab;
 
 import com.bookstore.bus.BookBUS;
 import com.bookstore.dto.BookDTO;

@@ -1,7 +1,7 @@
 package com.bookstore.gui.main;
 
 import com.bookstore.gui.panel.ImportTab.ImportTabbedPane;
-import com.bookstore.gui.panel.ImportTab.InventoryPanel;
+import com.bookstore.gui.panel.InventoryTab.InventoryPanel;
 import com.bookstore.gui.panel.ProductTab.ProductTabbedPane;
 import com.bookstore.gui.panel.SellingTab.SellingTabbedPane;
 import com.bookstore.util.AppConstant;
