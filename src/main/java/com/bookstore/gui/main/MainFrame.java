@@ -99,13 +99,23 @@ public class MainFrame extends JFrame {
 
         sidebar.add(lbHeader1);
         sidebar.add(lbHeader2);
+
+        sidebar.add(Box.createVerticalStrut(10));
+
+        String currentUserName = SharedData.currentUser.getEmployeeName();
+        JLabel lbUserInfo = new JLabel("<html><div style='text-align: center; width: 140px;'>Chào: " + currentUserName + "</div></html>");
+        lbUserInfo.setForeground(new Color(255, 255, 204));
+        lbUserInfo.setFont(new Font(AppConstant.FONT_NAME, Font.ITALIC, 15));
+        lbUserInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lbUserInfo.setHorizontalAlignment(SwingConstants.CENTER);
+        sidebar.add(lbUserInfo);
         sidebar.add(Box.createVerticalStrut(20));
+
         JSeparator separator1 = new JSeparator();
         separator1.setMaximumSize(new Dimension(160, 1));
         separator1.setForeground(Color.GRAY);
         separator1.setAlignmentX(Component.CENTER_ALIGNMENT);
         sidebar.add(separator1);
-        sidebar.add(Box.createVerticalStrut(20));
 
         btnSelling = createMenuButton("Bán Hàng", "cart_icon.svg");
         btnProduct = createMenuButton("Sản Phẩm", "book_icon.svg");
@@ -179,7 +189,6 @@ public class MainFrame extends JFrame {
         separator2.setForeground(Color.GRAY);
         separator2.setAlignmentX(Component.CENTER_ALIGNMENT);
         sidebar.add(separator2);
-        sidebar.add(Box.createVerticalStrut(10));
         sidebar.add(btnLogout);
 
         return sidebar;
