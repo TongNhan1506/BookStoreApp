@@ -161,8 +161,13 @@ public class MainFrame extends JFrame {
         btnStats.addActionListener(e -> cardLayout.show(mainContentPanel, "STATS"));
         btnAccount.addActionListener(e -> cardLayout.show(mainContentPanel, "ACCOUNT"));
         btnLogout.addActionListener(e -> {
-            this.dispose();
-            new LoginFrame().setVisible(true);
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Bạn có chắc chắn muốn đăng xuất?",
+                    "Xác nhận đăng xuất", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                this.dispose();
+                new LoginFrame().setVisible(true);
+            }
         });
 
         sidebar.add(btnSelling);
