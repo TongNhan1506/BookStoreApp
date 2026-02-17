@@ -1,12 +1,12 @@
 package com.bookstore.gui.main;
 
-import com.bookstore.dto.EmployeeDTO;
+import com.bookstore.gui.panel.ImportTab.ImportTabbedPane;
+import com.bookstore.gui.panel.ImportTab.InventoryPanel;
 import com.bookstore.gui.panel.ProductTab.ProductTabbedPane;
 import com.bookstore.gui.panel.SellingTab.SellingTabbedPane;
 import com.bookstore.util.AppConstant;
 import com.bookstore.util.SharedData;
 import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import javax.swing.*;
 import java.awt.*;
@@ -43,8 +43,8 @@ public class MainFrame extends JFrame {
         mainContentPanel.add(new SellingTabbedPane(), "SELLING");
         mainContentPanel.add(new ProductTabbedPane(), "PRODUCT");
         mainContentPanel.add(createDummyPanel("Giá Bán"), "PRICE");
-        mainContentPanel.add(createDummyPanel("Phiếu Nhập"), "IMPORT");
-        mainContentPanel.add(createDummyPanel("Tồn Kho"), "INVENTORY");
+        mainContentPanel.add(new ImportTabbedPane(), "IMPORT");
+        mainContentPanel.add(new InventoryPanel(), "INVENTORY");
         mainContentPanel.add(createDummyPanel("Hóa Đơn"), "BILL");
         mainContentPanel.add(createDummyPanel("Nhân Viên"), "EMPLOYEE");
         mainContentPanel.add(createDummyPanel("Thống Kê"), "STATS");

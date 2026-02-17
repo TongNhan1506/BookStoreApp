@@ -174,6 +174,38 @@ public class BookDAO {
         return false;
     }
 
+    public int getQuantityByID(int bookId) {
+        int quantity = 0;
+        String sql = "SELECT quantity FROM book WHERE book_id = ?";
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, bookId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    quantity = rs.getInt("quantity");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return quantity;
+    }
+
+    public void updateQuantity(int bookId, int newQuantity) {
+        try {
+            Connection c = DatabaseConnection.getConnection();
+            String sql = "UPDATE book SET quantity = ? WHERE book_id = ?";
+            PreparedStatement ps = c.prepareStatement(sql);
+            ps.setInt(1, newQuantity);
+            ps.setInt(2, bookId);
+            ps.executeUpdate();
+            DatabaseConnection.closeConnection(c);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private BookDTO mapResultSetToBookDTO(ResultSet rs) throws Exception {
         BookDTO book = new BookDTO(
                 rs.getInt("book_id"),
