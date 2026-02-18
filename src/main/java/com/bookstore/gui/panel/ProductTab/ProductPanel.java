@@ -17,12 +17,11 @@ import com.bookstore.bus.*;
 import com.bookstore.dto.*;
 
 public class ProductPanel extends JPanel {
-    // Colors
     private static final Color MAIN_COLOR = Color.decode(AppConstant.GREEN_COLOR_CODE);
     private static final Color BUTTON_COLOR = Color.decode(AppConstant.BUTTON_COLOR);
     private static final Color BORDER_COLOR = Color.decode("#E0E0E0");
 
-    // Components
+
     private JTextField searchField;
     private SearchableComboBox<String> authorCombo;
     private JComboBox<String> categoryCombo;
@@ -39,7 +38,7 @@ public class ProductPanel extends JPanel {
     private CategoryBUS categoryBUS;
     private SupplierBUS supplierBUS;
 
-    // Data
+
     private List<BookDTO> allBooks;
     private List<AuthorDTO> authors;
     private List<CategoryDTO> categories;
@@ -81,7 +80,6 @@ public class ProductPanel extends JPanel {
                     "Lỗi khi load dữ liệu từ database: " + e.getMessage(),
                     "Lỗi", JOptionPane.ERROR_MESSAGE);
 
-            // Fallback to empty lists
             authors = new ArrayList<>();
             categories = new ArrayList<>();
             suppliers = new ArrayList<>();
@@ -131,7 +129,7 @@ public class ProductPanel extends JPanel {
 
         searchRow.add(searchPanel, BorderLayout.CENTER);
 
-        // Add book button
+
         JButton addButton = createStyledButton("+ THÊM SÁCH", BUTTON_COLOR);
         addButton.setPreferredSize(new Dimension(160, 38));
         addButton.addActionListener(e -> showAddBookDialog());
@@ -139,7 +137,7 @@ public class ProductPanel extends JPanel {
 
         topPanel.add(searchRow, BorderLayout.NORTH);
 
-        // Filters row
+
         JPanel filtersPanel = createFiltersPanel();
         topPanel.add(filtersPanel, BorderLayout.CENTER);
 
@@ -150,7 +148,7 @@ public class ProductPanel extends JPanel {
         JPanel filtersPanel = new JPanel();
         filtersPanel.setLayout(new BoxLayout(filtersPanel, BoxLayout.Y_AXIS));
 
-        // Main grid panel for 2x2 filters
+
         JPanel gridPanel = new JPanel(new GridBagLayout());
         gridPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -158,13 +156,13 @@ public class ProductPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // Row 0, Col 0: Author Label
+
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weightx = 0;
         gridPanel.add(createFilterLabel("Tác giả:"), gbc);
 
-        // Row 0, Col 1: Author ComboBox
+
         gbc.gridx = 1;
         gbc.weightx = 1;
         authorCombo = new SearchableComboBox<>(getAuthorNamesList());
@@ -172,12 +170,12 @@ public class ProductPanel extends JPanel {
         authorCombo.addActionListener(e -> filterBooks());
         gridPanel.add(authorCombo, gbc);
 
-        // Row 0, Col 2: Category Label
+
         gbc.gridx = 2;
         gbc.weightx = 0;
         gridPanel.add(createFilterLabel("Thể loại:"), gbc);
 
-        // Row 0, Col 3: Category ComboBox
+
         gbc.gridx = 3;
         gbc.weightx = 1;
         categoryCombo = new JComboBox<>(getCategoryNamesList().toArray(new String[0]));
@@ -187,13 +185,13 @@ public class ProductPanel extends JPanel {
         categoryCombo.addActionListener(e -> filterBooks());
         gridPanel.add(categoryCombo, gbc);
 
-        // Row 1, Col 0: Supplier Label
+
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.weightx = 0;
         gridPanel.add(createFilterLabel("Nhà cung cấp:"), gbc);
 
-        // Row 1, Col 1: Supplier ComboBox
+
         gbc.gridx = 1;
         gbc.weightx = 1;
         supplierCombo = new SearchableComboBox<>(getSupplierNamesList());
@@ -201,12 +199,12 @@ public class ProductPanel extends JPanel {
         supplierCombo.addActionListener(e -> filterBooks());
         gridPanel.add(supplierCombo, gbc);
 
-        // Row 1, Col 2: Status Label
+
         gbc.gridx = 2;
         gbc.weightx = 0;
         gridPanel.add(createFilterLabel("Trạng thái:"), gbc);
 
-        // Row 1, Col 3: Status ComboBox
+
         gbc.gridx = 3;
         gbc.weightx = 1;
         statusCombo = new JComboBox<>(new String[]{"Tất cả trạng thái", "Đang bán", "Ngừng bán"});
@@ -219,11 +217,11 @@ public class ProductPanel extends JPanel {
         filtersPanel.add(gridPanel);
         filtersPanel.add(Box.createVerticalStrut(12));
 
-        // Row for Tag filter and Reset button
+
         JPanel buttonRow = new JPanel(new GridLayout(0, 5, 8, 8));
         buttonRow.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Tag filter button
+
         tagFilterButton = new JButton("Tags +");
         tagFilterButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
         tagFilterButton.setForeground(BUTTON_COLOR);
@@ -236,7 +234,7 @@ public class ProductPanel extends JPanel {
         tagFilterButton.addActionListener(e -> showTagFilterPanel());
         buttonRow.add(tagFilterButton);
 
-        // Reset filter button
+
         JButton resetButton = new JButton("✖ Xóa bộ lọc");
         resetButton.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         resetButton.setForeground(Color.decode("#666666"));
@@ -265,12 +263,12 @@ public class ProductPanel extends JPanel {
         JPanel tablePanel = new JPanel(new BorderLayout());
         tablePanel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
 
-        // Table
+
         String[] columns = {"Sách", "Tác giả", "Thể loại", "Nhà cung cấp", "Trạng thái", "Thao tác"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 5; // Only action column editable
+                return column == 5;
             }
         };
 
@@ -283,7 +281,7 @@ public class ProductPanel extends JPanel {
         bookTable.setSelectionBackground(Color.decode("#E8F5E9"));
         bookTable.setSelectionForeground(Color.BLACK);
 
-        // Fix: Ensure row is selected immediately on first click
+
         bookTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -298,7 +296,7 @@ public class ProductPanel extends JPanel {
         bookTable.getTableHeader().setReorderingAllowed(false);
         bookTable.getTableHeader().setResizingAllowed(false);
 
-        // Custom header
+
         JTableHeader header = bookTable.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 13));
         header.setBackground(MAIN_COLOR);
@@ -306,7 +304,7 @@ public class ProductPanel extends JPanel {
         header.setPreferredSize(new Dimension(header.getWidth(), 45));
         ((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
 
-        // Column widths - Make action column smaller
+
         bookTable.getColumnModel().getColumn(0).setPreferredWidth(280);
         bookTable.getColumnModel().getColumn(1).setPreferredWidth(180);
         bookTable.getColumnModel().getColumn(2).setPreferredWidth(150);
@@ -314,13 +312,13 @@ public class ProductPanel extends JPanel {
         bookTable.getColumnModel().getColumn(4).setPreferredWidth(120);
         bookTable.getColumnModel().getColumn(5).setPreferredWidth(150);
 
-        // Custom renderers
+
         bookTable.getColumnModel().getColumn(0).setCellRenderer(new BookCellRenderer());
         bookTable.getColumnModel().getColumn(4).setCellRenderer(new StatusCellRenderer());
         bookTable.getColumnModel().getColumn(5).setCellRenderer(new ActionCellRenderer());
         bookTable.getColumnModel().getColumn(5).setCellEditor(new ActionCellEditor());
 
-        // Center align other columns
+
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         bookTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
@@ -338,7 +336,7 @@ public class ProductPanel extends JPanel {
         JPanel tableContainer = new JPanel();
         tableContainer.setLayout(new OverlayLayout(tableContainer));
 
-        // Center panel for no results label
+
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setOpaque(false);
         centerPanel.add(noResultsLabel);
@@ -358,7 +356,6 @@ public class ProductPanel extends JPanel {
     private void loadTableData(List<BookDTO> books) {
         tableModel.setRowCount(0);
 
-        // FIX 1: Show/hide no results label
         if (books.isEmpty()) {
             noResultsLabel.setVisible(true);
             bookTable.setVisible(false);
@@ -393,12 +390,11 @@ public class ProductPanel extends JPanel {
         List<BookDTO> filtered = new ArrayList<>();
 
         for (BookDTO book : allBooks) {
-            // Search filter
+
             if (!searchText.isEmpty() && !book.getBookName().toLowerCase().contains(searchText)) {
                 continue;
             }
 
-            // Author filter
             if (!selectedAuthor.isEmpty() && !selectedAuthor.equals("Tất cả tác giả")) {
                 String authorNames = getAuthorNamesForBook(book);
                 if (!authorNames.contains(selectedAuthor)) {
@@ -406,21 +402,18 @@ public class ProductPanel extends JPanel {
                 }
             }
 
-            // Category filter
             if (!selectedCategory.isEmpty() && !selectedCategory.equals("Tất cả thể loại")) {
                 if (!getCategoryName(book.getCategoryId()).equals(selectedCategory)) {
                     continue;
                 }
             }
 
-            // Supplier filter
             if (!selectedSupplier.isEmpty() && !selectedSupplier.equals("Tất cả nhà cung cấp")) {
                 if (!getSupplierName(book.getSupplierId()).equals(selectedSupplier)) {
                     continue;
                 }
             }
 
-            // Status filter
             if (!selectedStatus.equals("Tất cả trạng thái")) {
                 int requiredStatus = selectedStatus.equals("Đang bán") ? 1 : 0;
                 if (book.getStatus() != requiredStatus) {
@@ -428,7 +421,6 @@ public class ProductPanel extends JPanel {
                 }
             }
 
-            // Tag filter
             if (!selectedTags.isEmpty()) {
                 boolean hasTag = false;
                 if (book.getTagDetail() != null) {
@@ -667,7 +659,6 @@ public class ProductPanel extends JPanel {
         }
     }
 
-    // FIX 4: Improved book detail dialog with better layout
     private void showBookDetail(BookDTO book) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Chi tiết sách", true);
         dialog.setLayout(new BorderLayout(10, 10));
@@ -677,24 +668,20 @@ public class ProductPanel extends JPanel {
         JPanel contentPanel = new JPanel(new BorderLayout(15, 15));
         contentPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        // Title at top
         JLabel title = new JLabel(book.getBookName());
         title.setFont(new Font("Segoe UI", Font.BOLD, 18));
         contentPanel.add(title, BorderLayout.NORTH);
 
-        // Main panel with image on left and details on right
         JPanel mainPanel = new JPanel(new BorderLayout(15, 0));
 
-        // Image on left - adjusted to proper book cover ratio (2:3 ratio)
         JLabel imageLabel = new JLabel();
-        imageLabel.setPreferredSize(new Dimension(160, 240)); // 2:3 ratio
+        imageLabel.setPreferredSize(new Dimension(160, 240));
         imageLabel.setHorizontalAlignment(JLabel.CENTER);
         imageLabel.setVerticalAlignment(JLabel.TOP);
         imageLabel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
         imageLabel.setIcon(new ImageIcon(getBookCoverImage(book, 160, 240)));
         mainPanel.add(imageLabel, BorderLayout.WEST);
 
-        // Details on right
         JPanel detailsPanel = new JPanel();
         detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
         detailsPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -709,7 +696,6 @@ public class ProductPanel extends JPanel {
         mainPanel.add(detailsPanel, BorderLayout.CENTER);
         contentPanel.add(mainPanel, BorderLayout.CENTER);
 
-        // Description at bottom
         if (book.getDescription() != null && !book.getDescription().trim().isEmpty()) {
             JPanel descPanel = new JPanel(new BorderLayout(5, 5));
 
@@ -733,7 +719,6 @@ public class ProductPanel extends JPanel {
             contentPanel.add(descPanel, BorderLayout.SOUTH);
         }
 
-        // Button panel
         JButton closeButton = createStyledButton("Đóng", BUTTON_COLOR);
         closeButton.addActionListener(e -> dialog.dispose());
 
@@ -789,7 +774,6 @@ public class ProductPanel extends JPanel {
         return button;
     }
 
-    // THAY ĐỔI: Trả về List<String> thay vì String[]
     private List<String> getAuthorNamesList() {
         List<String> names = new ArrayList<>();
         names.add("Tất cả tác giả");
@@ -890,7 +874,6 @@ public class ProductPanel extends JPanel {
         return createBookPlaceholder(width, height);
     }
 
-    // FIX 2: Completely rewritten text truncation - smarter word wrapping
     private String truncateText(String text, Font font, int maxWidth, int maxLines) {
         if (text == null || text.trim().isEmpty()) {
             return "";
@@ -915,29 +898,23 @@ public class ProductPanel extends JPanel {
             int width = fm.stringWidth(testLine);
 
             if (width <= maxWidth) {
-                // Word fits on current line
                 currentLine = new StringBuilder(testLine);
 
-                // If this is the last word and we haven't exceeded max lines
                 if (i == words.length - 1 && lines.size() < maxLines) {
                     lines.add(currentLine.toString());
                     currentLine = new StringBuilder();
                 }
             } else {
-                // Word doesn't fit on current line
                 if (currentLine.length() > 0) {
-                    // Save current line and start new one
                     lines.add(currentLine.toString());
 
                     if (lines.size() >= maxLines) {
-                        // We've hit the line limit
                         needsEllipsis = true;
                         break;
                     }
 
                     currentLine = new StringBuilder(word);
 
-                    // If this is the last word
                     if (i == words.length - 1) {
                         if (lines.size() < maxLines) {
                             lines.add(currentLine.toString());
@@ -947,10 +924,9 @@ public class ProductPanel extends JPanel {
                         currentLine = new StringBuilder();
                     }
                 } else {
-                    // Single word is too long for one line
                     String truncatedWord = truncateSingleWord(word, fm, maxWidth - fm.stringWidth("..."));
                     lines.add(truncatedWord + "...");
-                    needsEllipsis = false; // Already added ellipsis
+                    needsEllipsis = false;
 
                     if (lines.size() >= maxLines) {
                         break;
@@ -960,7 +936,6 @@ public class ProductPanel extends JPanel {
             }
         }
 
-        // Handle any remaining text
         if (currentLine.length() > 0) {
             if (lines.size() < maxLines) {
                 lines.add(currentLine.toString());
@@ -969,7 +944,6 @@ public class ProductPanel extends JPanel {
             }
         }
 
-        // Build result
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < lines.size(); i++) {
             if (i > 0) {
@@ -978,11 +952,9 @@ public class ProductPanel extends JPanel {
 
             String line = lines.get(i);
 
-            // Add ellipsis to last line if needed
             if (i == lines.size() - 1 && needsEllipsis) {
                 String withEllipsis = line + "...";
                 if (fm.stringWidth(withEllipsis) > maxWidth) {
-                    // Need to truncate to fit ellipsis
                     line = truncateSingleWord(line, fm, maxWidth - fm.stringWidth("..."));
                 }
                 result.append(line).append("...");
@@ -1010,7 +982,6 @@ public class ProductPanel extends JPanel {
         return truncated.toString();
     }
 
-    // Cell renderers
     class BookCellRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
@@ -1041,8 +1012,7 @@ public class ProductPanel extends JPanel {
 
             panel.add(imageLabel, BorderLayout.WEST);
 
-            // FIX 2: Better text truncation with proper width (account for image + padding)
-            int availableWidth = table.getColumnModel().getColumn(0).getWidth() - 80; // 50px image + 30px padding
+            int availableWidth = table.getColumnModel().getColumn(0).getWidth() - 80;
             String truncatedName = truncateText(book.getBookName(), new Font("Segoe UI", Font.BOLD, 13), availableWidth, 2);
 
             JLabel nameLabel = new JLabel("<html><b>" + truncatedName + "</b></html>");
