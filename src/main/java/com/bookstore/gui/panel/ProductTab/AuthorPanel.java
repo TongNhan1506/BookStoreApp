@@ -1,7 +1,6 @@
 package com.bookstore.gui.panel.ProductTab;
 
 import com.bookstore.bus.AuthorBUS;
-import com.bookstore.util.DatabaseConnection;
 import com.bookstore.dto.AuthorDTO;
 import com.bookstore.util.AppConstant;
 
@@ -13,9 +12,6 @@ import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -279,27 +275,10 @@ public class AuthorPanel extends JPanel {
             tableModel.addRow(new Object[]{
                     author.getAuthorName(),
                     author.getNationality(),
-                    getBookCountByAuthor(author.getAuthorId()),
+                    authorBUS.getBookCountByAuthorId(author.getAuthorId()),
                     "Sửa"
             });
         }
-    }
-
-    private int getBookCountByAuthor(int authorId) {
-        String sql = "SELECT COUNT(*) AS total FROM book_author WHERE author_id = ?";
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-
-            statement.setInt(1, authorId);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getInt("total");
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
     }
 
     private void saveAuthor() {

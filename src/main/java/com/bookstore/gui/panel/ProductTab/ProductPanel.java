@@ -254,7 +254,7 @@ public class ProductPanel extends JPanel {
         buttonRow.add(tagFilterButton);
         
         // Reset filter button
-        JButton resetButton = new JButton("✖ Xóa bộ lọc");
+        JButton resetButton = new JButton("x Xóa bộ lọc");
         resetButton.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         resetButton.setForeground(Color.decode("#666666"));
         resetButton.setBorder(BorderFactory.createCompoundBorder(
@@ -1185,7 +1185,6 @@ public class ProductPanel extends JPanel {
                 boolean isSelected, int row, int column) {
             currentBook = (BookDTO) value;
             
-            // Always highlight the row when editing
             panel.setBackground(table.getSelectionBackground());
             
             return panel;

@@ -136,6 +136,24 @@ public class AuthorDAO {
         return null;
     }
 
+    public int countBooksByAuthorId(int authorId) {
+        String sql = "SELECT COUNT(*) AS total FROM book_author WHERE author_id = ?";
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, authorId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("total");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+
     public List<AuthorDTO> getByBookId(int bookId) {
         List<AuthorDTO> authors = new ArrayList<>();
         String sql = "SELECT a.* FROM author a " +
