@@ -779,27 +779,15 @@ public class ProductPanel extends JPanel {
         panel.add(row);
     }
 
-    private JButton createStyledButton(String text, Color bgColor) {
+    private JButton createStyledButton(String text, Color backgroundColor) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        button.setBackground(backgroundColor);
         button.setForeground(Color.WHITE);
-        button.setBackground(bgColor);
-        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         button.setFocusPainted(false);
+        button.setBorderPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
-        button.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                button.setBackground(bgColor.darker());
-            }
-            
-            @Override
-            public void mouseExited(MouseEvent e) {
-                button.setBackground(bgColor);
-            }
-        });
-        
+        button.setPreferredSize(new Dimension(0, 36));
         return button;
     }
 
@@ -1097,6 +1085,7 @@ public class ProductPanel extends JPanel {
             return label;
         }
     }
+
 
     class ActionCellRenderer extends JPanel implements TableCellRenderer {
         private JButton editButton;

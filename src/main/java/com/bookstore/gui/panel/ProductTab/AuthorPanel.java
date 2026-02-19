@@ -142,6 +142,9 @@ public class AuthorPanel extends JPanel {
         header.setBackground(MAIN_COLOR);
         header.setForeground(Color.WHITE);
         header.setPreferredSize(new Dimension(header.getWidth(), 40));
+        header.setReorderingAllowed(false);
+        header.setResizingAllowed(false);
+
 
         authorTable.getColumnModel().getColumn(3).setCellRenderer(new ButtonCellRenderer());
         authorTable.getColumnModel().getColumn(3).setCellEditor(new ButtonCellEditor());
