@@ -99,7 +99,7 @@ public class AuthorPanel extends JPanel {
         JPanel countryPanel = new JPanel(new BorderLayout(8, 0));
         countryPanel.setBackground(Color.WHITE);
 
-        JLabel countryLabel = createFilterLabel("Quốc gia:");
+        JLabel countryLabel = createFilterLabel("Quốc tịch:");
         countryPanel.add(countryLabel, BorderLayout.WEST);
 
         nationalityCombo = new JComboBox<>();
@@ -120,7 +120,7 @@ public class AuthorPanel extends JPanel {
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
 
-        String[] columns = {"Tên tác giả", "Quốc gia", "Số lượng đầu sách", "Thao tác"};
+        String[] columns = {"Tên tác giả", "Quốc tịch", "Số lượng đầu sách", "Thao tác"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -196,7 +196,7 @@ public class AuthorPanel extends JPanel {
         formPanel.add(nameField, gbc);
 
         gbc.gridy = 3;
-        formPanel.add(createFormLabel("Quốc gia"), gbc);
+        formPanel.add(createFormLabel("Quốc tịch"), gbc);
 
         countryField = new JTextField();
         countryField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -230,7 +230,7 @@ public class AuthorPanel extends JPanel {
 
     private void loadCountriesToCombo() {
         nationalityCombo.removeAllItems();
-        nationalityCombo.addItem("Tất cả quốc gia");
+        nationalityCombo.addItem("Tất cả quốc tịch");
 
         for (AuthorDTO author : allAuthors) {
             String country = author.getNationality();
@@ -256,11 +256,11 @@ public class AuthorPanel extends JPanel {
         filteredAuthors.clear();
 
         String keyword = searchField.getText() == null ? "" : searchField.getText().trim().toLowerCase();
-        String countryFilter = nationalityCombo.getSelectedItem() == null ? "Tất cả quốc gia" : nationalityCombo.getSelectedItem().toString();
+        String countryFilter = nationalityCombo.getSelectedItem() == null ? "Tất cả quốc tịch" : nationalityCombo.getSelectedItem().toString();
 
         for (AuthorDTO author : allAuthors) {
             boolean matchedName = author.getAuthorName() != null && author.getAuthorName().toLowerCase().contains(keyword);
-            boolean matchedCountry = "Tất cả quốc gia".equals(countryFilter)
+            boolean matchedCountry = "Tất cả quốc tịch".equals(countryFilter)
                     || (author.getNationality() != null && author.getNationality().equalsIgnoreCase(countryFilter));
 
             if (matchedName && matchedCountry) {

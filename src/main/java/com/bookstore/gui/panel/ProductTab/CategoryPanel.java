@@ -14,9 +14,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class CategoryPanel extends JPanel {
     private static final Color MAIN_COLOR = Color.decode(AppConstant.GREEN_COLOR_CODE);
@@ -190,15 +188,16 @@ public class CategoryPanel extends JPanel {
         loadTableData();
     }
 
-    private void loadTableData() {
-        Map<Integer, Integer> bookCountByCategory = new HashMap<>();
-        for (BookDTO book : books) {
-            bookCountByCategory.merge(book.getCategoryId(), 1, Integer::sum);
-        }
-
+     private void loadTableData() {
         tableModel.setRowCount(0);
+
         for (CategoryDTO category : categories) {
-            int bookCount = bookCountByCategory.getOrDefault(category.getCategoryId(), 0);
+            int bookCount = 0;
+            for (BookDTO book : books) {
+                if (book.getCategoryId() == category.getCategoryId()) {
+                    bookCount++;
+                }
+            }
             tableModel.addRow(new Object[]{category, bookCount, "Sửa"});
         }
     }
