@@ -6,7 +6,9 @@ import com.bookstore.dao.CustomerDAO;
 import com.bookstore.dto.BillDTO;
 import com.bookstore.dto.BillDetailDTO;
 
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BillBUS {
     private BillDAO billDAO = new BillDAO();
@@ -29,5 +31,9 @@ public class BillBUS {
         }
 
         return true;
+    }
+
+    public List<BillDTO> getAllBills(){
+        return billDAO.getAllBills();
     }
 }

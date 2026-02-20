@@ -8,7 +8,6 @@ import java.util.List;
 
 public class BookAuthorDAO {
 
-    // Thêm tác giả cho sách
     public boolean addAuthorsToBook(int bookId, List<Integer> authorIds) {
         String sql = "INSERT INTO book_author (book_id, author_id) VALUES (?, ?)";
 
@@ -29,7 +28,6 @@ public class BookAuthorDAO {
         }
     }
 
-    // Xóa tất cả tác giả của sách
     public boolean removeAllAuthorsFromBook(int bookId) {
         String sql = "DELETE FROM book_author WHERE book_id = ?";
 
@@ -45,7 +43,6 @@ public class BookAuthorDAO {
         }
     }
 
-    // Lấy danh sách author_id của 1 sách
     public List<Integer> getAuthorIdsByBookId(int bookId) {
         List<Integer> authorIds = new ArrayList<>();
         String sql = "SELECT author_id FROM book_author WHERE book_id = ?";

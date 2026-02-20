@@ -5,6 +5,8 @@ import com.bookstore.dto.BillDetailDTO;
 import com.bookstore.util.DatabaseConnection;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BillDAO {
 
@@ -51,5 +53,34 @@ public class BillDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<BillDTO> getAllBills() {
+        List<BillDTO> list = new ArrayList<>();
+        String sql = "SELECT bill_id, created_date, total_bill_price, tax, " +
+                "employee_id, customer_id, payment_method_id, earned_points " +
+                "FROM bill";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                BillDTO bill = new BillDTO(
+                        rs.getInt("bill_id"),
+                        rs.getTimestamp("created_date"),
+                        rs.getDouble("total_bill_price"),
+                        rs.getDouble("tax"),
+                        rs.getInt("employee_id"),
+                        rs.getInt("customer_id"),
+                        rs.getInt("payment_method_id"),
+                        rs.getInt("earned_points")
+                );
+                list.add(bill);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

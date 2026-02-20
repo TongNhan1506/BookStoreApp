@@ -55,4 +55,8 @@ public class AuthorBUS {
     public AuthorDTO getById(int id) {
         return authorDAO.getAuthorById(id);
     }
+
+    public int getBookCountByAuthorId(int authorId) {
+        return authorDAO.countBooksByAuthorId(authorId);
+    }
 }
