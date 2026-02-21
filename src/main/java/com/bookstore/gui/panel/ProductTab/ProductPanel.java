@@ -12,11 +12,12 @@ import java.util.List;
 
 import com.bookstore.dao.BookAuthorDAO;
 import com.bookstore.util.AppConstant;
+import com.bookstore.util.Refreshable;
 import com.bookstore.util.SearchableComboBox;
 import com.bookstore.bus.*;
 import com.bookstore.dto.*;
 
-public class ProductPanel extends JPanel {
+public class ProductPanel extends JPanel implements Refreshable {
     private static final Color MAIN_COLOR = Color.decode(AppConstant.GREEN_COLOR_CODE);
     private static final Color BUTTON_COLOR = Color.decode(AppConstant.BUTTON_COLOR);
     private static final Color BORDER_COLOR = Color.decode("#E0E0E0");
@@ -54,6 +55,12 @@ public class ProductPanel extends JPanel {
         loadDataFromDatabase();
 
         initUI();
+        loadTableData();
+    }
+
+    @Override
+    public void refresh() {
+        loadDataFromDatabase();
         loadTableData();
     }
 

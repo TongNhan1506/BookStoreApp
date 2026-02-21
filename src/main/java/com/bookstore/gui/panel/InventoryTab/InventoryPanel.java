@@ -2,6 +2,7 @@ package com.bookstore.gui.panel.InventoryTab;
 
 import com.bookstore.bus.BookBUS;
 import com.bookstore.dto.BookDTO;
+import com.bookstore.util.Refreshable;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
@@ -13,14 +14,19 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-public class InventoryPanel extends JPanel {
+public class InventoryPanel extends JPanel implements Refreshable {
     private JTable table;
     private DefaultTableModel tableModel;
-    private BookBUS bookBUS = new BookBUS(); // Gọi BUS
+    private BookBUS bookBUS = new BookBUS();
 
     public InventoryPanel() {
         initUI();
-        loadDataToTable(); // Hàm load data từ DB
+        loadDataToTable();
+    }
+
+    @Override
+    public void refresh() {
+        loadDataToTable();
     }
 
     private void initUI() {

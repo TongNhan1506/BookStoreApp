@@ -2,10 +2,7 @@ package com.bookstore.gui.panel.SellingTab;
 
 import com.bookstore.bus.*;
 import com.bookstore.dto.*;
-import com.bookstore.util.AppConstant;
-import com.bookstore.util.MoneyFormatter;
-import com.bookstore.util.SearchableComboBox;
-import com.bookstore.util.SharedData;
+import com.bookstore.util.*;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 
@@ -21,7 +18,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SellingPanel extends JPanel {
+public class SellingPanel extends JPanel implements Refreshable {
     private SearchableComboBox<CategoryDTO> cboCategory;
     private SearchableComboBox<AuthorDTO> cboAuthor;
     private JTextField txtPriceFrom, txtPriceTo, txtSearch;
@@ -47,6 +44,13 @@ public class SellingPanel extends JPanel {
 
     public SellingPanel() {
         initUI();
+    }
+
+    @Override
+    public void refresh() {
+        loadCategoriesToComBoBox();
+        loadAuthorsToComboBox();
+        loadBookTable();
     }
 
     private void initUI() {

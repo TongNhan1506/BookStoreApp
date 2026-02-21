@@ -3,6 +3,7 @@ package com.bookstore.gui.panel.ProductTab;
 import com.bookstore.bus.AuthorBUS;
 import com.bookstore.dto.AuthorDTO;
 import com.bookstore.util.AppConstant;
+import com.bookstore.util.Refreshable;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -15,7 +16,7 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AuthorPanel extends JPanel {
+public class AuthorPanel extends JPanel implements Refreshable {
     private static final Color MAIN_COLOR = Color.decode(AppConstant.GREEN_COLOR_CODE);
     private static final Color BUTTON_COLOR = Color.decode(AppConstant.BUTTON_COLOR);
     private static final Color BORDER_COLOR = Color.decode("#E0E0E0");
@@ -46,6 +47,12 @@ public class AuthorPanel extends JPanel {
         initUI();
         loadCountriesToCombo();
         applyFilter();
+    }
+
+    @Override
+    public void refresh() {
+        loadAuthorData();
+        loadCountriesToCombo();
     }
 
     private void initUI() {

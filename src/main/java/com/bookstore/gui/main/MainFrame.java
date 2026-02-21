@@ -6,6 +6,7 @@ import com.bookstore.gui.panel.InventoryTab.InventoryPanel;
 import com.bookstore.gui.panel.ProductTab.ProductTabbedPane;
 import com.bookstore.gui.panel.SellingTab.SellingTabbedPane;
 import com.bookstore.util.AppConstant;
+import com.bookstore.util.Refreshable;
 import com.bookstore.util.SharedData;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -152,15 +153,15 @@ public class MainFrame extends JFrame {
                 "hoverBackground: #ff4f4f;"
         );
 
-        btnSelling.addActionListener(e -> cardLayout.show(mainContentPanel, "SELLING"));
-        btnProduct.addActionListener(e -> cardLayout.show(mainContentPanel, "PRODUCT"));
-        btnPrice.addActionListener(e -> cardLayout.show(mainContentPanel, "PRICE"));
-        btnImport.addActionListener(e -> cardLayout.show(mainContentPanel, "IMPORT"));
-        btnInventory.addActionListener(e -> cardLayout.show(mainContentPanel, "INVENTORY"));
-        btnBill.addActionListener(e -> cardLayout.show(mainContentPanel, "BILL"));
-        btnEmployee.addActionListener(e -> cardLayout.show(mainContentPanel, "EMPLOYEE"));
-        btnStats.addActionListener(e -> cardLayout.show(mainContentPanel, "STATS"));
-        btnAccount.addActionListener(e -> cardLayout.show(mainContentPanel, "ACCOUNT"));
+        btnSelling.addActionListener(e -> switchTab("SELLING"));
+        btnProduct.addActionListener(e -> switchTab("PRODUCT"));
+        btnPrice.addActionListener(e -> switchTab("PRICE"));
+        btnImport.addActionListener(e -> switchTab("IMPORT"));
+        btnInventory.addActionListener(e -> switchTab("INVENTORY"));
+        btnBill.addActionListener(e -> switchTab("BILL"));
+        btnEmployee.addActionListener(e -> switchTab("EMPLOYEE"));
+        btnStats.addActionListener(e -> switchTab("STATS"));
+        btnAccount.addActionListener(e -> switchTab("ACCOUNT"));
         btnLogout.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this,
                     "Bạn có chắc chắn muốn đăng xuất?",
@@ -236,6 +237,25 @@ public class MainFrame extends JFrame {
         lb.setForeground(Color.LIGHT_GRAY);
         p.add(lb);
         return p;
+    }
+
+    private void switchTab(String tabName) {
+        cardLayout.show(mainContentPanel, tabName);
+
+        for (Component comp : mainContentPanel.getComponents()) {
+            if (comp.isVisible()) {
+                if (comp instanceof Refreshable r) {
+                    r.refresh();
+                }
+                else if (comp instanceof JTabbedPane tabbedPane) {
+                    Component selectedTab = tabbedPane.getSelectedComponent();
+                    if (selectedTab instanceof Refreshable r) {
+                        r.refresh();
+                    }
+                }
+                break;
+            }
+        }
     }
 
     private void applyAuthorization() {

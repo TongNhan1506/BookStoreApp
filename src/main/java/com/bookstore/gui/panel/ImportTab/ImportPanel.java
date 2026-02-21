@@ -2,6 +2,7 @@ package com.bookstore.gui.panel.ImportTab;
 
 import com.bookstore.bus.ImportBUS;
 import com.bookstore.dto.ImportTicketDTO;
+import com.bookstore.util.Refreshable;
 import com.formdev.flatlaf.FlatClientProperties;
 
 import javax.swing.*;
@@ -16,13 +17,18 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
-public class ImportPanel extends JPanel {
+public class ImportPanel extends JPanel implements Refreshable {
     private ImportBUS importBUS = new ImportBUS();
     private JTable table;
     private DefaultTableModel tableModel;
 
     public ImportPanel() {
         initUI();
+        loadData();
+    }
+
+    @Override
+    public void refresh() {
         loadData();
     }
 
