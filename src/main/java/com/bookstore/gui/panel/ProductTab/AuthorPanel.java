@@ -13,6 +13,8 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.List;
 
 public class AuthorPanel extends JPanel {
@@ -231,23 +233,18 @@ public class AuthorPanel extends JPanel {
     private void loadCountriesToCombo() {
         nationalityCombo.removeAllItems();
         nationalityCombo.addItem("Tất cả quốc tịch");
+        
+        Set<String> normalizedCountries = new HashSet<>();
 
         for (AuthorDTO author : allAuthors) {
             String country = author.getNationality();
             if (country == null || country.trim().isEmpty()) {
                 continue;
             }
-
-            boolean existed = false;
-            for (int i = 0; i < nationalityCombo.getItemCount(); i++) {
-                String item = nationalityCombo.getItemAt(i);
-                if (country.equalsIgnoreCase(item)) {
-                    existed = true;
-                    break;
-                }
-            }
-            if (!existed) {
-                nationalityCombo.addItem(country);
+            String trimmedCountry = country.trim();
+            String normalizedCountry = trimmedCountry.toLowerCase();
+            if (normalizedCountries.add(normalizedCountry)) {
+                nationalityCombo.addItem(trimmedCountry);
             }
         }
     }
