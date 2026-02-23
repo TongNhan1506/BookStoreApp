@@ -252,9 +252,9 @@ public class SellingPanel extends JPanel implements Refreshable {
 
         btnRefresh = createActionButton("Làm mới", AppConstant.GREEN_COLOR_CODE);
         btnRefresh.putClientProperty(FlatClientProperties.STYLE, "hoverBackground: #00A364;");
-        btnDelete = createActionButton("Xóa", "#E53935");
+        btnDelete = createActionButton("Xóa sản phẩm", "#E53935");
         btnDelete.putClientProperty(FlatClientProperties.STYLE, "hoverBackground: #ff5a5a;");
-        btnEdit = createActionButton("Sửa", "#FBC02D");
+        btnEdit = createActionButton("Sửa số lượng", "#FBC02D");
         btnEdit.putClientProperty(FlatClientProperties.STYLE, "hoverBackground: #ffdd53;");
 
         pActions.add(btnRefresh);

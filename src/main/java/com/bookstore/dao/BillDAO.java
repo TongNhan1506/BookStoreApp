@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BillDAO {
-    private BookDAO bookDAO;
-
     public boolean createBillTransaction(BillDTO bill, List<BillDetailDTO> details) {
         String sqlBill = "INSERT INTO bill(total_bill_price, tax, employee_id, customer_id, payment_method_id, earned_points) VALUES (?, ?, ?, ?, ?, ?)";
         String sqlDetail = "INSERT INTO bill_detail (bill_id, book_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
@@ -48,7 +46,6 @@ public class BillDAO {
                 BookDAO bookDAO = new BookDAO();
 
                 for (BillDetailDTO detail : details) {
-                    // A. Lưu chi tiết hóa đơn
                     psDetail.setInt(1, generatedBillId);
                     psDetail.setInt(2, detail.getBookId());
                     psDetail.setInt(3, detail.getQuantity());

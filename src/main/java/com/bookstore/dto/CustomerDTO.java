@@ -6,15 +6,17 @@ public class CustomerDTO {
     private String customerPhone;
     private int point;
     private int rankId;
+    private String rankName;
 
     public CustomerDTO() {}
 
-    public CustomerDTO(int customerId, String customerName, String customerPhone, int point, int rankId) {
+    public CustomerDTO(int customerId, String customerName, String customerPhone, int point, int rankId, String rankName) {
         this.customerId = customerId;
         this.customerName = customerName;
         this.customerPhone = customerPhone;
         this.point = point;
         this.rankId = rankId;
+        this.rankName = rankName;
     }
 
     public int getCustomerId() {
@@ -55,5 +57,13 @@ public class CustomerDTO {
 
     public void setRankId(int rankId) {
         this.rankId = rankId;
+    }
+
+    public String getRankName() {
+        return rankName;
+    }
+
+    public void setRankName(String rankName) {
+        this.rankName = rankName;
     }
 }

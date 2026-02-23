@@ -39,7 +39,6 @@ public class ProductPanel extends JPanel implements Refreshable {
     private CategoryBUS categoryBUS;
     private SupplierBUS supplierBUS;
 
-
     private List<BookDTO> allBooks;
     private List<AuthorDTO> authors;
     private List<CategoryDTO> categories;
@@ -53,7 +52,6 @@ public class ProductPanel extends JPanel implements Refreshable {
         supplierBUS = new SupplierBUS();
 
         loadDataFromDatabase();
-
         initUI();
         loadTableData();
     }

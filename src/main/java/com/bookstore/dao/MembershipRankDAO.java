@@ -33,4 +33,26 @@ public class MembershipRankDAO {
         }
         return null;
     }
+
+    public java.util.List<MembershipRankDTO> getAllRanks() {
+        java.util.List<MembershipRankDTO> list = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM membership_rank ORDER BY min_point ASC";
+
+        try (java.sql.Connection c = DatabaseConnection.getConnection();
+             java.sql.PreparedStatement ps = c.prepareStatement(sql);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(new MembershipRankDTO(
+                        rs.getInt("rank_id"),
+                        rs.getString("rank_name"),
+                        rs.getInt("min_point"),
+                        rs.getDouble("discount_percent")
+                ));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

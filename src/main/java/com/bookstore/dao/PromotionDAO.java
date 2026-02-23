@@ -10,33 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PromotionDAO {
-    public List<PromotionDTO> selectAllValidPromotions() {
-        List<PromotionDTO> list = new ArrayList<>();
-        String sql = "SELECT * FROM promotion " +
-                "WHERE status = 1 " +
-                "AND NOW() BETWEEN start_date AND end_date";
-
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                PromotionDTO p = new PromotionDTO(
-                        rs.getInt("promotion_id"),
-                        rs.getString("promotion_name"),
-                        rs.getDouble("percent"),
-                        rs.getTimestamp("start_date"),
-                        rs.getTimestamp("end_date"),
-                        rs.getInt("status")
-                );
-                list.add(p);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
     public double getPromotionPercentByBook(int bookId) {
         double percent = 0;
         String sql = "SELECT p.percent FROM promotion p " +

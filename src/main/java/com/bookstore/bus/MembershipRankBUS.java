@@ -3,6 +3,8 @@ package com.bookstore.bus;
 import com.bookstore.dao.MembershipRankDAO;
 import com.bookstore.dto.MembershipRankDTO;
 
+import java.util.List;
+
 public class MembershipRankBUS {
     private final MembershipRankDAO rankDAO = new MembershipRankDAO();
 
@@ -12,5 +14,9 @@ public class MembershipRankBUS {
             return new MembershipRankDTO(1, "Thành viên", 0, 0.0);
         }
         return rank;
+    }
+
+    public List<MembershipRankDTO> getAllRanks() {
+        return rankDAO.getAllRanks();
     }
 }
