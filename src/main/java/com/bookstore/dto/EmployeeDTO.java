@@ -12,10 +12,11 @@ public class EmployeeDTO {
     private Date dayIn;
     private int status;
     private int roleId;
+    private String roleName;
 
     public EmployeeDTO() {}
 
-    public EmployeeDTO(int employeeId, String employeeName, String employeePhone, Date birthday, double baseSalary, double salaryFactor, Date dayIn, int status, int roleId) {
+    public EmployeeDTO(int employeeId, String employeeName, String employeePhone, Date birthday, double baseSalary, double salaryFactor, Date dayIn, int status, int roleId, String roleName) {
         this.employeeId = employeeId;
         this.employeeName = employeeName;
         this.employeePhone = employeePhone;
@@ -25,6 +26,7 @@ public class EmployeeDTO {
         this.dayIn = dayIn;
         this.status = status;
         this.roleId = roleId;
+        this.roleName = roleName;
     }
 
     public int getEmployeeId() {
@@ -97,5 +99,13 @@ public class EmployeeDTO {
 
     public void setRoleId(int roleId) {
         this.roleId = roleId;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
     }
 }

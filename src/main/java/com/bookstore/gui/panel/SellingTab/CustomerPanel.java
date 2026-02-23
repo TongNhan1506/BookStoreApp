@@ -307,6 +307,13 @@ public class CustomerPanel extends JPanel implements Refreshable {
         filterCustomers();
     }
 
+    private void resetFilter() {
+        txtSearch.setText("");
+        cboRank.setSelectedIndex(0);
+        txtMinPoint.setText("");
+        txtMaxPoint.setText("");
+    }
+
     private void openCustomerEditDialog() {
         int selectedRow = tblCustomer.getSelectedRow();
         if (selectedRow == -1) {
@@ -375,13 +382,7 @@ public class CustomerPanel extends JPanel implements Refreshable {
         txtMinPoint.getDocument().addDocumentListener(docListener);
         txtMaxPoint.getDocument().addDocumentListener(docListener);
 
-        btnResetFilter.addActionListener(e -> {
-            txtSearch.setText("");
-            cboRank.setSelectedIndex(0);
-            txtMinPoint.setText("");
-            txtMaxPoint.setText("");
-        });
-
+        btnResetFilter.addActionListener(e -> resetFilter());
         btnEditCustomer.addActionListener(e -> openCustomerEditDialog());
         btnViewCustomer.addActionListener(e -> openCustomerDetailDialog());
         btnAddCustomer.addActionListener(e -> openCustomerInsertDialog());
