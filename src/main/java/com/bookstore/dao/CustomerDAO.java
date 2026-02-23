@@ -33,42 +33,21 @@ public class CustomerDAO {
         return customer;
     }
 
-    public boolean addPoint(int customerId, int pointsToAdd) {
-        String sql = "UPDATE customer SET point = point + ? WHERE customer_id = ?";
-
+    public boolean updatePointAndRank(int customerId, int newTotalPoint, int newRankId) {
+        String sql = "UPDATE customer SET point = ?, rank_id = ? WHERE customer_id = ?";
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
 
-            ps.setInt(1, pointsToAdd);
-            ps.setInt(2, customerId);
+            ps.setInt(1, newTotalPoint);
+            ps.setInt(2, newRankId);
+            ps.setInt(3, customerId);
 
             int rowsAffected = ps.executeUpdate();
-            if (rowsAffected > 0) {
-                updateCustomerRank(customerId);
-            }
-
             return rowsAffected > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
-    }
-
-    private void updateCustomerRank(int customerId) {
-        String sql = "UPDATE customer SET rank_id = CASE " +
-                "WHEN point >= 10000 THEN 4 " +
-                "WHEN point >= 5000 THEN 3 " +
-                "WHEN point >= 2000 THEN 2 " +
-                "ELSE 1 END " +
-                "WHERE customer_id = ?";
-
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, customerId);
-            ps.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

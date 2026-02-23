@@ -9,49 +9,73 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BillDAO {
+    private BookDAO bookDAO;
 
-    public int insertBill(BillDTO bill) {
-        int generatedId = -1;
-        String sql = "INSERT INTO bill (created_date, total_bill_price, tax, employee_id, customer_id, payment_method_id, earned_points) " +
-                "VALUES (NOW(), ?, 0.08, ?, ?, ?, ?)";
+    public boolean createBillTransaction(BillDTO bill, List<BillDetailDTO> details) {
+        String sqlBill = "INSERT INTO bill(total_bill_price, tax, employee_id, customer_id, payment_method_id, earned_points) VALUES (?, ?, ?, ?, ?, ?)";
+        String sqlDetail = "INSERT INTO bill_detail (bill_id, book_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
 
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        Connection c = null;
+        PreparedStatement psBill = null;
+        PreparedStatement psDetail = null;
+        ResultSet rs = null;
 
-            ps.setDouble(1, bill.getTotalBillPrice());
-            ps.setInt(2, bill.getEmployeeId());
+        try {
+            c = DatabaseConnection.getConnection();
+            c.setAutoCommit(false);
 
-            if (bill.getCustomerId() == 0) ps.setNull(3, Types.INTEGER);
-            else ps.setInt(3, bill.getCustomerId());
+            psBill = c.prepareStatement(sqlBill, Statement.RETURN_GENERATED_KEYS);
+            psBill.setDouble(1, bill.getTotalBillPrice());
+            psBill.setDouble(2, bill.getTax());
+            psBill.setInt(3, bill.getEmployeeId());
+            if (bill.getCustomerId() > 0) {
+                psBill.setInt(4, bill.getCustomerId());
+            } else {
+                psBill.setNull(4, java.sql.Types.INTEGER);
+            }
+            psBill.setInt(5, bill.getPaymentMethodId());
+            psBill.setInt(6, bill.getEarnedPoints());
+            psBill.executeUpdate();
 
-            ps.setInt(4, bill.getPaymentMethodId());
-            ps.setInt(5, bill.getEarnedPoints());
+            int generatedBillId = -1;
+            rs = psBill.getGeneratedKeys();
+            if (rs.next()) {
+                generatedBillId = rs.getInt(1);
+            }
 
-            int result = ps.executeUpdate();
-            if (result > 0) {
-                try (ResultSet rs = ps.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        generatedId = rs.getInt(1);
-                    }
+            if (generatedBillId > 0) {
+                psDetail = c.prepareStatement(sqlDetail);
+                BookDAO bookDAO = new BookDAO();
+
+                for (BillDetailDTO detail : details) {
+                    // A. Lưu chi tiết hóa đơn
+                    psDetail.setInt(1, generatedBillId);
+                    psDetail.setInt(2, detail.getBookId());
+                    psDetail.setInt(3, detail.getQuantity());
+                    psDetail.setDouble(4, detail.getUnitPrice());
+                    psDetail.executeUpdate();
+
+                    bookDAO.decreaseQuantity(c, detail.getBookId(), detail.getQuantity());
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return generatedId;
-    }
+            c.commit();
+            return true;
 
-    public void insertBillDetail(BillDetailDTO detail) {
-        String sql = "INSERT INTO bill_detail (bill_id, book_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, detail.getBillId());
-            ps.setInt(2, detail.getBookId());
-            ps.setInt(3, detail.getQuantity());
-            ps.setDouble(4, detail.getUnitPrice());
-            ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+            if (c != null) {
+                try {
+                    c.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return false;
+        } finally {
+            try { if (rs != null) rs.close(); } catch (Exception e) {}
+            try { if (psDetail != null) psDetail.close(); } catch (Exception e) {}
+            try { if (psBill != null) psBill.close(); } catch (Exception e) {}
+            try { if (c != null) { c.setAutoCommit(true); c.close(); } } catch (Exception e) {}
         }
     }
 

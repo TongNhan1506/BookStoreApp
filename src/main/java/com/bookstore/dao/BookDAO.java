@@ -3,10 +3,7 @@ package com.bookstore.dao;
 import com.bookstore.dto.BookDTO;
 import com.bookstore.util.DatabaseConnection;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -147,17 +144,14 @@ public class BookDAO {
         return false;
     }
 
-    public boolean decreaseQuantity(int bookId, int quantitySold) {
+    public void decreaseQuantity(Connection c, int bookId, int quantitySold) throws SQLException {
         String sql = "UPDATE book SET quantity = quantity - ? WHERE book_id = ?";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+        // Chú ý: Chỉ đóng PreparedStatement, KHÔNG đóng Connection ở đây
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, quantitySold);
             ps.setInt(2, bookId);
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
+            ps.executeUpdate();
         }
-        return false;
     }
 
     public boolean existsByName(String bookname) {

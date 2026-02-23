@@ -19,9 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SellingPanel extends JPanel implements Refreshable {
-    private SearchableComboBox<CategoryDTO> cboCategory;
+    private JComboBox<CategoryDTO> cboCategory;
     private SearchableComboBox<AuthorDTO> cboAuthor;
     private JTextField txtPriceFrom, txtPriceTo, txtSearch;
+    private JButton btnResetFilter;
     private JTable tblProduct;
     private DefaultTableModel productModel;
     private JLabel lbProductImage, lbBookName, lbCategory, lbPrice, lbQuantity;
@@ -31,13 +32,16 @@ public class SellingPanel extends JPanel implements Refreshable {
     private DefaultTableModel cartModel;
     private JButton btnCustomer;
     private JTextField txtEmployee, txtPromo, txtRank;
-    private JLabel lbSubTotal, lbDiscountPromo, lbDiscountMember, lbFinalTotal;
+    private JLabel lbSubTotal, lbDiscountPromo, lbDiscountMember, lbTax, lbFinalTotal;
     private JButton btnRefresh, btnDelete, btnEdit, btnPay;
 
     private CategoryBUS categoryBUS = new CategoryBUS();
     private AuthorBUS authorBUS = new AuthorBUS();
     private BookBUS bookBUS = new BookBUS();
     private PromotionBUS promotionBUS = new PromotionBUS();
+    private MembershipRankBUS rankBUS = new MembershipRankBUS();
+    private CustomerBUS customerBUS = new CustomerBUS();
+    private SystemParameterBUS systemParameterBUS = new SystemParameterBUS();
 
     private List<BookDTO> listBooks = new ArrayList<>();
     private CustomerDTO currentCustomer = null;
@@ -80,7 +84,8 @@ public class SellingPanel extends JPanel implements Refreshable {
         JPanel pRow1 = new JPanel(new GridLayout(1,2,10,10));
         pRow1.setOpaque(false);
 
-        cboCategory = new SearchableComboBox<>();
+        cboCategory = new JComboBox<>();
+        cboCategory.setBackground(Color.WHITE);
         cboAuthor = new SearchableComboBox<>();
 
         pRow1.add(cboCategory);
@@ -97,11 +102,24 @@ public class SellingPanel extends JPanel implements Refreshable {
         pRow2.add(txtPriceTo);
         pFilter.add(pRow2);
 
+        JPanel pSearchRow = new JPanel(new BorderLayout(10, 0));
+        pSearchRow.setOpaque(false);
+
         txtSearch = new JTextField();
         txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Tìm kiếm theo tên hoặc mã sách...");
         FlatSVGIcon searchIcon = new FlatSVGIcon("icon/search_icon.svg").derive(20,20);
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, searchIcon);
-        pFilter.add(txtSearch);
+
+        btnResetFilter = new JButton("Làm mới");
+        btnResetFilter.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 14));
+        btnResetFilter.setForeground(Color.WHITE);
+        btnResetFilter.setBackground(Color.decode(AppConstant.GREEN_COLOR_CODE));
+        btnResetFilter.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnResetFilter.putClientProperty(FlatClientProperties.STYLE, "arc: 10; hoverBackground: #00A364;");
+
+        pSearchRow.add(txtSearch, BorderLayout.CENTER);
+        pSearchRow.add(btnResetFilter, BorderLayout.EAST);
+        pFilter.add(pSearchRow);
 
         String[] headers = {"Mã", "Tên sản phẩm", "Thể loại", "Đơn giá", "SL"};
         productModel = new DefaultTableModel(headers, 0) {
@@ -268,7 +286,7 @@ public class SellingPanel extends JPanel implements Refreshable {
         JScrollPane scrollCart = new JScrollPane(tblCart);
         scrollCart.getViewport().setBackground(Color.WHITE);
 
-        JPanel pSummary = new JPanel(new GridLayout(4, 1, 0, 5));
+        JPanel pSummary = new JPanel(new GridLayout(5, 1, 0, 5));
         pSummary.setBackground(Color.WHITE);
 
         lbSubTotal = new JLabel("0đ", SwingConstants.RIGHT);
@@ -277,6 +295,8 @@ public class SellingPanel extends JPanel implements Refreshable {
         lbDiscountPromo.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
         lbDiscountMember = new JLabel("0đ", SwingConstants.RIGHT);
         lbDiscountMember.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
+        lbTax = new JLabel("0đ", SwingConstants.RIGHT);
+        lbTax.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
         lbFinalTotal = new JLabel("0đ", SwingConstants.RIGHT);
         lbFinalTotal.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
         lbFinalTotal.setForeground(Color.RED);
@@ -284,6 +304,7 @@ public class SellingPanel extends JPanel implements Refreshable {
         pSummary.add(createSummaryLabel("Tổng tiền hàng:", lbSubTotal));
         pSummary.add(createSummaryLabel("Giảm giá sách:", lbDiscountPromo));
         pSummary.add(createSummaryLabel("Giảm giá thành viên:", lbDiscountMember));
+        pSummary.add(createSummaryLabel("Thuế VAT:", lbTax));
 
         JPanel pFinal = createSummaryLabel("CÒN LẠI: ", lbFinalTotal);
         JLabel lbTitleFinal = (JLabel) pFinal.getComponent(0);
@@ -351,6 +372,7 @@ public class SellingPanel extends JPanel implements Refreshable {
         header.setForeground(Color.WHITE);
         header.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 15));
         header.setPreferredSize(new Dimension(header.getWidth(), 40));
+        header.setReorderingAllowed(false);
 
         table.setRowHeight(35);
         table.setShowGrid(true);
@@ -367,7 +389,8 @@ public class SellingPanel extends JPanel implements Refreshable {
     private void loadCategoriesToComBoBox() {
         List<CategoryDTO> list = categoryBUS.selectAllCategories();
         list.add(0, new CategoryDTO(0, "Tất cả thể loại"));
-        cboCategory.updateData(list);
+        CategoryDTO[] categoryArray = list.toArray(new CategoryDTO[0]);
+        cboCategory.setModel(new DefaultComboBoxModel<>(categoryArray));
     }
 
     private void loadAuthorsToComboBox() {
@@ -485,12 +508,13 @@ public class SellingPanel extends JPanel implements Refreshable {
             this.currentCustomer = customer;
             btnCustomer.setText(customer.getCustomerName());
 
-            int point = customer.getPoint();
-            String rank = "Thành viên";
-            if (point >= 1000) rank = "Vàng";
-            else if (point >= 500) rank = "Bạc";
+            MembershipRankDTO rank = rankBUS.getRankByPoint(customer.getPoint());
 
-            txtRank.setText(rank);
+            if (rank.getDiscountPercent() > 0) {
+                txtRank.setText(rank.getRankName() + " (-" + (int)rank.getDiscountPercent() + "%)");
+            } else {
+                txtRank.setText(rank.getRankName());
+            }
         } else {
             this.currentCustomer = null;
             btnCustomer.setText("Khách lẻ");
@@ -560,21 +584,19 @@ public class SellingPanel extends JPanel implements Refreshable {
         double discountPromo = totalOriginal - totalCart;
         double discountMember = 0;
         if (currentCustomer != null) {
-            int point = currentCustomer.getPoint();
-            double memberPercent = 0;
-
-            if (point >= 10000) memberPercent = 15;
-            else if (point >= 5000) memberPercent = 10;
-            else if (point >= 2000) memberPercent = 5;
-
-            discountMember = totalCart * (memberPercent / 100.0);
+            MembershipRankDTO rank = rankBUS.getRankByPoint(currentCustomer.getPoint());
+            discountMember = totalCart * (rank.getDiscountPercent() / 100.0);
         }
 
-        double finalTotal = totalCart - discountMember;
+        double subTotalAfterDiscount = totalCart - discountMember;
+        double vatRate = systemParameterBUS.getVAT();
+        double taxAmount = subTotalAfterDiscount * vatRate;
+        double finalTotal = subTotalAfterDiscount + taxAmount;
 
         lbSubTotal.setText(MoneyFormatter.toVND(totalOriginal));
         lbDiscountPromo.setText(MoneyFormatter.toVND(discountPromo));
         lbDiscountMember.setText(MoneyFormatter.toVND(discountMember));
+        lbTax.setText(MoneyFormatter.toVND(taxAmount));
         lbFinalTotal.setText(MoneyFormatter.toVND(finalTotal));
     }
 
@@ -769,16 +791,17 @@ public class SellingPanel extends JPanel implements Refreshable {
         int employeeId = SharedData.currentUser != null ? SharedData.currentUser.getEmployeeId() : 1;
 
         int customerId = 0;
+        int earnedPoints = 0;
+
+        int pointsPer10K = systemParameterBUS.getEarnedPointsPer10K();
+
         if (currentCustomer != null) {
             customerId = currentCustomer.getCustomerId();
+            earnedPoints = (int) (finalTotal / 10000) * pointsPer10K;
         }
 
-        int earnedPoints = 0;
-        if (customerId > 0) {
-            earnedPoints = (int) (finalTotal / 10000);
-        }
-
-        BillDTO bill = new BillDTO(0, null, finalTotal, 0.08, employeeId, customerId, paymentMethodId, earnedPoints);
+        double vatRate = systemParameterBUS.getVAT();
+        BillDTO bill = new BillDTO(0, null, finalTotal, vatRate, employeeId, customerId, paymentMethodId, earnedPoints);
 
         List<BillDetailDTO> details = new ArrayList<>();
         for (int i = 0; i < cartModel.getRowCount(); i++) {
@@ -795,9 +818,24 @@ public class SellingPanel extends JPanel implements Refreshable {
         boolean success = billBUS.createBill(bill, details);
 
         if (success) {
+            String rankUpMessage = "";
+            if (currentCustomer != null && earnedPoints > 0) {
+                int oldPoint = currentCustomer.getPoint();
+                int newTotalPoint = oldPoint + earnedPoints;
+
+                MembershipRankDTO oldRank = rankBUS.getRankByPoint(oldPoint);
+                MembershipRankDTO newRank = rankBUS.getRankByPoint(newTotalPoint);
+
+                customerBUS.updateCustomerRank(currentCustomer.getCustomerId(), oldPoint, earnedPoints);
+
+                if (newRank.getRankId() != oldRank.getRankId()) {
+                    rankUpMessage = "\nChúc mừng! Khách hàng đã thăng lên hạng: " + newRank.getRankName();
+                }
+            }
+
             JOptionPane.showMessageDialog(this,
                     "Thanh toán thành công!\nTổng tiền: " + MoneyFormatter.toVND(finalTotal) +
-                            "\nĐiểm tích lũy: " + earnedPoints);
+                            "\nĐiểm tích lũy: " + earnedPoints + rankUpMessage);
 
             resetSellingPanel();
         } else {
@@ -817,6 +855,15 @@ public class SellingPanel extends JPanel implements Refreshable {
 
         listBooks = bookBUS.selectAllBooks();
         updateProductTable(listBooks);
+    }
+
+    private void resetFilter() {
+        txtSearch.setText("");
+        txtPriceFrom.setText("");
+        txtPriceTo.setText("");
+        cboCategory.setSelectedIndex(0);
+        cboAuthor.setSelectedIndex(0);
+        filterBooks();
     }
 
     private void addEvents() {
@@ -861,5 +908,6 @@ public class SellingPanel extends JPanel implements Refreshable {
         btnDelete.addActionListener(e -> deleteRowFromCart());
         btnEdit.addActionListener(e -> editRowFromCart());
         btnPay.addActionListener(e -> createNewBill());
+        btnResetFilter.addActionListener(e -> resetFilter());
     }
 }

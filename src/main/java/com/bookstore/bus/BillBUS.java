@@ -12,25 +12,9 @@ import java.util.stream.Collectors;
 
 public class BillBUS {
     private BillDAO billDAO = new BillDAO();
-    private BookDAO bookDAO = new BookDAO();
-    private CustomerDAO customerDAO = new CustomerDAO();
 
     public boolean createBill(BillDTO bill, List<BillDetailDTO> details) {
-        int billId = billDAO.insertBill(bill);
-        if (billId == -1) return false;
-
-        for (BillDetailDTO detail : details) {
-            detail.setBillId(billId);
-            billDAO.insertBillDetail(detail);
-
-            bookDAO.decreaseQuantity(detail.getBookId(), detail.getQuantity());
-        }
-
-        if (bill.getCustomerId() > 0 && bill.getEarnedPoints() > 0) {
-            customerDAO.addPoint(bill.getCustomerId(), bill.getEarnedPoints());
-        }
-
-        return true;
+        return billDAO.createBillTransaction(bill, details);
     }
 
     public List<BillDTO> getAllBills(){

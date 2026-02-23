@@ -1,6 +1,8 @@
 package com.bookstore.gui.panel.SellingTab;
 
+import com.bookstore.bus.SupplierBUS;
 import com.bookstore.dto.BookDTO;
+import com.bookstore.dto.SupplierDTO;
 import com.bookstore.util.AppConstant;
 import com.bookstore.util.MoneyFormatter;
 
@@ -9,10 +11,12 @@ import java.awt.*;
 
 public class BookDetailDialog extends JDialog {
     private BookDTO book;
+    private SupplierBUS supplierBUS;
 
     public BookDetailDialog(JFrame parent, BookDTO book) {
         super(parent, "Chi Tiết Sản Phẩm", true);
         this.book = book;
+        this.supplierBUS = new SupplierBUS();
         initUI();
     }
 
@@ -82,6 +86,9 @@ public class BookDetailDialog extends JDialog {
 
         int row = 0;
 
+        SupplierDTO supplier = supplierBUS.getById(book.getSupplierId());
+        String supplierName = (supplier != null) ? supplier.getSupplierName() : "Không rõ";
+
         addDetailRow(pBookDetail, gbc, row++,"Tên sản phẩm: ", book.getBookName());
         addDetailRow(pBookDetail, gbc, row++,"Thể loại: ", book.getCategoryName());
         addDetailRow(pBookDetail, gbc, row++, "Tags: ", book.getTagDetail());
@@ -89,7 +96,7 @@ public class BookDetailDialog extends JDialog {
         addDetailRow(pBookDetail, gbc, row++, "Số lượng tồn:", String.valueOf(book.getQuantity()));
         addDetailRow(pBookDetail, gbc, row++, "Tác giả:", book.getAuthorsName());
         addDetailRow(pBookDetail, gbc, row++, "Dịch giả:", book.getTranslator() == null ? "Không có" : book.getTranslator());
-        addDetailRow(pBookDetail, gbc, row++, "Nhà cung cấp:", String.valueOf(book.getSupplierId()));
+        addDetailRow(pBookDetail, gbc, row++, "Nhà cung cấp:", supplierName);
 
         JPanel pDetailWrapper = new JPanel(new BorderLayout());
         pDetailWrapper.setOpaque(false);

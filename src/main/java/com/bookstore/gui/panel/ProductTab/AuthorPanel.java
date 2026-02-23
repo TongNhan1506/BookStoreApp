@@ -16,7 +16,7 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AuthorPanel extends JPanel implements Refreshable {
+public class AuthorPanel extends JPanel implements Refreshable{
     private static final Color MAIN_COLOR = Color.decode(AppConstant.GREEN_COLOR_CODE);
     private static final Color BUTTON_COLOR = Color.decode(AppConstant.BUTTON_COLOR);
     private static final Color BORDER_COLOR = Color.decode("#E0E0E0");
@@ -53,6 +53,7 @@ public class AuthorPanel extends JPanel implements Refreshable {
     public void refresh() {
         loadAuthorData();
         loadCountriesToCombo();
+        applyFilter();
     }
 
     private void initUI() {

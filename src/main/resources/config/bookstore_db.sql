@@ -376,13 +376,13 @@ insert into book_author (book_id, author_id) values
     (30, 20);
 
 insert into membership_rank(rank_name, min_point, discount_percent) values
-('Thành viên', 100, 0),
+('Thành viên', 0, 0),
 ('Bạc', 2000, 5),
-('Vàng', 5000, 10),
-('Bạch Kim', 10000, 15);
+('Vàng', 7000, 10),
+('Bạch Kim', 20000, 15);
 
 insert into customer(customer_name, customer_phone, point, rank_id) values
-("nquyleee", "0909901421", 1500, 2),
+("nquyleee", "0909901421", 2100, 2),
 ("Lê Ngọc Quý", "0934129959", 0, 1);
 
 insert into payment_method(payment_method_name) values
