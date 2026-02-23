@@ -209,6 +209,7 @@ public class CustomerPanel extends JPanel implements Refreshable {
         table.setSelectionBackground(Color.decode("#d4ffee"));
         table.setSelectionForeground(Color.BLACK);
         table.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 14));
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
     private void loadCustomerTable() {
