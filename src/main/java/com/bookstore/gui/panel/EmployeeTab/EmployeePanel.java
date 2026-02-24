@@ -62,7 +62,6 @@ public class EmployeePanel extends JPanel implements Refreshable {
         JPanel pTop = new JPanel(new BorderLayout(0, 15));
         pTop.setOpaque(false);
 
-        // --- HÀNG 1: TÌM KIẾM VÀ NÚT THÊM ---
         JPanel pSearchRow = new JPanel(new BorderLayout(15, 0));
         pSearchRow.setOpaque(false);
 
@@ -82,11 +81,9 @@ public class EmployeePanel extends JPanel implements Refreshable {
         pSearchRow.add(txtSearch, BorderLayout.CENTER);
         pSearchRow.add(btnAddEmployee, BorderLayout.EAST);
 
-        // --- HÀNG 2: BỘ LỌC VÀ THAO TÁC ---
         JPanel pFilterRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         pFilterRow.setOpaque(false);
 
-        // Bộ lọc chức vụ
         JPanel pRole = createFilterGroup("Chức vụ:");
         cboRole = new JComboBox<>();
         cboRole.addItem("Tất cả chức vụ");
@@ -94,17 +91,14 @@ public class EmployeePanel extends JPanel implements Refreshable {
         cboRole.setBackground(Color.WHITE);
         pRole.add(cboRole);
 
-        // Bộ lọc trạng thái
         JPanel pStatus = createFilterGroup("Trạng thái:");
         cboStatus = new JComboBox<>(new String[]{"Tất cả", "Còn làm việc", "Nghỉ việc"});
         cboStatus.setPreferredSize(new Dimension(150, 35));
         cboStatus.setBackground(Color.WHITE);
         pStatus.add(cboStatus);
 
-        // Khởi tạo ColorFilter cho icon trắng
         FlatSVGIcon.ColorFilter whiteFilter = new FlatSVGIcon.ColorFilter(color -> Color.WHITE);
 
-        // Nút Xóa bộ lọc
         FlatSVGIcon resetIcon = new FlatSVGIcon("icon/reset_icon.svg").derive(16, 16);
         resetIcon.setColorFilter(whiteFilter);
         btnResetFilter = new JButton("Xóa bộ lọc", resetIcon);
@@ -115,7 +109,6 @@ public class EmployeePanel extends JPanel implements Refreshable {
         btnResetFilter.setForeground(Color.WHITE);
         btnResetFilter.putClientProperty(FlatClientProperties.STYLE, "arc: 5; hoverBackground: #ff5757;");
 
-        // Nút Sửa
         FlatSVGIcon editIcon = new FlatSVGIcon("icon/edit_icon.svg").derive(16, 16);
         editIcon.setColorFilter(whiteFilter);
         btnEditEmployee = new JButton("Sửa", editIcon);
@@ -126,7 +119,6 @@ public class EmployeePanel extends JPanel implements Refreshable {
         btnEditEmployee.setForeground(Color.WHITE);
         btnEditEmployee.putClientProperty(FlatClientProperties.STYLE, "arc: 5; hoverBackground: #ffdd53;");
 
-        // Nút Xem chi tiết
         FlatSVGIcon viewIcon = new FlatSVGIcon("icon/info_icon.svg").derive(16, 16);
         viewIcon.setColorFilter(whiteFilter);
         btnViewEmployee = new JButton("Xem chi tiết", viewIcon);
@@ -137,7 +129,6 @@ public class EmployeePanel extends JPanel implements Refreshable {
         btnViewEmployee.setForeground(Color.WHITE);
         btnViewEmployee.putClientProperty(FlatClientProperties.STYLE, "arc: 5; hoverBackground: #64B5F6;");
 
-        // Wrappers để đẩy nút xuống ngang hàng TextField
         pFilterRow.add(pRole);
         pFilterRow.add(pStatus);
         pFilterRow.add(createWrapper(btnResetFilter));
@@ -172,7 +163,6 @@ public class EmployeePanel extends JPanel implements Refreshable {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
 
-        // Chỉ khai báo các cột cần hiển thị + ID để định danh
         String[] headers = {"ID", "Tên nhân viên", "Số điện thoại", "Ngày sinh", "Chức vụ", "Trạng thái"};
         employeeModel = new DefaultTableModel(headers, 0) {
             @Override
@@ -184,7 +174,6 @@ public class EmployeePanel extends JPanel implements Refreshable {
         tblEmployee = new JTable(employeeModel);
         styleTable(tblEmployee);
 
-        // Ẩn cột ID
         tblEmployee.getColumnModel().getColumn(0).setMinWidth(0);
         tblEmployee.getColumnModel().getColumn(0).setMaxWidth(0);
         tblEmployee.getColumnModel().getColumn(0).setPreferredWidth(0);
@@ -215,7 +204,6 @@ public class EmployeePanel extends JPanel implements Refreshable {
     }
 
     private void loadEmployeeTable() {
-        // Kéo toàn bộ dữ liệu từ Database lên RAM
         listEmployees = employeeBUS.getAllEmployees();
         updateEmployeeTable(listEmployees);
     }
@@ -316,6 +304,65 @@ public class EmployeePanel extends JPanel implements Refreshable {
         cboStatus.setSelectedIndex(0);
     }
 
+    private void openEditDialog() {
+        int selectedRow = tblEmployee.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân viên cần sửa!");
+            return;
+        }
+
+        int employeeId = (int) tblEmployee.getValueAt(selectedRow, 0);
+
+        EmployeeDTO selectedEmployee = null;
+        if (listEmployees != null) {
+            for (EmployeeDTO emp : listEmployees) {
+                if (emp.getEmployeeId() == employeeId) {
+                    selectedEmployee = emp;
+                    break;
+                }
+            }
+        }
+
+        if (selectedEmployee != null) {
+            JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            EmployeeEditDialog dialog = new EmployeeEditDialog(parentFrame, this, selectedEmployee);
+            dialog.setVisible(true);
+        }
+    }
+
+    private void openEmployeeDetailDialog() {
+        int selectedRow = tblEmployee.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân viên cần xem chi tiết!",
+                    "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int employeeId = (int) tblEmployee.getValueAt(selectedRow, 0);
+
+        EmployeeDTO selectedEmployee = null;
+        if (listEmployees != null) {
+            for (EmployeeDTO emp : listEmployees) {
+                if (emp.getEmployeeId() == employeeId) {
+                    selectedEmployee = emp;
+                    break;
+                }
+            }
+        }
+
+        if (selectedEmployee != null) {
+            JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            EmployeeDetailDialog dialog = new EmployeeDetailDialog(parentFrame, selectedEmployee);
+            dialog.setVisible(true);
+        }
+    }
+
+    private void openAddDialog() {
+        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        EmployeeAddDialog dialog = new EmployeeAddDialog(parentFrame, this);
+        dialog.setVisible(true);
+    }
+
     private void addEvents() {
         txtSearch.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -328,5 +375,8 @@ public class EmployeePanel extends JPanel implements Refreshable {
 
         cboStatus.addActionListener(e -> filterEmployees());
         btnResetFilter.addActionListener(e -> resetFilter());
+        btnEditEmployee.addActionListener(e -> openEditDialog());
+        btnViewEmployee.addActionListener(e -> openEmployeeDetailDialog());
+        btnAddEmployee.addActionListener(e -> openAddDialog());
     }
 }
