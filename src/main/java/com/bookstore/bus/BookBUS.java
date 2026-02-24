@@ -31,7 +31,7 @@ public class BookBUS {
         }
 
         int generatedId = bookDAO.add(book);
-        if (generatedId != -1) {
+        if (generatedId > 0) {
             book.setBookId(generatedId);
             return "Thêm sách thành công!";
         }

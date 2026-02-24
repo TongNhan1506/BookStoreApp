@@ -12,18 +12,22 @@ import java.util.List;
 public class AuthorDAO {
     public List<AuthorDTO> selectAllAuthors() {
         List<AuthorDTO> list = new ArrayList<>();
-        String sql = "SELECT * FROM author";
+        String sql = "SELECT a.*, " +
+                "(SELECT COUNT(*) FROM book_author ba WHERE ba.author_id = a.author_id) AS total_books " +
+                "FROM author a ORDER BY a.author_id";
 
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                list.add(new AuthorDTO(
-                        rs.getInt("author_id"),
-                        rs.getString("author_name"),
-                        rs.getString("nationality")
-                ));
+                AuthorDTO author = new AuthorDTO();
+                author.setAuthorId(rs.getInt("author_id"));
+                author.setAuthorName(rs.getString("author_name"));
+                author.setNationality(rs.getString("nationality"));
+                author.setBookCount(rs.getInt("total_books"));
+
+                list.add(author);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -93,7 +97,9 @@ public class AuthorDAO {
 
     public List <AuthorDTO> searchByName(String authorname){
         List<AuthorDTO> list = new ArrayList<>();
-        String sql = "SELECT * FROM author WHERE author_name LIKE ?";
+        String sql = "SELECT a.*, " +
+                "(SELECT COUNT(*) FROM book_author ba WHERE ba.author_id = a.author_id) AS total_books " +
+                "FROM author a WHERE a.author_name LIKE ?";
 
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql);) {
@@ -104,7 +110,8 @@ public class AuthorDAO {
                     list.add(new AuthorDTO(
                             rs.getInt("author_id"),
                             rs.getString("author_name"),
-                            rs.getString("nationality")
+                            rs.getString("nationality"),
+                            rs.getInt("total_books")
                     ));
                 }
             }
@@ -115,7 +122,9 @@ public class AuthorDAO {
     }
 
     public AuthorDTO getAuthorById(int id){
-        String sql = "SELECT * FROM author WHERE author_id = ?";
+        String sql = "SELECT a.*," +
+                "(SELECT COUNT(*) FROM book_author ba2 WHERE ba2.author_id = a.author_id) AS total_books " +
+                "FROM author a WHERE a.author_id = ?";
         try(Connection c = DatabaseConnection.getConnection();
             PreparedStatement ps = c.prepareStatement(sql);){
 
@@ -125,7 +134,8 @@ public class AuthorDAO {
                     return new AuthorDTO(
                             rs.getInt("author_id"),
                             rs.getString("author_name"),
-                            rs.getString("nationality")
+                            rs.getString("nationality"),
+                            rs.getInt("total_books")
                     );
                 }
             }
@@ -137,7 +147,9 @@ public class AuthorDAO {
 
     public List<AuthorDTO> getByBookId(int bookId) {
         List<AuthorDTO> authors = new ArrayList<>();
-        String sql = "SELECT a.* FROM author a " +
+        String sql = "SELECT a.*, " +
+                "(SELECT COUNT(*) FROM book_author ba WHERE ba.author_id = a.author_id) AS total_books " +
+                "FROM author a " +
                 "JOIN book_author ba ON a.author_id = ba.author_id " +
                 "WHERE ba.book_id = ?";
 
@@ -151,7 +163,8 @@ public class AuthorDAO {
                 AuthorDTO author = new AuthorDTO(
                         rs.getInt("author_id"),
                         rs.getString("author_name"),
-                        rs.getString("nationality")
+                        rs.getString("nationality"),
+                        rs.getInt("total_books")
                 );
                 authors.add(author);
             }
@@ -159,22 +172,5 @@ public class AuthorDAO {
             e.printStackTrace();
         }
         return authors;
-    }
-
-    public int countBooksByAuthorId(int authorId) {
-        String sql = "SELECT COUNT(*) AS total FROM book_author WHERE author_id = ?";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-
-            ps.setInt(1, authorId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("total");
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
     }
 }

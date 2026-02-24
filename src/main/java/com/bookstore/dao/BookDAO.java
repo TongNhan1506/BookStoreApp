@@ -17,7 +17,6 @@ public class BookDAO {
                 "JOIN category c ON b.category_id = c.category_id " +
                 "LEFT JOIN book_author ba ON b.book_id = ba.book_id " +
                 "LEFT JOIN author a ON ba.author_id = a.author_id " +
-                "WHERE b.status = 1 " +
                 "GROUP BY b.book_id";
 
         try (Connection c = DatabaseConnection.getConnection();
@@ -115,7 +114,7 @@ public class BookDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return -1;
+        return 0;
     }
 
     public boolean update(BookDTO book) {

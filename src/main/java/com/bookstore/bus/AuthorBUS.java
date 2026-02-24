@@ -29,7 +29,6 @@ public class AuthorBUS {
         return "Thêm tác giả thất bại!";
     }
 
-
     public String updateAuthor(AuthorDTO author) {
         if (author.getAuthorName().trim().isEmpty())
             return "Tên tác giả không được để trống!";
@@ -52,11 +51,8 @@ public class AuthorBUS {
         }
         return result;
     }
+
     public AuthorDTO getById(int id) {
         return authorDAO.getAuthorById(id);
-    }
-
-    public int getBookCountByAuthorId(int authorId) {
-        return authorDAO.countBooksByAuthorId(authorId);
     }
 }

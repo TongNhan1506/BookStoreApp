@@ -14,7 +14,9 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class AuthorPanel extends JPanel implements Refreshable{
     private static final Color MAIN_COLOR = Color.decode(AppConstant.GREEN_COLOR_CODE);
@@ -42,7 +44,6 @@ public class AuthorPanel extends JPanel implements Refreshable{
         authorBUS = new AuthorBUS();
         allAuthors = new ArrayList<>();
         filteredAuthors = new ArrayList<>();
-
         loadAuthorData();
         initUI();
         loadCountriesToCombo();
@@ -234,27 +235,27 @@ public class AuthorPanel extends JPanel implements Refreshable{
     }
 
     private void loadCountriesToCombo() {
+        for (java.awt.event.ActionListener al : nationalityCombo.getActionListeners()) {
+            nationalityCombo.removeActionListener(al);
+        }
+
         nationalityCombo.removeAllItems();
         nationalityCombo.addItem("Tất cả quốc gia");
 
+        Set<String> uniqueCountries = new HashSet<>();
+
         for (AuthorDTO author : allAuthors) {
             String country = author.getNationality();
-            if (country == null || country.trim().isEmpty()) {
-                continue;
-            }
-
-            boolean existed = false;
-            for (int i = 0; i < nationalityCombo.getItemCount(); i++) {
-                String item = nationalityCombo.getItemAt(i);
-                if (country.equalsIgnoreCase(item)) {
-                    existed = true;
-                    break;
-                }
-            }
-            if (!existed) {
-                nationalityCombo.addItem(country);
+            if (country != null && !country.trim().isEmpty()) {
+                uniqueCountries.add(country.trim());
             }
         }
+
+        for (String country : uniqueCountries) {
+            nationalityCombo.addItem(country);
+        }
+
+        nationalityCombo.addActionListener(e -> applyFilter());
     }
 
     private void applyFilter() {
@@ -283,7 +284,7 @@ public class AuthorPanel extends JPanel implements Refreshable{
             tableModel.addRow(new Object[]{
                     author.getAuthorName(),
                     author.getNationality(),
-                    authorBUS.getBookCountByAuthorId(author.getAuthorId()),
+                    author.getBookCount(),
                     "Sửa"
             });
         }

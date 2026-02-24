@@ -74,15 +74,12 @@ public class BookFormDialog extends JDialog {
         mainPanel.setBackground(BG_COLOR);
         mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        // Left panel - Image
         JPanel leftPanel = createImagePanel();
         mainPanel.add(leftPanel, BorderLayout.WEST);
 
-        // Right panel - Form
         JPanel rightPanel = createFormPanel();
         mainPanel.add(rightPanel, BorderLayout.CENTER);
 
-        // Bottom panel - Buttons
         JPanel buttonPanel = createButtonPanel();
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -94,7 +91,6 @@ public class BookFormDialog extends JDialog {
         panel.setBackground(BG_COLOR);
         panel.setPreferredSize(new Dimension(220, 0));
 
-        // Image display
         imageLabel = new JLabel();
         imageLabel.setPreferredSize(new Dimension(180, 250));
         imageLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -141,7 +137,6 @@ public class BookFormDialog extends JDialog {
         helperLabel.setFont(new Font("Segoe UI", Font.ITALIC, 11));
         helperLabel.setForeground(Color.decode("#777777"));
 
-        // Upload button
         JButton uploadButton = new JButton("Browse ảnh");
         uploadButton.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         uploadButton.setBackground(Color.decode("#E0E0E0"));
@@ -167,7 +162,6 @@ public class BookFormDialog extends JDialog {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(BG_COLOR);
 
-        // Scrollable
         JScrollPane scrollPane = new JScrollPane(panel);
         scrollPane.setBorder(null);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
@@ -176,27 +170,22 @@ public class BookFormDialog extends JDialog {
         wrapper.setBackground(BG_COLOR);
         wrapper.add(scrollPane, BorderLayout.CENTER);
 
-        // Book name (required)
         addFormField(panel, "Tên sách *", nameField = new JTextField(), true);
 
-        // Authors (required)
         authorPanel = new JPanel();
         authorPanel.setLayout(new BoxLayout(authorPanel, BoxLayout.Y_AXIS));
         authorPanel.setBackground(BG_COLOR);
         addFormSection(panel, "Tác giả *", authorPanel, true);
         refreshAuthorPanel();
 
-        // Category (required)
         categoryCombo = new JComboBox<>(getCategoryNames());
         categoryCombo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         addFormField(panel, "Thể loại *", categoryCombo, true);
 
-        // Supplier (required)
         supplierCombo = new JComboBox<>(getSupplierNames());
         supplierCombo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         addFormField(panel, "Nhà cung cấp *", supplierCombo, true);
 
-        // Status (required)
         JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         statusPanel.setBackground(BG_COLOR);
 
@@ -217,17 +206,14 @@ public class BookFormDialog extends JDialog {
 
         addFormField(panel, "Trạng thái *", statusPanel, true);
 
-        // Translator (optional)
         addFormField(panel, "Người dịch", translatorField = new JTextField(), false);
 
-        // Tags (optional)
         tagPanel = new JPanel();
         tagPanel.setLayout(new BoxLayout(tagPanel, BoxLayout.Y_AXIS));
         tagPanel.setBackground(BG_COLOR);
         addFormSection(panel, "Tags", tagPanel, false);
         refreshTagPanel();
 
-        // Description (optional)
         descriptionArea = new JTextArea(4, 20);
         descriptionArea.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         descriptionArea.setLineWrap(true);
@@ -247,7 +233,6 @@ public class BookFormDialog extends JDialog {
     private void refreshAuthorPanel() {
         authorPanel.removeAll();
 
-        // Selected authors
         for (Integer authorId : selectedAuthorIds) {
             for (AuthorDTO author : authors) {
                 if (author.getAuthorId() == authorId) {
@@ -262,7 +247,6 @@ public class BookFormDialog extends JDialog {
             }
         }
 
-        // Add author button
         JButton addAuthorButton = new JButton("+ Thêm tác giả");
         addAuthorButton.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         addAuthorButton.setForeground(BUTTON_COLOR);
@@ -285,7 +269,6 @@ public class BookFormDialog extends JDialog {
     private void refreshTagPanel() {
         tagPanel.removeAll();
 
-        // Selected tags as chips
         JPanel chipsPanel = new JPanel(new GridLayout(0, 3, 8, 8));
         chipsPanel.setBackground(BG_COLOR);
         chipsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -301,7 +284,6 @@ public class BookFormDialog extends JDialog {
         tagPanel.add(chipsPanel);
         tagPanel.add(Box.createVerticalStrut(8));
 
-        // Add tag buttons
         JPanel buttonPanel = new JPanel(new GridLayout(0, 4, 8, 8));
         buttonPanel.setBackground(BG_COLOR);
         buttonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -394,13 +376,11 @@ public class BookFormDialog extends JDialog {
         topPanel.add(searchField, BorderLayout.CENTER);
         contentPanel.add(topPanel, BorderLayout.NORTH);
 
-        // Use a container panel that will hold filtered results
         JPanel listContainer = new JPanel(new BorderLayout());
         listContainer.setBackground(BG_COLOR);
 
         Map<Integer, JCheckBox> allCheckBoxes = new HashMap<>();
 
-        // Create all checkboxes first
         for (AuthorDTO author : authors) {
             JCheckBox cb = new JCheckBox(author.getAuthorName());
             cb.setFont(new Font("Segoe UI", Font.PLAIN, 13));
@@ -412,7 +392,6 @@ public class BookFormDialog extends JDialog {
             allCheckBoxes.put(author.getAuthorId(), cb);
         }
 
-        // Method to rebuild the list panel based on filter
         Runnable rebuildList = () -> {
             String keyword = searchField.getText().toLowerCase().trim();
 
@@ -430,7 +409,6 @@ public class BookFormDialog extends JDialog {
                 }
             }
 
-            // Update the container
             listContainer.removeAll();
             JScrollPane scrollPane = new JScrollPane(listPanel);
             scrollPane.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
@@ -440,10 +418,8 @@ public class BookFormDialog extends JDialog {
             listContainer.repaint();
         };
 
-        // Initial build
         rebuildList.run();
 
-        // Add search listener
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
@@ -463,7 +439,6 @@ public class BookFormDialog extends JDialog {
 
         contentPanel.add(listContainer, BorderLayout.CENTER);
 
-        // Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setBackground(BG_COLOR);
 
@@ -516,7 +491,6 @@ public class BookFormDialog extends JDialog {
         title.setFont(new Font("Segoe UI", Font.BOLD, 15));
         contentPanel.add(title, BorderLayout.NORTH);
 
-        // Tag chips
         JPanel chipsPanel = new JPanel(new GridLayout(0, 3, 8, 8));
         chipsPanel.setBackground(BG_COLOR);
 
@@ -534,7 +508,6 @@ public class BookFormDialog extends JDialog {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         contentPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setBackground(BG_COLOR);
 
@@ -708,7 +681,6 @@ public class BookFormDialog extends JDialog {
     }
 
     private void saveBook() {
-        // Validation
         if (nameField.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this,
                     "Vui lòng nhập tên sách!",
@@ -738,7 +710,6 @@ public class BookFormDialog extends JDialog {
             return;
         }
 
-        // Confirmation
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Bạn có chắc chắn muốn lưu thông tin sách này?",
                 "Xác nhận",
@@ -749,7 +720,6 @@ public class BookFormDialog extends JDialog {
             return;
         }
 
-        // Create or update book
         if (book == null) {
             book = new BookDTO();
             book.setBookId(0);
@@ -793,29 +763,25 @@ public class BookFormDialog extends JDialog {
             }
         }
 
-        // Authors
         if (book.getAuthorIdsList() != null) {
             selectedAuthorIds.addAll(book.getAuthorIdsList());
             refreshAuthorPanel();
         }
 
-        // Category - find index in categories list
         for (int i = 0; i < categories.size(); i++) {
             if (categories.get(i).getCategoryId() == book.getCategoryId()) {
-                categoryCombo.setSelectedIndex(i + 1); // +1 because index 0 is "-- Chọn --"
+                categoryCombo.setSelectedIndex(i + 1);
                 break;
             }
         }
 
-        // Supplier - find index in suppliers list
         for (int i = 0; i < suppliers.size(); i++) {
             if (suppliers.get(i).getSupplierId() == book.getSupplierId()) {
-                supplierCombo.setSelectedIndex(i + 1); // +1 because index 0 is "-- Chọn --"
+                supplierCombo.setSelectedIndex(i + 1);
                 break;
             }
         }
 
-        // Status
         if (book.getStatus() == 1) {
             activeRadio.setSelected(true);
         } else {

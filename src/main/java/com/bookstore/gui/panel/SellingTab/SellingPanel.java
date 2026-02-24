@@ -395,7 +395,7 @@ public class SellingPanel extends JPanel implements Refreshable {
 
     private void loadAuthorsToComboBox() {
         List<AuthorDTO> list = authorBUS.selectAllAuthors();
-        list.add(0, new AuthorDTO(0, "Tất cả tác giả", "Tất cả tác giả"));
+        list.add(0, new AuthorDTO(0, "Tất cả tác giả", "Tất cả tác giả", 0));
         cboAuthor.updateData(list);
     }
 

@@ -4,13 +4,15 @@ public class AuthorDTO {
     private int authorId;
     private String authorName;
     private String nationality;
+    private int bookCount;
 
     public AuthorDTO() {}
 
-    public AuthorDTO(int authorId, String authorName, String nationality) {
+    public AuthorDTO(int authorId, String authorName, String nationality, int bookCount) {
         this.authorId = authorId;
         this.authorName = authorName;
         this.nationality = nationality;
+        this.bookCount = bookCount;
     }
 
     public int getAuthorId() {
@@ -35,6 +37,14 @@ public class AuthorDTO {
 
     public void setNationality(String nationality) {
         this.nationality = nationality;
+    }
+
+    public int getBookCount() {
+        return bookCount;
+    }
+
+    public void setBookCount(int bookCount) {
+        this.bookCount = bookCount;
     }
 
     @Override

@@ -10,18 +10,17 @@ import java.io.File;
 import java.util.*;
 import java.util.List;
 
-import com.bookstore.dao.BookAuthorDAO;
 import com.bookstore.util.AppConstant;
 import com.bookstore.util.Refreshable;
 import com.bookstore.util.SearchableComboBox;
 import com.bookstore.bus.*;
 import com.bookstore.dto.*;
+import com.bookstore.dao.BookAuthorDAO;
 
-public class ProductPanel extends JPanel implements Refreshable {
+public class ProductPanel extends JPanel implements Refreshable{
     private static final Color MAIN_COLOR = Color.decode(AppConstant.GREEN_COLOR_CODE);
     private static final Color BUTTON_COLOR = Color.decode(AppConstant.BUTTON_COLOR);
     private static final Color BORDER_COLOR = Color.decode("#E0E0E0");
-
 
     private JTextField searchField;
     private SearchableComboBox<String> authorCombo;
@@ -38,6 +37,7 @@ public class ProductPanel extends JPanel implements Refreshable {
     private AuthorBUS authorBUS;
     private CategoryBUS categoryBUS;
     private SupplierBUS supplierBUS;
+    private BookAuthorDAO bookAuthorDAO;
 
     private List<BookDTO> allBooks;
     private List<AuthorDTO> authors;
@@ -50,6 +50,7 @@ public class ProductPanel extends JPanel implements Refreshable {
         authorBUS = new AuthorBUS();
         categoryBUS = new CategoryBUS();
         supplierBUS = new SupplierBUS();
+        bookAuthorDAO = new BookAuthorDAO();
 
         loadDataFromDatabase();
         initUI();
@@ -134,14 +135,12 @@ public class ProductPanel extends JPanel implements Refreshable {
 
         searchRow.add(searchPanel, BorderLayout.CENTER);
 
-
         JButton addButton = createStyledButton("+ THÊM SÁCH", BUTTON_COLOR);
         addButton.setPreferredSize(new Dimension(160, 38));
         addButton.addActionListener(e -> showAddBookDialog());
         searchRow.add(addButton, BorderLayout.EAST);
 
         topPanel.add(searchRow, BorderLayout.NORTH);
-
 
         JPanel filtersPanel = createFiltersPanel();
         topPanel.add(filtersPanel, BorderLayout.CENTER);
@@ -153,7 +152,6 @@ public class ProductPanel extends JPanel implements Refreshable {
         JPanel filtersPanel = new JPanel();
         filtersPanel.setLayout(new BoxLayout(filtersPanel, BoxLayout.Y_AXIS));
 
-
         JPanel gridPanel = new JPanel(new GridBagLayout());
         gridPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -161,12 +159,10 @@ public class ProductPanel extends JPanel implements Refreshable {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weightx = 0;
         gridPanel.add(createFilterLabel("Tác giả:"), gbc);
-
 
         gbc.gridx = 1;
         gbc.weightx = 1;
@@ -175,11 +171,9 @@ public class ProductPanel extends JPanel implements Refreshable {
         authorCombo.addActionListener(e -> filterBooks());
         gridPanel.add(authorCombo, gbc);
 
-
         gbc.gridx = 2;
         gbc.weightx = 0;
         gridPanel.add(createFilterLabel("Thể loại:"), gbc);
-
 
         gbc.gridx = 3;
         gbc.weightx = 1;
@@ -190,12 +184,10 @@ public class ProductPanel extends JPanel implements Refreshable {
         categoryCombo.addActionListener(e -> filterBooks());
         gridPanel.add(categoryCombo, gbc);
 
-
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.weightx = 0;
         gridPanel.add(createFilterLabel("Nhà cung cấp:"), gbc);
-
 
         gbc.gridx = 1;
         gbc.weightx = 1;
@@ -204,11 +196,9 @@ public class ProductPanel extends JPanel implements Refreshable {
         supplierCombo.addActionListener(e -> filterBooks());
         gridPanel.add(supplierCombo, gbc);
 
-
         gbc.gridx = 2;
         gbc.weightx = 0;
         gridPanel.add(createFilterLabel("Trạng thái:"), gbc);
-
 
         gbc.gridx = 3;
         gbc.weightx = 1;
@@ -222,11 +212,10 @@ public class ProductPanel extends JPanel implements Refreshable {
         filtersPanel.add(gridPanel);
         filtersPanel.add(Box.createVerticalStrut(12));
 
-
         JPanel buttonRow = new JPanel(new GridLayout(0, 5, 8, 8));
         buttonRow.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-
+        tagFilterButton = new JButton("Tags +");
         tagFilterButton = new JButton("Tags +");
         tagFilterButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
         tagFilterButton.setForeground(BUTTON_COLOR);
@@ -239,8 +228,7 @@ public class ProductPanel extends JPanel implements Refreshable {
         tagFilterButton.addActionListener(e -> showTagFilterPanel());
         buttonRow.add(tagFilterButton);
 
-
-        JButton resetButton = new JButton("✖ Xóa bộ lọc");
+        JButton resetButton = new JButton("x Xóa bộ lọc");
         resetButton.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         resetButton.setForeground(Color.decode("#666666"));
         resetButton.setBorder(BorderFactory.createCompoundBorder(
@@ -268,7 +256,6 @@ public class ProductPanel extends JPanel implements Refreshable {
         JPanel tablePanel = new JPanel(new BorderLayout());
         tablePanel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
 
-
         String[] columns = {"Sách", "Tác giả", "Thể loại", "Nhà cung cấp", "Trạng thái", "Thao tác"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -285,8 +272,6 @@ public class ProductPanel extends JPanel implements Refreshable {
         bookTable.setGridColor(BORDER_COLOR);
         bookTable.setSelectionBackground(Color.decode("#E8F5E9"));
         bookTable.setSelectionForeground(Color.BLACK);
-
-
         bookTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -301,7 +286,6 @@ public class ProductPanel extends JPanel implements Refreshable {
         bookTable.getTableHeader().setReorderingAllowed(false);
         bookTable.getTableHeader().setResizingAllowed(false);
 
-
         JTableHeader header = bookTable.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 13));
         header.setBackground(MAIN_COLOR);
@@ -309,20 +293,17 @@ public class ProductPanel extends JPanel implements Refreshable {
         header.setPreferredSize(new Dimension(header.getWidth(), 45));
         ((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
 
-
-        bookTable.getColumnModel().getColumn(0).setPreferredWidth(280);
-        bookTable.getColumnModel().getColumn(1).setPreferredWidth(180);
+        bookTable.getColumnModel().getColumn(0).setPreferredWidth(250);
+        bookTable.getColumnModel().getColumn(1).setPreferredWidth(150);
         bookTable.getColumnModel().getColumn(2).setPreferredWidth(150);
         bookTable.getColumnModel().getColumn(3).setPreferredWidth(150);
         bookTable.getColumnModel().getColumn(4).setPreferredWidth(120);
         bookTable.getColumnModel().getColumn(5).setPreferredWidth(150);
 
-
         bookTable.getColumnModel().getColumn(0).setCellRenderer(new BookCellRenderer());
         bookTable.getColumnModel().getColumn(4).setCellRenderer(new StatusCellRenderer());
         bookTable.getColumnModel().getColumn(5).setCellRenderer(new ActionCellRenderer());
         bookTable.getColumnModel().getColumn(5).setCellEditor(new ActionCellEditor());
-
 
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
@@ -340,7 +321,6 @@ public class ProductPanel extends JPanel implements Refreshable {
 
         JPanel tableContainer = new JPanel();
         tableContainer.setLayout(new OverlayLayout(tableContainer));
-
 
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setOpaque(false);
@@ -395,7 +375,6 @@ public class ProductPanel extends JPanel implements Refreshable {
         List<BookDTO> filtered = new ArrayList<>();
 
         for (BookDTO book : allBooks) {
-
             if (!searchText.isEmpty() && !book.getBookName().toLowerCase().contains(searchText)) {
                 continue;
             }
@@ -586,11 +565,16 @@ public class ProductPanel extends JPanel implements Refreshable {
                 String result = bookBUS.addBook(bookDTO);
 
                 if (result.contains("thành công")) {
-                    if (newBook.getAuthorIdsList() != null && !newBook.getAuthorIdsList().isEmpty()) {
-                        bookBUS.addAuthorsToBook(bookDTO.getBookId(), newBook.getAuthorIdsList());
+                    try {
+                        if (newBook.getAuthorIdsList() != null && !newBook.getAuthorIdsList().isEmpty()) {
+                            bookAuthorDAO.addAuthorsToBook(bookDTO.getBookId(), newBook.getAuthorIdsList());
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Lỗi khi thêm tác giả phụ" + e.getMessage());
+                    } finally {
+                        loadDataFromDatabase();
+                        filterBooks();
                     }
-                    loadDataFromDatabase();
-                    filterBooks();
 
                     JOptionPane.showMessageDialog(this, result,
                             "Thành công", JOptionPane.INFORMATION_MESSAGE);
@@ -640,9 +624,9 @@ public class ProductPanel extends JPanel implements Refreshable {
                 String result = bookBUS.updateBook(bookDTO);
 
                 if (result.contains("thành công")) {
-                    bookBUS.removeAllAuthorsFromBook(book.getBookId());
+                    bookAuthorDAO.removeAllAuthorsFromBook(book.getBookId());
                     if (updatedBook.getAuthorIdsList() != null && !updatedBook.getAuthorIdsList().isEmpty()) {
-                        bookBUS.addAuthorsToBook(book.getBookId(), updatedBook.getAuthorIdsList());
+                        bookAuthorDAO.addAuthorsToBook(book.getBookId(), updatedBook.getAuthorIdsList());
                     }
 
                     loadDataFromDatabase();
@@ -680,7 +664,7 @@ public class ProductPanel extends JPanel implements Refreshable {
         JPanel mainPanel = new JPanel(new BorderLayout(15, 0));
 
         JLabel imageLabel = new JLabel();
-        imageLabel.setPreferredSize(new Dimension(160, 240));
+        imageLabel.setPreferredSize(new Dimension(160, 240)); // 2:3 ratio
         imageLabel.setHorizontalAlignment(JLabel.CENTER);
         imageLabel.setVerticalAlignment(JLabel.TOP);
         imageLabel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR, 1));
@@ -755,27 +739,15 @@ public class ProductPanel extends JPanel implements Refreshable {
         panel.add(row);
     }
 
-    private JButton createStyledButton(String text, Color bgColor) {
+    private JButton createStyledButton(String text, Color backgroundColor) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        button.setBackground(backgroundColor);
         button.setForeground(Color.WHITE);
-        button.setBackground(bgColor);
-        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         button.setFocusPainted(false);
+        button.setBorderPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        button.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                button.setBackground(bgColor.darker());
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                button.setBackground(bgColor);
-            }
-        });
-
+        button.setPreferredSize(new Dimension(0, 36));
         return button;
     }
 
@@ -1017,7 +989,7 @@ public class ProductPanel extends JPanel implements Refreshable {
 
             panel.add(imageLabel, BorderLayout.WEST);
 
-            int availableWidth = table.getColumnModel().getColumn(0).getWidth() - 80;
+            int availableWidth = table.getColumnModel().getColumn(0).getWidth() - 80; // 50px image + 30px padding
             String truncatedName = truncateText(book.getBookName(), new Font("Segoe UI", Font.BOLD, 13), availableWidth, 2);
 
             JLabel nameLabel = new JLabel("<html><b>" + truncatedName + "</b></html>");
@@ -1060,37 +1032,34 @@ public class ProductPanel extends JPanel implements Refreshable {
         }
     }
 
+
     class ActionCellRenderer extends JPanel implements TableCellRenderer {
         private JButton editButton;
         private JButton viewButton;
 
         public ActionCellRenderer() {
-            setLayout(new GridBagLayout());
+            setLayout(new GridLayout(1, 2, 0, 0));
             setOpaque(true);
             setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, BORDER_COLOR));
 
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            gbc.insets = new Insets(0, 4, 0, 4);
-
             editButton = new JButton("Sửa");
-            editButton.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            editButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
             editButton.setForeground(Color.WHITE);
-            editButton.setBackground(Color.decode("#2196F3"));
-            editButton.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
+            editButton.setBackground(BUTTON_COLOR);
+            editButton.setBorder(BorderFactory.createMatteBorder(8, 8, 8, 4, getBackground()));
             editButton.setFocusPainted(false);
+            editButton.setOpaque(true);
 
             viewButton = new JButton("Xem");
-            viewButton.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            viewButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
             viewButton.setForeground(Color.WHITE);
-            viewButton.setBackground(Color.decode("#757575"));
-            viewButton.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
+            viewButton.setBackground(Color.decode("#616161"));
+            viewButton.setBorder(BorderFactory.createMatteBorder(8, 4, 8, 8, getBackground()));
             viewButton.setFocusPainted(false);
+            viewButton.setOpaque(true);
 
-            add(editButton, gbc);
-            gbc.gridx = 1;
-            add(viewButton, gbc);
+            add(editButton);
+            add(viewButton);
         }
 
         @Override
@@ -1114,19 +1083,14 @@ public class ProductPanel extends JPanel implements Refreshable {
         private BookDTO currentBook;
 
         public ActionCellEditor() {
-            panel = new JPanel(new GridBagLayout());
+            panel = new JPanel(new GridLayout(1, 2, 0, 0));
             panel.setOpaque(true);
 
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            gbc.insets = new Insets(0, 4, 0, 4);
-
             editButton = new JButton("Sửa");
-            editButton.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            editButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
             editButton.setForeground(Color.WHITE);
-            editButton.setBackground(Color.decode("#2196F3"));
-            editButton.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
+            editButton.setBackground(BUTTON_COLOR);
+            editButton.setBorder(BorderFactory.createMatteBorder(8, 8, 8, 4, getBackground()));
             editButton.setFocusPainted(false);
             editButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             editButton.addActionListener(e -> {
@@ -1135,10 +1099,10 @@ public class ProductPanel extends JPanel implements Refreshable {
             });
 
             viewButton = new JButton("Xem");
-            viewButton.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            viewButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
             viewButton.setForeground(Color.WHITE);
-            viewButton.setBackground(Color.decode("#757575"));
-            viewButton.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
+            viewButton.setBackground(Color.decode("#616161"));
+            viewButton.setBorder(BorderFactory.createMatteBorder(8, 4, 8, 8, getBackground()));
             viewButton.setFocusPainted(false);
             viewButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             viewButton.addActionListener(e -> {
@@ -1146,16 +1110,17 @@ public class ProductPanel extends JPanel implements Refreshable {
                 SwingUtilities.invokeLater(() -> showBookDetail(currentBook));
             });
 
-            panel.add(editButton, gbc);
-            gbc.gridx = 1;
-            panel.add(viewButton, gbc);
+            panel.add(editButton);
+            panel.add(viewButton);
         }
 
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
                                                      boolean isSelected, int row, int column) {
             currentBook = (BookDTO) value;
+
             panel.setBackground(table.getSelectionBackground());
+
             return panel;
         }
 
