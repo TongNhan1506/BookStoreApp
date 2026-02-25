@@ -235,10 +235,10 @@ public class PricePanel extends JPanel implements Refreshable {
         searchCard.add(Box.createVerticalStrut(10));
         searchCard.add(searchBoxContainer);
 
-        btnSearch.addActionListener(e -> xuLyTimKiem());
+        btnSearch.addActionListener(e -> SearchProcessing());
     }
 
-    private void xuLyTimKiem() {
+    private void SearchProcessing() {
         String input = txtSearch.getText().trim();
 
         if (input.isEmpty()) {
@@ -420,11 +420,10 @@ public class PricePanel extends JPanel implements Refreshable {
     }
 
     private void showEditPriceDialog(PriceDTO p) {
-//        String role = SharedData.getUserRole();
-//        if (!"Quản lý".equals(role)) {
-//            JOptionPane.showMessageDialog(this, "Chỉ Quản lý mới có quyền thay đổi giá bán!", "Từ chối truy cập", JOptionPane.WARNING_MESSAGE);
-//            return;
-//        }
+        /*String role = SharedData.getUserRole();
+        if (!"Quản lý".equals(role)) {
+            JOptionPane.showMessageDialog(this, "Chỉ Quản lý mới có quyền thay đổi giá bán!", "Từ chối truy cập", JOptionPane.WARNING_MESSAGE);            return;
+        }*/
 
         double currentPercent = p.getProfitRate() * 100;
         String res = JOptionPane.showInputDialog(this,
@@ -466,11 +465,11 @@ public class PricePanel extends JPanel implements Refreshable {
             return;
         }
 
-//        String role = SharedData.getUserRole();
-//        if (!"Quản lý".equals(role)) {
-//            JOptionPane.showMessageDialog(this, "Chỉ Quản lý mới có quyền cấu hình giá hàng loạt!", "Từ chối truy cập", JOptionPane.WARNING_MESSAGE);
-//            return;
-//        }
+        /*String role = SharedData.getUserRole();
+            if (!"Quản lý".equals(role)) {
+                JOptionPane.showMessageDialog(this, "Chỉ Quản lý mới có quyền cấu hình giá hàng loạt!", "Từ chối truy cập", JOptionPane.WARNING_MESSAGE);
+            return;
+        }*/
 
         String res = JOptionPane.showInputDialog(this, "Nhập % lợi nhuận áp dụng chung cho " + listHienThi.size() + " cuốn sách:");
         if (res != null && !res.trim().isEmpty()) {
