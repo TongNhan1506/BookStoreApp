@@ -25,7 +25,7 @@ public class PriceTabbedPane extends JPanel implements Refreshable {
         setLayout(new BorderLayout());
         tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
         tabbedPane.addTab("Giá Bán", new PricePanel());
-        tabbedPane.addTab("Khuyến Mãi", new JPanel());
+        tabbedPane.addTab("Khuyến Mãi", new PromotionPanel());
         add(tabbedPane, BorderLayout.CENTER);
 
         tabbedPane.addChangeListener(e -> {
