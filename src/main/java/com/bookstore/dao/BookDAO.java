@@ -10,14 +10,15 @@ import java.util.List;
 public class BookDAO {
     public List<BookDTO> selectAllBooks() {
         List<BookDTO> list = new ArrayList<>();
-        String sql = "SELECT b.*, c.category_name, " +
+        String sql = "SELECT b.*, IFNULL(bp.selling_price, 0) AS current_selling_price, c.category_name, " +
                 "GROUP_CONCAT(DISTINCT a.author_name SEPARATOR ', ') as author_names, " +
                 "GROUP_CONCAT(DISTINCT ba.author_id SEPARATOR ',') as author_ids " +
                 "FROM book b " +
+                "LEFT JOIN price bp ON b.book_id = bp.book_id AND bp.is_active = 1 " +
                 "JOIN category c ON b.category_id = c.category_id " +
                 "LEFT JOIN book_author ba ON b.book_id = ba.book_id " +
                 "LEFT JOIN author a ON ba.author_id = a.author_id " +
-                "GROUP BY b.book_id";
+                "GROUP BY b.book_id, bp.selling_price";
 
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
@@ -34,15 +35,16 @@ public class BookDAO {
 
     public List<BookDTO> searchByName(String bookname) {
         List<BookDTO> list = new ArrayList<>();
-        String sql = "SELECT b.*, c.category_name, " +
+        String sql = "SELECT b.*, IFNULL(bp.selling_price, 0) AS current_selling_price, c.category_name, " +
                 "GROUP_CONCAT(DISTINCT a.author_name SEPARATOR ', ') as author_names, " +
                 "GROUP_CONCAT(DISTINCT ba.author_id SEPARATOR ',') as author_ids " +
                 "FROM book b " +
+                "LEFT JOIN price bp ON b.book_id = bp.book_id AND bp.is_active = 1 " +
                 "JOIN category c ON b.category_id = c.category_id " +
                 "LEFT JOIN book_author ba ON b.book_id = ba.book_id " +
                 "LEFT JOIN author a ON ba.author_id = a.author_id " +
                 "WHERE b.status = 1 AND b.book_name LIKE ? " +
-                "GROUP BY b.book_id";
+                "GROUP BY b.book_id, bp.selling_price";
 
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
@@ -60,15 +62,16 @@ public class BookDAO {
     }
 
     public BookDTO getBookbyId(int bookId) {
-        String sql = "SELECT b.*, c.category_name, " +
+        String sql = "SELECT b.*, IFNULL(bp.selling_price, 0) AS current_selling_price, c.category_name, " +
                 "GROUP_CONCAT(DISTINCT a.author_name SEPARATOR ', ') as author_names, " +
                 "GROUP_CONCAT(DISTINCT ba.author_id SEPARATOR ',') as author_ids " +
                 "FROM book b " +
+                "LEFT JOIN price bp ON b.book_id = bp.book_id AND bp.is_active = 1 " +
                 "JOIN category c ON b.category_id = c.category_id " +
                 "LEFT JOIN book_author ba ON b.book_id = ba.book_id " +
                 "LEFT JOIN author a ON ba.author_id = a.author_id " +
                 "WHERE b.book_id = ? " +
-                "GROUP BY b.book_id";
+                "GROUP BY b.book_id, bp.selling_price";
 
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
@@ -86,21 +89,20 @@ public class BookDAO {
     }
 
     public int add(BookDTO book) {
-        String sql = "INSERT INTO book(book_name, selling_price, quantity, translator, image, description, status, category_id, tag_detail, supplier_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO book(book_name, quantity, translator, image, description, status, category_id, tag_detail, supplier_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, book.getBookName());
-            ps.setDouble(2, book.getSellingPrice());
-            ps.setInt(3, book.getQuantity());
-            ps.setString(4, book.getTranslator());
-            ps.setString(5, book.getImage());
-            ps.setString(6, book.getDescription());
-            ps.setInt(7, book.getStatus());
-            ps.setInt(8, book.getCategoryId());
-            ps.setString(9, book.getTagDetail());
-            ps.setInt(10, book.getSupplierId());
+            ps.setInt(2, book.getQuantity());
+            ps.setString(3, book.getTranslator());
+            ps.setString(4, book.getImage());
+            ps.setString(5, book.getDescription());
+            ps.setInt(6, book.getStatus());
+            ps.setInt(7, book.getCategoryId());
+            ps.setString(8, book.getTagDetail());
+            ps.setInt(9, book.getSupplierId());
 
             int rowsAffected = ps.executeUpdate();
 
@@ -118,22 +120,21 @@ public class BookDAO {
     }
 
     public boolean update(BookDTO book) {
-        String sql = "UPDATE book SET book_name = ?, selling_price = ?, quantity = ?, translator = ?, image = ?, description = ?, status = ?, category_id = ?, tag_detail = ?, supplier_id = ? " +
+        String sql = "UPDATE book SET book_name = ?, quantity = ?, translator = ?, image = ?, description = ?, status = ?, category_id = ?, tag_detail = ?, supplier_id = ? " +
                 "WHERE book_id = ?";
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setString(1, book.getBookName());
-            ps.setDouble(2, book.getSellingPrice());
-            ps.setInt(3, book.getQuantity());
-            ps.setString(4, book.getTranslator());
-            ps.setString(5, book.getImage());
-            ps.setString(6, book.getDescription());
-            ps.setInt(7, book.getStatus());
-            ps.setInt(8, book.getCategoryId());
-            ps.setString(9, book.getTagDetail());
-            ps.setInt(10, book.getSupplierId());
-            ps.setInt(11, book.getBookId());
+            ps.setInt(2, book.getQuantity());
+            ps.setString(3, book.getTranslator());
+            ps.setString(4, book.getImage());
+            ps.setString(5, book.getDescription());
+            ps.setInt(6, book.getStatus());
+            ps.setInt(7, book.getCategoryId());
+            ps.setString(8, book.getTagDetail());
+            ps.setInt(9, book.getSupplierId());
+            ps.setInt(10, book.getBookId());
 
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
@@ -203,7 +204,7 @@ public class BookDAO {
         BookDTO book = new BookDTO(
                 rs.getInt("book_id"),
                 rs.getString("book_name"),
-                rs.getDouble("selling_price"),
+                rs.getDouble("current_selling_price"),
                 rs.getInt("quantity"),
                 rs.getString("translator"),
                 rs.getString("image"),

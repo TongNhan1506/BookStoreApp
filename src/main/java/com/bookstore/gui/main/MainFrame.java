@@ -4,6 +4,7 @@ import com.bookstore.gui.panel.BillTab.BillPanel;
 import com.bookstore.gui.panel.EmployeeTab.EmployeePanel;
 import com.bookstore.gui.panel.ImportTab.ImportTabbedPane;
 import com.bookstore.gui.panel.InventoryTab.InventoryPanel;
+import com.bookstore.gui.panel.PriceTab.PriceTabbedPane;
 import com.bookstore.gui.panel.ProductTab.ProductTabbedPane;
 import com.bookstore.gui.panel.SellingTab.SellingTabbedPane;
 import com.bookstore.util.AppConstant;
@@ -45,7 +46,7 @@ public class MainFrame extends JFrame {
         mainContentPanel.add(welcomePanel, "WELCOME");
         mainContentPanel.add(new SellingTabbedPane(), "SELLING");
         mainContentPanel.add(new ProductTabbedPane(), "PRODUCT");
-        mainContentPanel.add(createDummyPanel("Giá Bán"), "PRICE");
+        mainContentPanel.add(new PriceTabbedPane(), "PRICE");
         mainContentPanel.add(new ImportTabbedPane(), "IMPORT");
         mainContentPanel.add(new InventoryPanel(), "INVENTORY");
         mainContentPanel.add(new BillPanel(), "BILL");
