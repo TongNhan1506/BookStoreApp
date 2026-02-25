@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BillDAO {
-    public boolean createBillTransaction(BillDTO bill, List<BillDetailDTO> details) {
+    public int createBillTransaction(BillDTO bill, List<BillDetailDTO> details) {
         String sqlBill = "INSERT INTO bill(total_bill_price, tax, employee_id, customer_id, payment_method_id, earned_points) VALUES (?, ?, ?, ?, ?, ?)";
         String sqlDetail = "INSERT INTO bill_detail (bill_id, book_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
 
@@ -56,7 +56,7 @@ public class BillDAO {
                 }
             }
             c.commit();
-            return true;
+            return rs.getInt(1);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -67,7 +67,7 @@ public class BillDAO {
                     ex.printStackTrace();
                 }
             }
-            return false;
+            return 0;
         } finally {
             try { if (rs != null) rs.close(); } catch (Exception e) {}
             try { if (psDetail != null) psDetail.close(); } catch (Exception e) {}

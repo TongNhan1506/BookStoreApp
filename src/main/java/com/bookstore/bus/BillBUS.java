@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class BillBUS {
     private BillDAO billDAO = new BillDAO();
 
-    public boolean createBill(BillDTO bill, List<BillDetailDTO> details) {
+    public int createBill(BillDTO bill, List<BillDetailDTO> details) {
         return billDAO.createBillTransaction(bill, details);
     }
 

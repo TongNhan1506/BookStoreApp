@@ -45,6 +45,7 @@ public class SellingPanel extends JPanel implements Refreshable {
 
     private List<BookDTO> listBooks = new ArrayList<>();
     private CustomerDTO currentCustomer = null;
+    private double finalTotal = 0;
 
     public SellingPanel() {
         initUI();
@@ -591,7 +592,7 @@ public class SellingPanel extends JPanel implements Refreshable {
         double subTotalAfterDiscount = totalCart - discountMember;
         double vatRate = systemParameterBUS.getVAT();
         double taxAmount = subTotalAfterDiscount * vatRate;
-        double finalTotal = subTotalAfterDiscount + taxAmount;
+        finalTotal = subTotalAfterDiscount + taxAmount;
 
         lbSubTotal.setText(MoneyFormatter.toVND(totalOriginal));
         lbDiscountPromo.setText(MoneyFormatter.toVND(discountPromo));
@@ -815,32 +816,60 @@ public class SellingPanel extends JPanel implements Refreshable {
         }
 
         BillBUS billBUS = new BillBUS();
-        boolean success = billBUS.createBill(bill, details);
+        int newBillId = billBUS.createBill(bill, details);
 
-        if (success) {
-            String rankUpMessage = "";
-            if (currentCustomer != null && earnedPoints > 0) {
-                int oldPoint = currentCustomer.getPoint();
-                int newTotalPoint = oldPoint + earnedPoints;
+        if (newBillId > 0) {
+            int choice = JOptionPane.showConfirmDialog(this,
+                    "Thanh toán thành công! Bạn có muốn in hóa đơn (PDF) không?",
+                    "In hóa đơn", JOptionPane.YES_NO_OPTION);
 
-                MembershipRankDTO oldRank = rankBUS.getRankByPoint(oldPoint);
-                MembershipRankDTO newRank = rankBUS.getRankByPoint(newTotalPoint);
+            if (choice == JOptionPane.YES_OPTION) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Lưu hóa đơn PDF");
+                fileChooser.setSelectedFile(new File("HoaDon_" + newBillId + ".pdf"));
 
-                customerBUS.updateCustomerRank(currentCustomer.getCustomerId(), oldPoint, earnedPoints);
+                if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                    String savePath = fileChooser.getSelectedFile().getAbsolutePath();
 
-                if (newRank.getRankId() != oldRank.getRankId()) {
-                    rankUpMessage = "\nChúc mừng! Khách hàng đã thăng lên hạng: " + newRank.getRankName();
+                    if (!savePath.toLowerCase().endsWith(".pdf")) {
+                        savePath += ".pdf";
+                    }
+
+                    List<Object[]> cartData = getCartDataFromTable();
+                    boolean isExported = BillPDFExporter.exportInvoice(savePath, newBillId, currentCustomer.getCustomerName(),
+                            cartData, bill.getTotalBillPrice());
+
+                    if (isExported) {
+                        JOptionPane.showMessageDialog(this, "Đã xuất hóa đơn thành công!");
+                        try {
+                            Desktop.getDesktop().open(new File(savePath));
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Lỗi khi xuất PDF!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
-
-            JOptionPane.showMessageDialog(this,
-                    "Thanh toán thành công!\nTổng tiền: " + MoneyFormatter.toVND(finalTotal) +
-                            "\nĐiểm tích lũy: " + earnedPoints + rankUpMessage);
-
             resetSellingPanel();
-        } else {
-            JOptionPane.showMessageDialog(this, "Có lỗi xảy ra khi tạo hóa đơn!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private List<Object[]> getCartDataFromTable() {
+        List<Object[]> cartData = new ArrayList<>();
+        for (int i = 0; i < cartModel.getRowCount(); i++) {
+            Object bookId = cartModel.getValueAt(i, 0);
+            Object bookName = cartModel.getValueAt(i, 1);
+            Object quantity = cartModel.getValueAt(i, 2);
+            Object price = cartModel.getValueAt(i, 3);
+            Object discount = cartModel.getValueAt(i, 4);
+            Object subTotal = cartModel.getValueAt(i, 5);
+
+            Object[] row = new Object[]{bookId, bookName, quantity, price, discount, subTotal};
+            cartData.add(row);
+        }
+
+        return cartData;
     }
 
     private void resetSellingPanel() {
