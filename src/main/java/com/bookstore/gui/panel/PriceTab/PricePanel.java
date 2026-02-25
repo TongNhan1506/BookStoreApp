@@ -146,7 +146,7 @@ public class PricePanel extends JPanel implements Refreshable {
                 return false;
             }
         });
-        leftBox.add(new JLabel("| Nhập tên sách"));
+        leftBox.add(new JLabel("| Nhập "));
 
         txtSearch = new JTextField();
         txtSearch.setOpaque(false);
