@@ -1,9 +1,15 @@
 package com.bookstore.gui.main;
 
-import com.bookstore.dto.EmployeeDTO;
-import com.bookstore.gui.panel.SellingPanel;
-import com.bookstore.gui.panel.BillPanel;
+import com.bookstore.gui.panel.BillTab.BillPanel;
+import com.bookstore.gui.panel.EmployeeTab.EmployeePanel;
+import com.bookstore.gui.panel.ImportTab.ImportTabbedPane;
+import com.bookstore.gui.panel.InventoryTab.InventoryPanel;
+import com.bookstore.gui.panel.PriceTab.PriceTabbedPane;
+import com.bookstore.gui.panel.ProductTab.ProductTabbedPane;
+import com.bookstore.gui.panel.SellingTab.SellingTabbedPane;
 import com.bookstore.util.AppConstant;
+import com.bookstore.util.Refreshable;
+import com.bookstore.util.SharedData;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import javax.swing.*;
@@ -14,10 +20,8 @@ public class MainFrame extends JFrame {
     private JPanel mainContentPanel, sidebarPanel;
     private JButton btnLogout, btnSelling, btnProduct, btnPrice, btnImport, btnInventory, btnBill, btnEmployee, btnStats, btnAccount;
     private JPanel welcomePanel;
-    private EmployeeDTO employee;
 
-    public MainFrame(EmployeeDTO employee) {
-        this.employee = employee;
+    public MainFrame() {
         initUI();
 
         applyAuthorization();
@@ -40,13 +44,13 @@ public class MainFrame extends JFrame {
 
         welcomePanel = createWelcomePanel();
         mainContentPanel.add(welcomePanel, "WELCOME");
-        mainContentPanel.add(new SellingPanel(), "SELLING");
-        mainContentPanel.add(createDummyPanel("Sản Phẩm"), "PRODUCT");
-        mainContentPanel.add(createDummyPanel("Giá Bán"), "PRICE");
-        mainContentPanel.add(createDummyPanel("Phiếu Nhập"), "IMPORT");
-        mainContentPanel.add(createDummyPanel("Tồn Kho"), "INVENTORY");
+        mainContentPanel.add(new SellingTabbedPane(), "SELLING");
+        mainContentPanel.add(new ProductTabbedPane(), "PRODUCT");
+        mainContentPanel.add(new PriceTabbedPane(), "PRICE");
+        mainContentPanel.add(new ImportTabbedPane(), "IMPORT");
+        mainContentPanel.add(new InventoryPanel(), "INVENTORY");
         mainContentPanel.add(new BillPanel(), "BILL");
-        mainContentPanel.add(createDummyPanel("Nhân Viên"), "EMPLOYEE");
+        mainContentPanel.add(new EmployeePanel(), "EMPLOYEE");
         mainContentPanel.add(createDummyPanel("Thống Kê"), "STATS");
         mainContentPanel.add(createDummyPanel("Tài Khoản"), "ACCOUNT");
 
@@ -70,12 +74,11 @@ public class MainFrame extends JFrame {
 
         gbc.gridy++;
 
-        String username = employee.getEmployeeName();
+        String username = SharedData.currentUser.getEmployeeName();
         JLabel lbWelcome2 = new JLabel("Xin chào, " + username + "!");
         lbWelcome2.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 28));
         lbWelcome2.setForeground(Color.GRAY);
         panel.add(lbWelcome2, gbc);
-
         return panel;
     }
 
@@ -100,13 +103,23 @@ public class MainFrame extends JFrame {
 
         sidebar.add(lbHeader1);
         sidebar.add(lbHeader2);
+
+        sidebar.add(Box.createVerticalStrut(10));
+
+        String currentUserName = SharedData.currentUser.getEmployeeName();
+        JLabel lbUserInfo = new JLabel("<html><div style='text-align: center; width: 140px;'>Chào: " + currentUserName + "</div></html>");
+        lbUserInfo.setForeground(new Color(255, 255, 204));
+        lbUserInfo.setFont(new Font(AppConstant.FONT_NAME, Font.ITALIC, 15));
+        lbUserInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lbUserInfo.setHorizontalAlignment(SwingConstants.CENTER);
+        sidebar.add(lbUserInfo);
         sidebar.add(Box.createVerticalStrut(20));
+
         JSeparator separator1 = new JSeparator();
         separator1.setMaximumSize(new Dimension(160, 1));
         separator1.setForeground(Color.GRAY);
         separator1.setAlignmentX(Component.CENTER_ALIGNMENT);
         sidebar.add(separator1);
-        sidebar.add(Box.createVerticalStrut(20));
 
         btnSelling = createMenuButton("Bán Hàng", "cart_icon.svg");
         btnProduct = createMenuButton("Sản Phẩm", "book_icon.svg");
@@ -142,18 +155,23 @@ public class MainFrame extends JFrame {
                 "hoverBackground: #ff4f4f;"
         );
 
-        btnSelling.addActionListener(e -> cardLayout.show(mainContentPanel, "SELLING"));
-        btnProduct.addActionListener(e -> cardLayout.show(mainContentPanel, "PRODUCT"));
-        btnPrice.addActionListener(e -> cardLayout.show(mainContentPanel, "PRICE"));
-        btnImport.addActionListener(e -> cardLayout.show(mainContentPanel, "IMPORT"));
-        btnInventory.addActionListener(e -> cardLayout.show(mainContentPanel, "INVENTORY"));
-        btnBill.addActionListener(e -> cardLayout.show(mainContentPanel, "BILL"));
-        btnEmployee.addActionListener(e -> cardLayout.show(mainContentPanel, "EMPLOYEE"));
-        btnStats.addActionListener(e -> cardLayout.show(mainContentPanel, "STATS"));
-        btnAccount.addActionListener(e -> cardLayout.show(mainContentPanel, "ACCOUNT"));
+        btnSelling.addActionListener(e -> switchTab("SELLING"));
+        btnProduct.addActionListener(e -> switchTab("PRODUCT"));
+        btnPrice.addActionListener(e -> switchTab("PRICE"));
+        btnImport.addActionListener(e -> switchTab("IMPORT"));
+        btnInventory.addActionListener(e -> switchTab("INVENTORY"));
+        btnBill.addActionListener(e -> switchTab("BILL"));
+        btnEmployee.addActionListener(e -> switchTab("EMPLOYEE"));
+        btnStats.addActionListener(e -> switchTab("STATS"));
+        btnAccount.addActionListener(e -> switchTab("ACCOUNT"));
         btnLogout.addActionListener(e -> {
-            this.dispose();
-            new LoginFrame().setVisible(true);
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Bạn có chắc chắn muốn đăng xuất?",
+                    "Xác nhận đăng xuất", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                this.dispose();
+                new LoginFrame().setVisible(true);
+            }
         });
 
         sidebar.add(btnSelling);
@@ -180,7 +198,6 @@ public class MainFrame extends JFrame {
         separator2.setForeground(Color.GRAY);
         separator2.setAlignmentX(Component.CENTER_ALIGNMENT);
         sidebar.add(separator2);
-        sidebar.add(Box.createVerticalStrut(10));
         sidebar.add(btnLogout);
 
         return sidebar;
@@ -224,10 +241,29 @@ public class MainFrame extends JFrame {
         return p;
     }
 
-    private void applyAuthorization() {
-        if (employee == null) return;
+    private void switchTab(String tabName) {
+        cardLayout.show(mainContentPanel, tabName);
 
-        int roleId = employee.getRoleId();
+        for (Component comp : mainContentPanel.getComponents()) {
+            if (comp.isVisible()) {
+                if (comp instanceof Refreshable r) {
+                    r.refresh();
+                }
+                else if (comp instanceof JTabbedPane tabbedPane) {
+                    Component selectedTab = tabbedPane.getSelectedComponent();
+                    if (selectedTab instanceof Refreshable r) {
+                        r.refresh();
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    private void applyAuthorization() {
+        if (SharedData.currentUser == null) return;
+
+        int roleId = SharedData.currentUser.getRoleId();
 
         if (roleId == 2) {
             btnProduct.setVisible(false);

@@ -1,35 +1,111 @@
 package com.bookstore.dto;
-import java.util.Date;
+
+import java.sql.Timestamp;
 
 public class BillDTO {
-
-    private String billId;
-    private Date createdDate;
+    private int billId;
+    private Timestamp createdDate;
+    private double totalBillPrice;
+    private double tax;
+    private int employeeId;
     private String employeeName;
     private String customerName;
-    private double totalAmount;
+    private int customerId;
+    private int paymentMethodId;
+    private int earnedPoints;
 
-    public BillDTO(){}
-
-    public BillDTO(String billId, Date createdDate, String employeeName, String customerName, double totalAmount){
+    public BillDTO(int billId, Timestamp createdDate, double totalBillPrice, double tax, int employeeId, int customerId, int paymentMethodId, int earnedPoints) {
         this.billId = billId;
         this.createdDate = createdDate;
-        this.employeeName = employeeName;
-        this.customerName = customerName;
-        this.totalAmount = totalAmount;
+        this.totalBillPrice = totalBillPrice;
+        this.tax = tax;
+        this.employeeId = employeeId;
+        this.customerId = customerId;
+        this.paymentMethodId = paymentMethodId;
+        this.earnedPoints = earnedPoints;
     }
 
-    public String getBillId(){return billId;}
-    public Date getCreatedDate(){return createdDate;}
-    public String getEmployeeName(){return employeeName;}
-    public String getCustomerName(){return customerName;}
-    public double getTotalAmount(){return totalAmount;}
+    public int getBillId() {
+        return billId;
+    }
 
-    public void setBillId(String billId){this.billId = billId;}
-    public void setCreatedDate( Date createdDate){this.createdDate = createdDate;}
-    public void setEmployeeName(String employeeDate){this.employeeName = employeeName;}
-    public void setCustomerName(String customerName){this.customerName = customerName;}
-    public void setTotalAmount(double totalAmount){this.totalAmount = totalAmount;}
+    public void setBillId(int billId) {
+        this.billId = billId;
+    }
+
+    public Timestamp getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Timestamp createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public double getTotalBillPrice() {
+        return totalBillPrice;
+    }
+
+    public void setTotalBillPrice(double totalBillPrice) {
+        this.totalBillPrice = totalBillPrice;
+    }
+
+    public double getTax() {
+        return tax;
+    }
+
+    public void setTax(double tax) {
+        this.tax = tax;
+    }
+
+    public int getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(int employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public int getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(int customerId) {
+        this.customerId = customerId;
+    }
+
+    public String getCustomerName(){
+        return customerName;
+    }
+
+    public void setCustomerName(){
+        this.customerName = customerName;
+    }
+
+    public String getEmployeeName(){
+        return employeeName;
+    }
     
-    
+    public void setEmployeeName(String employeeName){
+        this.employeeName = employeeName;
+    }
+
+    public int getPaymentMethodId() {
+        return paymentMethodId;
+    }
+
+    public void setPaymentMethodId(int paymentMethodId) {
+        this.paymentMethodId = paymentMethodId;
+    }
+
+    public int getEarnedPoints() {
+        return earnedPoints;
+    }
+
+    public void setEarnedPoints(int earnedPoints) {
+        this.earnedPoints = earnedPoints;
+    }
 }
+
+
+
+

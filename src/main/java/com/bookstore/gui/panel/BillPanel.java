@@ -1,4 +1,6 @@
 package com.bookstore.gui.panel;
+import com.bookstore.bus.BillBUS;
+import com.bookstore.dto.BillDTO;
 import com.bookstore.util.AppConstant;
 import com.bookstore.util.MoneyFormatter;
 import javax.swing.*;
@@ -10,7 +12,9 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 
 public class BillPanel extends JPanel {
@@ -18,6 +22,10 @@ public class BillPanel extends JPanel {
     private JLabel lbTotalQuantity, lbRevenue;
     private JTable table;
     private DefaultTableModel model;
+    private BillBUS billBUS = new BillBUS();
+    private JSpinner spFrom;
+    private JSpinner spTo;
+    private JTextField txtSearch;
     
     private final Color MAIN_GREEN = Color.decode(AppConstant.GREEN_COLOR_CODE);
 
@@ -28,6 +36,7 @@ public class BillPanel extends JPanel {
 
         add(createStatisticPanel(),BorderLayout.NORTH);
         add(createCenterPanel(), BorderLayout.CENTER);
+        filterBillsFromDatabase();
     }
 
 
@@ -83,7 +92,7 @@ private JPanel createCenterPanel(){
     JLabel lbFrom = new JLabel("Từ:");
     lbFrom.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
     SpinnerDateModel fromModel = new SpinnerDateModel(new Date(), null, null,java.util.Calendar.DAY_OF_MONTH);
-    JSpinner spFrom = new JSpinner(fromModel);
+    spFrom = new JSpinner(fromModel);
     JSpinner.DateEditor fromEditor = new JSpinner.DateEditor(spFrom, "d/M/yyyy");
     spFrom.setEditor(fromEditor);
     spFrom.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 16));
@@ -92,21 +101,21 @@ private JPanel createCenterPanel(){
     JLabel lbTo = new JLabel("Đến:");
     lbTo.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
     SpinnerDateModel toModel = new SpinnerDateModel(new Date(), null, null, java.util.Calendar.DAY_OF_MONTH);
-    JSpinner spTo = new JSpinner(toModel);
+    spTo = new JSpinner(toModel);
     JSpinner.DateEditor toEditor = new JSpinner.DateEditor(spTo,"d/M/yyyy");
     spTo.setEditor(toEditor);
     spTo.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 16));
 
 
-    JTextField txtSearch = new JTextField(20);
+    txtSearch = new JTextField(20);
     txtSearch.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 16));
-    txtSearch.setBorder(BorderFactory.createTitledBorder("Tìm Kiếm theo mã hóa đơn, tên khách hàng, tên nhân viên"));
+    txtSearch.setBorder(BorderFactory.createTitledBorder("Tìm Kiếm theo mã hóa đơn, khách hàng, nhân viên, sản phẩm"));
 
 
     JButton btnFilter = new JButton("Lọc");
     btnFilter.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD,16));
     btnFilter.setBackground(MAIN_GREEN);
-    btnFilter.setForeground(MAIN_GREEN);
+    btnFilter.setForeground(Color.WHITE);
 
     
 
@@ -125,13 +134,7 @@ panel.add(filterPanel, BorderLayout.NORTH);
 
 String[]columns = {"Mã Hóa Đơn", "Ngày Giờ Lập", "Nhân Viên Lập", "Khách Hàng", "Tổng Tiền"};
 
-DefaultTableModel model = new DefaultTableModel(columns, 0);
-
-model.addRow(new Object[]{"005", "13:05:05 - 1/1/2025", "Trần Anh Tài", "Hồ Tiên", 300000});
-model.addRow(new Object[]{"004", "12:02:25 - 1/1/2025", "Trần Anh Tài", "Anh Thư", 250000});
-model.addRow(new Object[]{"003", "10:05:45 - 1/1/2025", "Nguyễn Anh Thư", "Trần Hoàng", 300000});
-model.addRow(new Object[]{"002", "09:02:24 - 1/1/2025", "Nguyễn Anh Thư", "Lương Trần", 250000});
-model.addRow(new Object[]{"001", "07:25:04 - 1/1/2025", "Nguyễn Anh Thư", "Đỗ Thư", 100000});
+model = new DefaultTableModel(columns, 0);
 
 table = new JTable(model);
 
@@ -175,9 +178,6 @@ table.getColumnModel().getColumn(4).setCellRenderer(new DefaultTableCellRenderer
     }
 });
 
-TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
-table.setRowSorter(sorter);
-
 JScrollPane scrollPane = new JScrollPane(
     table,
     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -187,34 +187,54 @@ JScrollPane scrollPane = new JScrollPane(
 
 panel.add(scrollPane, BorderLayout.CENTER);
 
-btnFilter.addActionListener(e->{
-    final Date fromDate = (Date) spFrom.getValue();
-    final Date toDate = (Date) spTo.getValue();
+btnFilter.addActionListener(e -> {
+    filterBillsFromDatabase();
+        });
+    return panel;
+    
+}
+private void filterBillsFromDatabase() {
 
-    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss - d/M/yyyy");
+    Date fromDate = (Date) spFrom.getValue();
+    Date toDate = (Date) spTo.getValue();
+    String keyword = txtSearch.getText().trim();
 
-    sorter.setRowFilter(new RowFilter<>(){
-        @Override
-        public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry){
-            try{
-                String dateStr = entry.getStringValue(1);
-                Date billDate = sdf.parse(dateStr);
+    Calendar calFrom = Calendar.getInstance();
+    calFrom.setTime(fromDate);
+    calFrom.set(Calendar.HOUR_OF_DAY, 0);
+    calFrom.set(Calendar.MINUTE, 0);
+    calFrom.set(Calendar.SECOND, 0);
+    calFrom.set(Calendar.MILLISECOND, 0);
 
-                boolean matchDate = !billDate.before(fromDate) && !billDate.after(toDate);
+    Calendar calTo = Calendar.getInstance();
+    calTo.setTime(toDate);
+    calTo.set(Calendar.HOUR_OF_DAY, 23);
+    calTo.set(Calendar.MINUTE, 59);
+    calTo.set(Calendar.SECOND, 59);
+    calTo.set(Calendar.MILLISECOND, 999);
 
-                String keyword = txtSearch.getText().toLowerCase();
-                boolean matchSearch = keyword.isEmpty() || entry.getStringValue(0).toLowerCase().contains(keyword) || entry.getStringValue(3).toLowerCase().contains(keyword);
+    List<BillDTO> list =
+            billBUS.filterBills(
+                    calFrom.getTime(),
+                    calTo.getTime(),
+                    keyword);
 
-                return matchDate && matchSearch;
-            }catch(ParseException ex){
-                return true;
-            }
-        }
-    });
-    updateStatistics();
-});
+    model.setRowCount(0);
 
-return panel;
+    SimpleDateFormat sdf =
+            new SimpleDateFormat("HH:mm:ss - d/M/yyyy");
+
+    for (BillDTO bill : list) {
+        model.addRow(new Object[]{
+                bill.getBillId(),
+                sdf.format(bill.getCreatedDate()),
+                bill.getEmployeeName(),
+                bill.getCustomerName(),
+                bill.getTotalBillPrice()
+        });
+        
+    }
+updateStatistics();
 
 }
 
@@ -224,7 +244,10 @@ private void updateStatistics(){
 
     for (int i = 0; i < count; i++){
         int modelRow = table.convertRowIndexToModel(i);
-        total += (double) model.getValueAt(modelRow, 4);
+       Object value = model.getValueAt(modelRow, 4);
+       if (value instanceof Number) {
+       total += ((Number) value).doubleValue();
+}
     }
 
     lbTotalQuantity.setText(String.valueOf(count));
