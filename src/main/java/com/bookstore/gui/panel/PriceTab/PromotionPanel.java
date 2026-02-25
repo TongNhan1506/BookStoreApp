@@ -1,18 +1,26 @@
 package com.bookstore.gui.panel.PriceTab;
 import com.formdev.flatlaf.FlatClientProperties;
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.*;
 import java.awt.*;
+import java.awt.event.*;
+import java.util.List;
+import com.bookstore.util.AppConstant;
+//import org.w3c.dom.events.MouseEvent;
+
 import com.bookstore.bus.*;
 
 public class PromotionPanel extends JPanel {
     private PromotionBUS bus = new PromotionBUS();
     private JTable table;
     private JPanel header;
-    private WhiteBoxPanel centerBox;
+    private WhiteBoxPanel centerBox, whiteBox;;
     private DefaultTableModel model;
     private JTextField txtTenKM, txtPhanTram;
     private JComboBox<String> cbTrangThai, cbChonSach;
+    private JTextField txtSearch;
+    private JScrollPane scroll;
 
     public PromotionPanel() {
 
@@ -44,161 +52,219 @@ public class PromotionPanel extends JPanel {
     }
 
     private void initHeader() {
-        // 1. Tiêu đề Khuyến mãi
-        JLabel lblTitle = new JLabel("Khuyến mãi");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        lblTitle.setForeground(new Color(17, 71, 50));
-        lblTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-        add(lblTitle, BorderLayout.NORTH);
+    // Tiêu đề
+    JLabel lblTitle = new JLabel("Khuyến mãi");
+    lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 28));
+    lblTitle.setForeground(new Color(17, 71, 50));
+    lblTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+    add(lblTitle, BorderLayout.NORTH);
 
-        // 2. WhiteBoxPanel làm nền trắng bo góc cho nội dung
-        WhiteBoxPanel whiteBox = new WhiteBoxPanel();
-        whiteBox.setLayout(new BorderLayout(0, 15));
+    // Panel chứa nút và lọc
+    JPanel controlPanel = new JPanel(new BorderLayout());
+    controlPanel.setOpaque(false);
+    controlPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
 
-        // --- THANH ĐIỀU KHIỂN (NORTH của WhiteBox) ---
-        JPanel controlPanel = new JPanel(new BorderLayout());
-        controlPanel.setOpaque(false);
+    // Cụm lọc bên trái (Copy phong cách PricePanel)
+    JPanel leftGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
+    leftGroup.setOpaque(false);
+    
+    // 3 Label Radio mới thêm: Tên, Phần trăm, Thời gian
+    JPanel filterBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+    filterBox.setOpaque(false);
+    JRadioButton rbTen = new JRadioButton("Tên", true);
+    JRadioButton rbPhanTram = new JRadioButton("Phần trăm");
+    JRadioButton rbThoiGian = new JRadioButton("Thời gian");
+    ButtonGroup bg = new ButtonGroup();
+    bg.add(rbTen); bg.add(rbPhanTram); bg.add(rbThoiGian);
+    filterBox.add(new JLabel("Tìm theo:"));
+    filterBox.add(rbTen); filterBox.add(rbPhanTram); filterBox.add(rbThoiGian);
 
-        // Cụm lọc và tìm kiếm (Căn trái)
-        JPanel leftGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
-        leftGroup.setOpaque(false);
+    leftGroup.add(filterBox);
+    leftGroup.add(createSearchWrapper());
 
-        // Radio Buttons
-        JPanel filterBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        filterBox.setOpaque(false);
-        JRadioButton rbTen = new JRadioButton("Tên", true);
-        JRadioButton rbPhanTram = new JRadioButton("Phần trăm");
-        JRadioButton rbThoiGian = new JRadioButton("Thời gian");
-        ButtonGroup bg = new ButtonGroup();
-        bg.add(rbTen); bg.add(rbPhanTram); bg.add(rbThoiGian);
-        filterBox.add(new JLabel("Tìm theo:"));
-        filterBox.add(rbTen); filterBox.add(rbPhanTram); filterBox.add(rbThoiGian);
+    controlPanel.add(leftGroup, BorderLayout.WEST);
+    
+    // Nút thêm dạt sang phải
+    JButton btnAdd = new JButton("+ Thêm Khuyến Mãi");
+    btnAdd.setPreferredSize(new Dimension(180, 42));
+    btnAdd.setBackground(new Color(35, 90, 180));
+    btnAdd.setForeground(Color.WHITE);
+    btnAdd.setFont(new Font("Segoe UI", Font.BOLD, 13));
+    controlPanel.add(btnAdd, BorderLayout.EAST);
 
-        // Thanh Tìm Kiếm (Tự vẽ để không bị nuốt)
-        JPanel searchWrapper = createSearchWrapper();
+    // Lắp ráp vào Box trắng
+    whiteBox = new WhiteBoxPanel();
+    whiteBox.setLayout(new BorderLayout(0, 15));
+    whiteBox.add(controlPanel, BorderLayout.NORTH);
+    
+    initTable();
 
-        leftGroup.add(filterBox);
-        leftGroup.add(searchWrapper);
+    add(whiteBox, BorderLayout.CENTER);
 
-        // Nút thêm (Căn phải)
-        JButton btnAdd = new JButton("+ Thêm Khuyến Mãi") {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(getBackground());
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
-                g2.dispose();
-                super.paintComponent(g);
-            }
-        };
-        btnAdd.setPreferredSize(new Dimension(180, 42));
-        btnAdd.setBackground(new Color(35, 90, 180));
-        btnAdd.setForeground(Color.WHITE);
-        btnAdd.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnAdd.setContentAreaFilled(false);
-        btnAdd.setFocusPainted(false);
-        btnAdd.setBorderPainted(false);
-
-        controlPanel.add(leftGroup, BorderLayout.WEST);
-        controlPanel.add(btnAdd, BorderLayout.EAST);
-
-        whiteBox.add(controlPanel, BorderLayout.NORTH);
-
-        // 3. Bảng dữ liệu
-        initTable();
-        JScrollPane scroll = new JScrollPane(table);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
-        scroll.getViewport().setBackground(Color.WHITE);
-        whiteBox.add(scroll, BorderLayout.CENTER);
-
-        add(whiteBox, BorderLayout.CENTER);
-    }
+}
 
     private JPanel createSearchWrapper() {
-        // Dùng -2 để ép 2 khối dính liền khít rịt
-        JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, -2, 0));
-        wrapper.setOpaque(false);
+    // 1. Dùng FlowLayout.LEFT để nhích cả cụm sang trái
+    JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, -1, 0));
+    wrapper.setOpaque(false);
+    wrapper.setPreferredSize(new Dimension(450, 45));
 
-        // Ô Icon Kính lúp (Swing vẽ tay)
-        JPanel iconBox = new JPanel(new GridBagLayout()) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(180, 195, 180));
-                g2.fillRoundRect(0, 0, getWidth() + 20, getHeight(), 25, 25);
-                g2.dispose();
-            }
-        };
-        iconBox.setPreferredSize(new Dimension(50, 42));
-        iconBox.setOpaque(false);
-
-        java.net.URL imgURL = getClass().getResource("/icon/Thêm văn bản-Photoroom.png");
-        if (imgURL != null) {
-            ImageIcon icon = new ImageIcon(new ImageIcon(imgURL).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
-            iconBox.add(new JLabel(icon));
+    // 2. Ô Icon Kính lúp (Giữ nguyên phong cách của Vy)
+    JPanel iconBox = new JPanel(new GridBagLayout()) {
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(new Color(180, 195, 180));
+            // Vẽ bo góc trái, lấn sang phải 20px để nối liền với ô nhập
+            g2.fillRoundRect(0, 0, getWidth() + 20, getHeight(), 25, 25);
+            g2.dispose();
         }
+    };
+    iconBox.setPreferredSize(new Dimension(50, 42));
+    iconBox.setOpaque(false);
 
-        // Ô Nhập liệu (Swing vẽ tay để chống lỗi nuốt textfield)
-        JTextField txtSearch = new JTextField("Tìm kiếm chương trình...") {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(235, 235, 235));
-                g2.fillRoundRect(-20, 0, getWidth() + 20, getHeight(), 25, 25);
-                g2.dispose();
-                super.paintComponent(g);
-            }
-        };
-        txtSearch.setOpaque(false);
-        txtSearch.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
-        txtSearch.setPreferredSize(new Dimension(300, 42));
-        txtSearch.setFont(new Font("Segoe UI", Font.ITALIC, 13));
-
-        wrapper.add(iconBox);
-        wrapper.add(txtSearch);
-        return wrapper;
+    java.net.URL imgURL = getClass().getResource("/icon/Thêm văn bản-Photoroom.png");
+    if (imgURL != null) {
+        iconBox.add(new JLabel(new ImageIcon(new ImageIcon(imgURL).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH))));
     }
+
+    // 3. Ô Nhập liệu (CHỈ VẼ NỀN, KHÔNG VẼ ĐÈ LÊN SUPER)
+    JPanel inputBackground = new JPanel(new BorderLayout()) {
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(new Color(235, 235, 235));
+            // Vẽ lấn sang trái 20px để khớp với iconBox
+            g2.fillRoundRect(-20, 0, getWidth() + 20, getHeight(), 25, 25);
+            g2.dispose();
+        }
+    };
+    inputBackground.setOpaque(false);
+    inputBackground.setPreferredSize(new Dimension(300, 42));
+
+    // Nhét JTextField thuần vào trong cái nền vừa vẽ
+    txtSearch = new JTextField("Tìm kiếm chương trình...");
+    txtSearch.setOpaque(false);
+    txtSearch.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 15));
+    txtSearch.setFont(new Font("Segoe UI", Font.ITALIC, 13));
+    txtSearch.setBackground(new Color(0,0,0,0)); // Trong suốt tuyệt đối
+    
+    inputBackground.add(txtSearch, BorderLayout.CENTER);
+
+    wrapper.add(iconBox);
+    wrapper.add(inputBackground);
+    return wrapper;
+}
 
     private void initTable() {
-        String[] cols = {"ID", "Tên chương trình", "Ngày bắt đầu", "Ngày kết thúc", "Trạng thái", "Thao tác"};
-        model = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int row, int column) { return false; }
-        };
-        table = new JTable(model);
-        table.setRowHeight(50);
-        table.setShowGrid(true);
-        table.setGridColor(new Color(200, 210, 200));
+    String[] cols = {"ID", "Tên chương trình", "Ngày bắt đầu", "Ngày kết thúc", "Trạng thái", "Thao tác"};
+    model = new DefaultTableModel(cols, 0) {
+        @Override
+        public boolean isCellEditable(int row, int column) { return false; }
+    };
+    table = new JTable(model);
+    
+    scroll = new JScrollPane(table);
+    scroll.getViewport().setBackground(Color.WHITE);
+    scroll.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(200,200,200), 1),
+            " Bảng Khuyến Mãi ", 
+            TitledBorder.CENTER, 
+            TitledBorder.TOP, 
+            new Font("Segoe UI", Font.BOLD, 14), 
+            new Color(17, 71, 50)
+        ),
+        BorderFactory.createEmptyBorder(10, 10, 10, 10)
+    ));
 
-        // Header
-        table.getTableHeader().setBackground(new Color(17, 71, 50));
-        table.getTableHeader().setForeground(Color.WHITE);
-        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+   table.addMouseListener(new java.awt.event.MouseAdapter() {
+        private int lastSelectedRow = -1;
 
-        // Render hàng
-        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                                                           boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel c = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                c.setHorizontalAlignment(SwingConstants.CENTER);
-                if (isSelected) {
-                    c.setBackground(new Color(17, 71, 50));
-                    c.setForeground(Color.WHITE);
-                } else {
-                    c.setBackground(row % 2 != 0 ? new Color(180, 200, 180) : Color.WHITE);
-                    c.setForeground(Color.BLACK);
-                }
-                return c;
+        @Override
+        public void mousePressed(java.awt.event.MouseEvent e) {
+            int row = table.rowAtPoint(e.getPoint());
+            if (row != -1 && row == lastSelectedRow) {
+                table.clearSelection();
+                lastSelectedRow = -1;
+            } else {
+                lastSelectedRow = row;
             }
-        });
+        }
+    });
+    
+    table.setRowHeight(50);
+    table.setShowGrid(true); 
+    table.setGridColor(new Color(5,30,20));
+    table.setIntercellSpacing(new Dimension(1, 1));
 
-        // Dữ liệu mẫu sếp xem
-        model.addRow(new Object[]{"KM001", "Mừng Xuân 2026", "01/02/2026", "28/02/2026", "Đang chạy", ""});
-        model.addRow(new Object[]{"KM002", "Xả kho Truyện Tranh", "10/02/2026", "15/02/2026", "Đang chạy", ""});
+    // Header màu xanh đậm đồng bộ app
+    table.getTableHeader().setBackground(new Color(17, 71, 50));
+    table.getTableHeader().setForeground(Color.WHITE);
+    table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+    table.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+
+    // cac cot khac
+    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, 
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            JLabel c = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            c.setHorizontalAlignment(SwingConstants.CENTER);
+        
+            if (isSelected) {
+                c.setBackground(new Color(17, 71, 50)); 
+                c.setForeground(Color.WHITE);
+            } else {
+                c.setBackground(row % 2 != 0 ? new Color(180, 200, 180) : Color.WHITE);
+                c.setForeground(Color.BLACK);
+            }
+            return c;
+        }
+    });
+
+    //cot cuoi
+    table.getColumnModel().getColumn(5).setCellRenderer(new DefaultTableCellRenderer() {
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 10));
+
+        if (isSelected) {
+            p.setBackground(new Color(17, 71, 50)); // Màu xanh
+        } else {
+            p.setBackground(row % 2 != 0 ? new Color(180, 200, 180) : Color.WHITE);
+        }
+        
+        JButton btnEdit = new JButton("Sửa");
+        JButton btnChange = new JButton("Đổi");
+
+
+        btnEdit.setBackground(new Color(240, 173, 78));
+        btnChange.setBackground(new Color(35, 90, 180));
+
+        for (JButton b : new JButton[]{btnEdit, btnChange}) {
+            b.setForeground(Color.WHITE);
+            b.setPreferredSize(new Dimension(65, 30));
+            b.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            p.add(b);
+        }
+        return p;
     }
+});
+
+    // Dữ liệu mẫu từ Database Vy mới insert
+    model.addRow(new Object[]{"KM1", "Mừng Xuân 2026 - Giảm giá Văn học", "01/02/2026", "28/02/2026", "Đang chạy", ""});
+    model.addRow(new Object[]{"KM2", "Xả kho Truyện Tranh - Flash Sale", "10/02/2026", "15/02/2026", "Đang chạy", ""});
+
+    if (whiteBox != null && scroll != null) {
+        whiteBox.add(scroll, BorderLayout.CENTER);
+        whiteBox.revalidate();
+        whiteBox.repaint();
+    }
+
+}
     private void initForm() {
         JPanel form = new JPanel(new GridBagLayout());
         form.setBackground(new Color(43, 45, 49));

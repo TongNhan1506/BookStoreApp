@@ -500,25 +500,24 @@ public class PricePanel extends JPanel implements Refreshable {
     }
 
     private void setupSearchBorderStyle(JTextField field, String placeholder, boolean showIcon) {
-    field.setOpaque(false);
-    java.net.URL imgURL = getClass().getResource("/icon/Thêm văn bản-Photoroom.png");
-    final Image searchIcon = (imgURL != null) ? new ImageIcon(imgURL).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH) : null;
-    int leftPadding = showIcon ? 35 : 15; 
+        field.setOpaque(false);
+        java.net.URL imgURL = getClass().getResource("/icon/Thêm văn bản-Photoroom.png");
+        final Image searchIcon = (imgURL != null) ? new ImageIcon(imgURL).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH) : null;
+        int leftPadding = showIcon ? 35 : 15; 
 
-    field.setBorder(new javax.swing.border.EmptyBorder(0, leftPadding, 0, 10) {
-        @Override
-        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            if (showIcon && searchIcon != null) g2.drawImage(searchIcon, x + 10, (height - 18) / 2, c);
-            if (field.getText().isEmpty()) {
-                g2.setColor(Color.GRAY);
-                g2.setFont(c.getFont().deriveFont(Font.ITALIC));
-                g2.drawString(placeholder, x + leftPadding, (height + g2.getFontMetrics().getAscent()) / 2 - 2);
+        field.setBorder(new javax.swing.border.EmptyBorder(0, leftPadding, 0, 10) {
+            @Override
+            public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                if (showIcon && searchIcon != null) g2.drawImage(searchIcon, x + 10, (height - 18) / 2, c);
+                if (field.getText().isEmpty()) {
+                    g2.setColor(Color.GRAY);
+                    g2.setFont(c.getFont().deriveFont(Font.ITALIC));
+                    g2.drawString(placeholder, x + leftPadding, (height + g2.getFontMetrics().getAscent()) / 2 - 2);
+                }
+                g2.dispose();
             }
-            g2.dispose();
-        }
-    });
-}
-
+        });
+    }
 }
