@@ -215,11 +215,16 @@ public class PromotionPanel extends JPanel {
             c.setHorizontalAlignment(SwingConstants.CENTER);
         
             if (isSelected) {
+                c.setBackground(new Color(200, 200, 200)); 
+                c.setForeground(Color.BLACK);
+            } else {
+                if (row % 2 == 0) { 
+                c.setBackground(Color.WHITE);
+                c.setForeground(Color.BLACK);
+            } else {
                 c.setBackground(new Color(17, 71, 50)); 
                 c.setForeground(Color.WHITE);
-            } else {
-                c.setBackground(row % 2 != 0 ? new Color(180, 200, 180) : Color.WHITE);
-                c.setForeground(Color.BLACK);
+            }
             }
             return c;
         }
@@ -230,16 +235,21 @@ public class PromotionPanel extends JPanel {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 10));
+        p.setOpaque(true); // Đảm bảo hiện màu nền
+        p.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK)); // Viền đen dưới
 
         if (isSelected) {
-            p.setBackground(new Color(17, 71, 50)); // Màu xanh
+            p.setBackground(new Color(200, 200, 200)); // Màu click chọn
         } else {
-            p.setBackground(row % 2 != 0 ? new Color(180, 200, 180) : Color.WHITE);
+            if (row % 2 == 0) { 
+                p.setBackground(Color.WHITE);
+            } else {
+                p.setBackground(new Color(17, 71, 50));
+            }
         }
-        
+
         JButton btnEdit = new JButton("Sửa");
         JButton btnChange = new JButton("Đổi");
-
 
         btnEdit.setBackground(new Color(240, 173, 78));
         btnChange.setBackground(new Color(35, 90, 180));
@@ -254,7 +264,7 @@ public class PromotionPanel extends JPanel {
     }
 });
 
-    // Dữ liệu mẫu từ Database Vy mới insert
+
     model.addRow(new Object[]{"KM1", "Mừng Xuân 2026 - Giảm giá Văn học", "01/02/2026", "28/02/2026", "Đang chạy", ""});
     model.addRow(new Object[]{"KM2", "Xả kho Truyện Tranh - Flash Sale", "10/02/2026", "15/02/2026", "Đang chạy", ""});
 

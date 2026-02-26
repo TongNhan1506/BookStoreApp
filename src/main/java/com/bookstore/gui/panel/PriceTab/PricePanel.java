@@ -243,27 +243,53 @@ public class PricePanel extends JPanel implements Refreshable {
     }
 
     private void SearchProcessing() {
-        String type = "Tên";
-        if (rbPrice.isSelected()) type = "Giá";
-        else if (rbAuthor.isSelected()) type = "Tác giả";
-        else if (rbCategory.isSelected()) type = "Thể loại";
+    String type = "Tên";
+    if (rbPrice.isSelected()) type = "Giá";
+    else if (rbAuthor.isSelected()) type = "Tác giả";
+    else if (rbCategory.isSelected()) type = "Thể loại";
 
-        String input = "";
-        if (type.equals("Giá")) {
-            // Gộp 2 ô thành dạng "min-max" để lớp BUS xử lý
-            input = txtMinPrice.getText().trim() + "-" + txtMaxPrice.getText().trim();
-        } else {
-            input = txtSearch.getText().trim();
+    String input = "";
+    
+    // 1. Kiểm tra bỏ trống
+    if (type.equals("Giá")) {
+        String minStr = txtMinPrice.getText().trim();
+        String maxStr = txtMaxPrice.getText().trim();
+        
+        if (minStr.isEmpty() && maxStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập khoảng giá cần tìm!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return;
         }
-
-        if (input.isEmpty() || input.equals("-")) {
+        
+        // Kiểm tra xem có nhập chữ vào ô giá không
+        try {
+            if (!minStr.isEmpty()) Double.parseDouble(minStr);
+            if (!maxStr.isEmpty()) Double.parseDouble(maxStr);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chỉ nhậo số!", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        input = minStr + "-" + maxStr;
+    } else {
+        input = txtSearch.getText().trim();
+        if (input.isEmpty() || input.equals("Tìm kiếm chương trình...")) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập từ khóa tìm kiếm!", "Thông báo", JOptionPane.WARNING_MESSAGE);
             refresh();
             return;
         }
-
-        this.listHienThi = bus.timKiemSach(listPrices, input, type);
-        capNhatBang(listHienThi);
+        // 2. Kiểm tra nhập số vào ô chữ (Tên, Tác giả, Thể loại)
+        if (input.matches("^[0-9]+$")) {
+            JOptionPane.showMessageDialog(this, type + " không được nhập số!", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
     }
+
+    this.listHienThi = bus.timKiemSach(listPrices, input, type);
+    
+    if (listHienThi.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Không tìm thấy kết quả phù hợp!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+    }
+    capNhatBang(listHienThi);
+}
 
     private void initTableUI() {
         tableCard = new JPanel(new BorderLayout(0, 15));
