@@ -7,6 +7,7 @@ import com.bookstore.util.DatabaseConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 public class BillDAO {
     public boolean createBillTransaction(BillDTO bill, List<BillDetailDTO> details) {
@@ -78,9 +79,25 @@ public class BillDAO {
 
     public List<BillDTO> getAllBills() {
         List<BillDTO> list = new ArrayList<>();
-        String sql = "SELECT bill_id, created_date, total_bill_price, tax, " +
-                "employee_id, customer_id, payment_method_id, earned_points " +
-                "FROM bill";
+        String sql = """
+          SELECT 
+            b.bill_id,
+            b.created_date,
+            b.total_bill_price,
+            b.tax,
+            b.employee_id,
+            b.customer_id,
+            b.payment_method_id,
+            b.earned_points,
+            e.employee_name AS employeeName,
+            c.customer_name AS customerName,
+            pm.payment_method_name AS paymentMethodName
+        FROM bill b
+        LEFT JOIN employee e ON b.employee_id = e.employee_id
+        LEFT JOIN customer c ON b.customer_id = c.customer_id
+        LEFT JOIN payment_method pm ON b.payment_method_id = pm.payment_method_id
+        ORDER BY b.bill_id DESC
+               """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -94,8 +111,12 @@ public class BillDAO {
                         rs.getDouble("tax"),
                         rs.getInt("employee_id"),
                         rs.getInt("customer_id"),
+                        rs.getString("employeeName"),
+                        rs.getString("customerName"),
                         rs.getInt("payment_method_id"),
+                        rs.getString("paymentMethodName"),
                         rs.getInt("earned_points")
+                       
                 );
                 list.add(bill);
             }
@@ -109,19 +130,27 @@ public class BillDAO {
         List<BillDTO> list = new ArrayList<>();
 
         String sql = """
-                 SELECT DISTINCT b.bill_id,
+                 SELECT DISTINCT 
+               b.bill_id,
                b.created_date,
                b.total_bill_price,
-               e.employee_name,
-               c.customer_name
+               b.tax,
+               b.employee_id,
+               b.customer_id,
+               b.payment_method_id,
+               b.earned_points,
+               e.employee_name AS employeeName,
+               c.customer_name AS customerName,
+               pm.payment_method_name AS paymentMethodName
         FROM bill b
         LEFT JOIN employee e ON b.employee_id = e.employee_id
         LEFT JOIN customer c ON b.customer_id = c.customer_id
-        WHERE DATE(b.created_date) BETWEEN ? AND ?
+        LEFT JOIN payment_method pm ON b.payment_method_id = pm.payment_method_id
+        WHERE b.created_date >= ? AND b.created_date < DATE_ADD(?, INTERVAL 1 DAY)
         AND (
             CAST(b.bill_id AS CHAR) LIKE ?
-            OR e.employee_name LIKE ?
-            OR c.customer_name LIKE ?
+            OR LOWER(IFNULL(e.employee_name, '')) LIKE LOWER(?)
+            OR LOWER(IFNULL(c.customer_name, '')) LIKE LOWER(?)
         )
         ORDER BY b.bill_id DESC
                 """;
@@ -136,15 +165,25 @@ public class BillDAO {
                     keyword = "";
                 }
                 String searchValue = "%" + keyword + "%";
-                ps.setString(3,"%" + searchValue + "%");
-                ps.setString(4, "%" + searchValue + "%");
-                ps.setString(5, "%" + searchValue + "%");
+                ps.setString(3,searchValue);
+                ps.setString(4,searchValue);
+                ps.setString(5,searchValue);
 
 
                 ResultSet rs = ps.executeQuery();
 
                 while(rs.next()) {
-                    BillDTO bill = new BillDTO(rs.getInt("bill_id"), rs.getTimestamp("created_date"), rs.getDouble("total_bill_price"), rs.getDouble("tax"), rs.getInt("employee_id"), rs.getInt("customer_id"), rs.getInt("payment_method_id"), rs.getInt("earned_points")
+                    BillDTO bill = new BillDTO(rs.getInt("bill_id"),
+                                               rs.getTimestamp("created_date"),
+                                               rs.getDouble("total_bill_price"), 
+                                               rs.getDouble("tax"), 
+                                               rs.getInt("employee_id"), 
+                                               rs.getInt("customer_id"),
+                                               rs.getString("employeeName"), 
+                                               rs.getString("customerName"),
+                                               rs.getInt("payment_method_id"),
+                                               rs.getString("paymentMethodName"),
+                                               rs.getInt("earned_points")
                 );
                 list.add(bill);
                 }

@@ -10,6 +10,7 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import com.bookstore.bus.BillBUS;
 import com.bookstore.dto.BillDTO;
@@ -22,6 +23,8 @@ public class BillPanel extends JPanel implements Refreshable {
     private JLabel lbTotalQuantity, lbRevenue;
     private JTable table;
     private DefaultTableModel model;
+    private JSpinner spFrom;
+    private JSpinner spTo;
 
     private final Color MAIN_GREEN = Color.decode(AppConstant.GREEN_COLOR_CODE);
 
@@ -34,6 +37,7 @@ public class BillPanel extends JPanel implements Refreshable {
         add(createCenterPanel(), BorderLayout.CENTER);
 
         loadBillTable();
+        applyTodayFilter();
     }
 
     @Override
@@ -94,7 +98,7 @@ public class BillPanel extends JPanel implements Refreshable {
         JLabel lbFrom = new JLabel("Từ:");
         lbFrom.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
         SpinnerDateModel fromModel = new SpinnerDateModel(new Date(), null, null,java.util.Calendar.DAY_OF_MONTH);
-        JSpinner spFrom = new JSpinner(fromModel);
+        spFrom = new JSpinner(fromModel);
         JSpinner.DateEditor fromEditor = new JSpinner.DateEditor(spFrom, "d/M/yyyy");
         spFrom.setEditor(fromEditor);
         spFrom.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 16));
@@ -103,7 +107,7 @@ public class BillPanel extends JPanel implements Refreshable {
         JLabel lbTo = new JLabel("Đến:");
         lbTo.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
         SpinnerDateModel toModel = new SpinnerDateModel(new Date(), null, null, java.util.Calendar.DAY_OF_MONTH);
-        JSpinner spTo = new JSpinner(toModel);
+        spTo = new JSpinner(toModel);
         JSpinner.DateEditor toEditor = new JSpinner.DateEditor(spTo,"d/M/yyyy");
         spTo.setEditor(toEditor);
         spTo.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 16));
@@ -117,7 +121,11 @@ public class BillPanel extends JPanel implements Refreshable {
         JButton btnFilter = new JButton("Lọc");
         btnFilter.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD,16));
         btnFilter.setBackground(MAIN_GREEN);
-        btnFilter.setForeground(MAIN_GREEN);
+        btnFilter.setForeground(Color.white);
+        JButton btnReset = new JButton("Làm mới");
+        btnReset.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
+        btnReset.setBackground(Color.decode("#5674ff"));
+        btnReset.setForeground(Color.WHITE);
 
 
 
@@ -127,6 +135,7 @@ public class BillPanel extends JPanel implements Refreshable {
         filterPanel.add(spTo);
         filterPanel.add(txtSearch);
         filterPanel.add(btnFilter);
+        filterPanel.add(btnReset);
 
 
         panel.add(filterPanel, BorderLayout.NORTH);
@@ -136,14 +145,23 @@ public class BillPanel extends JPanel implements Refreshable {
 
         String[]columns = {"Mã Hóa Đơn", "Ngày Giờ Lập", "Nhân Viên Lập", "Khách Hàng", "Tổng Tiền"};
 
-        model = new DefaultTableModel(columns, 0);
+        model = new DefaultTableModel(columns, 0){
+          @Override
+          public boolean isCellEditable(int row, int columm){
+            return false;
+          }
+        };
         table = new JTable(model);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.getTableHeader().setReorderingAllowed(false);
+        table.setShowGrid(true);
+        table.setGridColor(Color.BLACK);
 
         JTableHeader header = table.getTableHeader();
         header.setOpaque(true);
         table.setRowHeight(35);
-        table.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
-        table.getTableHeader().setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
+        table.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 16));
+        table.getTableHeader().setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 16));
         table.getTableHeader().setBackground(MAIN_GREEN);
         table.getTableHeader().setForeground(Color.WHITE);
 
@@ -190,6 +208,17 @@ public class BillPanel extends JPanel implements Refreshable {
 
 
         panel.add(scrollPane, BorderLayout.CENTER);
+
+
+
+
+        btnReset.addActionListener(e->{
+            Date today = new Date();
+            spFrom.setValue(today);
+            spTo.setValue(today);
+            applyTodayFilter();
+
+        });
 
         btnFilter.addActionListener(e->{
             Date fromDate = (Date) spFrom.getValue();
@@ -251,10 +280,37 @@ private void loadBillTable(){
             formattedDate = sdf.format(bill.getCreatedDate());
         }
         model.addRow(new Object[]{
-            bill.getBillId(), formattedDate, bill.getEmployeeId(), bill.getCustomerId(), bill.getTotalBillPrice()
+            bill.getBillId(), formattedDate, bill.getEmployeeName(), bill.getCustomerName(), bill.getTotalBillPrice()
         });
     }
      updateStatistics();
+}
+
+private void applyTodayFilter(){
+    TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) table.getRowSorter();
+    Date today = new Date();
+    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss - d/M/yyyy");
+
+    sorter.setRowFilter(new RowFilter<>(){
+        @Override
+        public boolean include (Entry<? extends DefaultTableModel, ? extends Integer> entry){
+          try{
+
+            String dateStr = entry.getStringValue(1);
+            Date billDate = sdf.parse(dateStr);
+            Calendar c1 = Calendar.getInstance();
+            Calendar c2 = Calendar.getInstance();
+
+            c1.setTime(today);
+            c2.setTime(billDate);
+
+            return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR) && c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR);
+          }catch (Exception e){
+            return false;
+          }
+        }
+    });
+    updateStatistics();
 }
 
 }

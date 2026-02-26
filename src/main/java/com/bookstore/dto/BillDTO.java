@@ -12,8 +12,24 @@ public class BillDTO {
     private String customerName;
     private int customerId;
     private int paymentMethodId;
+    private String paymentMethodName;
     private int earnedPoints;
 
+    public BillDTO(int billId, Timestamp createdDate, double totalBillPrice, double tax, int employeeId, int customerId, String employeeName, String customerName, int paymentMethodId, String paymentMethodName, int earnedPoints) {
+        this.billId = billId;
+        this.createdDate = createdDate;
+        this.totalBillPrice = totalBillPrice;
+        this.tax = tax;
+        this.employeeId = employeeId;
+        this.employeeName = employeeName;
+        this.customerId = customerId;
+        this.customerName = customerName;
+        this.paymentMethodId = paymentMethodId;
+        this.paymentMethodName = paymentMethodName;
+        this.earnedPoints = earnedPoints;
+    }
+
+    
     public BillDTO(int billId, Timestamp createdDate, double totalBillPrice, double tax, int employeeId, int customerId, int paymentMethodId, int earnedPoints) {
         this.billId = billId;
         this.createdDate = createdDate;
@@ -24,6 +40,7 @@ public class BillDTO {
         this.paymentMethodId = paymentMethodId;
         this.earnedPoints = earnedPoints;
     }
+
 
     public int getBillId() {
         return billId;
@@ -65,6 +82,14 @@ public class BillDTO {
         this.employeeId = employeeId;
     }
 
+    public String getEmployeeName(){
+        return employeeName;
+    }
+    
+    public void setEmployeeName(String employeeName){
+        this.employeeName = employeeName;
+    }
+    
     public int getCustomerId() {
         return customerId;
     }
@@ -77,16 +102,8 @@ public class BillDTO {
         return customerName;
     }
 
-    public void setCustomerName(){
+    public void setCustomerName(String customerName){
         this.customerName = customerName;
-    }
-
-    public String getEmployeeName(){
-        return employeeName;
-    }
-    
-    public void setEmployeeName(String employeeName){
-        this.employeeName = employeeName;
     }
 
     public int getPaymentMethodId() {
@@ -95,6 +112,14 @@ public class BillDTO {
 
     public void setPaymentMethodId(int paymentMethodId) {
         this.paymentMethodId = paymentMethodId;
+    }
+
+    public String getPaymentMethodName(){
+        return paymentMethodName;
+    }
+
+    public void setPaymentMethodName(String paymentMethodName){
+        this.paymentMethodName = paymentMethodName;
     }
 
     public int getEarnedPoints() {
