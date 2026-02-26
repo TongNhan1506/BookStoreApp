@@ -1,5 +1,7 @@
 package com.bookstore.gui.panel.AccountTab;
 
-public class AccountPanel {
+import javax.swing.*;
+
+public class AccountPanel extends JPanel {
 
 }

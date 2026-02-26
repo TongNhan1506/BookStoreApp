@@ -1,6 +1,7 @@
 package com.bookstore.gui.main;
 
 import com.bookstore.bus.AccountBUS;
+import com.bookstore.bus.PermissionBUS;
 import com.bookstore.dto.EmployeeDTO;
 import com.bookstore.util.AppConstant;
 import com.bookstore.util.SharedData;
@@ -127,6 +128,8 @@ public class LoginFrame extends JFrame {
             EmployeeDTO employee = accountBUS.login(username, password);
             if (employee != null) {
                 SharedData.currentUser = employee;
+                PermissionBUS permissionBUS = new PermissionBUS();
+                SharedData.userPermissions = permissionBUS.getPermissionsByRoleId(employee.getRoleId());
                 JOptionPane.showMessageDialog(this, "Xin chào " + employee.getEmployeeName() + "!",
                         "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 this.dispose();

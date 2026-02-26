@@ -1,12 +1,15 @@
 package com.bookstore.gui.panel.SellingTab;
 
+import com.bookstore.util.PermissionUtil;
 import com.bookstore.util.Refreshable;
 import com.formdev.flatlaf.FlatClientProperties;
 import javax.swing.*;
 import java.awt.*;
 
 public class SellingTabbedPane extends JPanel implements Refreshable{
-    JTabbedPane tabbedPane = new JTabbedPane();
+    private JTabbedPane tabbedPane = new JTabbedPane();
+    private SellingPanel sellingPanel;
+    private CustomerPanel customerPanel;
 
     public SellingTabbedPane() {
         initUI();
@@ -23,8 +26,17 @@ public class SellingTabbedPane extends JPanel implements Refreshable{
     private void initUI() {
         setLayout(new BorderLayout());
         tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
-        tabbedPane.addTab("Bán Hàng", new SellingPanel());
-        tabbedPane.addTab("Khách Hàng", new CustomerPanel());
+
+        if (PermissionUtil.hasViewPermission("MANAGE_SELLING")) {
+            sellingPanel = new SellingPanel();
+            tabbedPane.addTab("Bán Hàng", sellingPanel);
+        }
+
+        if (PermissionUtil.hasViewPermission("MANAGE_CUSTOMER")) {
+            customerPanel = new CustomerPanel();
+            tabbedPane.addTab("Khách Hàng", customerPanel);
+        }
+
         add(tabbedPane, BorderLayout.CENTER);
 
         tabbedPane.addChangeListener(e -> {

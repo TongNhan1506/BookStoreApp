@@ -1,5 +1,7 @@
 package com.bookstore.gui.main;
 
+import com.bookstore.dto.PermissionDTO;
+import com.bookstore.gui.panel.AccountTab.AccountTabbedPane;
 import com.bookstore.gui.panel.BillTab.BillPanel;
 import com.bookstore.gui.panel.EmployeeTab.EmployeePanel;
 import com.bookstore.gui.panel.ImportTab.ImportTabbedPane;
@@ -14,17 +16,19 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainFrame extends JFrame {
     private CardLayout cardLayout;
     private JPanel mainContentPanel, sidebarPanel;
     private JButton btnLogout, btnSelling, btnProduct, btnPrice, btnImport, btnInventory, btnBill, btnEmployee, btnStats, btnAccount;
     private JPanel welcomePanel;
+    private Map<JButton, String[]> menuMap = new HashMap<>();
 
     public MainFrame() {
         initUI();
-
-        applyAuthorization();
+        applyMenuPermissions();
     }
 
     private void initUI() {
@@ -52,7 +56,7 @@ public class MainFrame extends JFrame {
         mainContentPanel.add(new BillPanel(), "BILL");
         mainContentPanel.add(new EmployeePanel(), "EMPLOYEE");
         mainContentPanel.add(createDummyPanel("Thống Kê"), "STATS");
-        mainContentPanel.add(createDummyPanel("Tài Khoản"), "ACCOUNT");
+        mainContentPanel.add(new AccountTabbedPane(), "ACCOUNT");
 
         add(mainContentPanel, BorderLayout.CENTER);
         cardLayout.show(mainContentPanel, "WELCOME");
@@ -130,6 +134,16 @@ public class MainFrame extends JFrame {
         btnEmployee = createMenuButton("Nhân Viên", "employee_icon.svg");
         btnStats = createMenuButton("Thống Kê", "stats_icon.svg");
         btnAccount = createMenuButton("Tài Khoản", "account_icon.svg");
+
+        menuMap.put(btnSelling, new String[]{"MANAGE_SELLING", "MANAGE_CUSTOMER"});
+        menuMap.put(btnProduct, new String[]{"MANAGE_PRODUCT", "MANAGE_AUTHOR", "MANAGE_CATEGORY", "MANAGE_SUPPLIER"});
+        menuMap.put(btnPrice, new String[]{"MANAGE_PRICE", "MANAGE_PROMOTION"});
+        menuMap.put(btnImport, new String[]{"MANAGE_IMPORT_TICKET", "MANAGE_IMPORT"});
+        menuMap.put(btnInventory, new String[]{"MANAGE_INVENTORY"});
+        menuMap.put(btnBill, new String[]{"MANAGE_BILL"});
+        menuMap.put(btnEmployee, new String[]{"MANAGE_EMPLOYEE"});
+        menuMap.put(btnStats, new String[]{"STATISTICS"});
+        menuMap.put(btnAccount, new String[]{"MANAGE_ACCOUNT", "MANAGE_ROLE"});
 
         btnLogout = new JButton("Đăng xuất");
         btnLogout.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
@@ -260,17 +274,21 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private void applyAuthorization() {
-        if (SharedData.currentUser == null) return;
+    private void applyMenuPermissions() {
+        for (Map.Entry<JButton, String[]> entry : menuMap.entrySet()) {
+            JButton btn = entry.getKey();
+            String[] actionCodes = entry.getValue();
 
-        int roleId = SharedData.currentUser.getRoleId();
+            boolean isVisible = false;
 
-        if (roleId == 2) {
-            btnProduct.setVisible(false);
-            btnEmployee.setVisible(false);
-            btnStats.setVisible(false);
-            btnImport.setVisible(false);
-            btnAccount.setVisible(false);
+            for (String code : actionCodes) {
+                PermissionDTO permission = SharedData.userPermissions.get(code);
+                if (permission != null && permission.isView()) {
+                    isVisible = true;
+                    break;
+                }
+            }
+            btn.setVisible(isVisible);
         }
     }
 }

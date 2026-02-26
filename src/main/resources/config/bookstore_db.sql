@@ -53,7 +53,7 @@ create table employee (
     base_salary decimal(15, 0) default 0,
     salary_factor decimal(5, 2) default 1,
     day_in date,
-    status bit default 1,
+    status int default 1,
     role_id int not null,
     foreign key (role_id) references role(role_id)
 );
@@ -70,8 +70,8 @@ create table permission (
 	permission_id int auto_increment primary key,
     role_id int not null,
     action_id int not null,
-    is_view bit default 1,
-    is_action bit default 1,
+    is_view int default 1,
+    is_action int default 1,
     foreign key (role_id) references role(role_id),
     foreign key (action_id) references action(action_id)
 );
@@ -93,7 +93,7 @@ create table book (
 	translator text,
     image varchar(255),
     description text,
-    status bit default 1,
+    status int default 1,
     category_id int not null,
     tag_detail text,
     supplier_id int not null,
@@ -191,7 +191,7 @@ CREATE TABLE price (
     selling_price DECIMAL(15, 0) NOT NULL,
     effective_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     end_date DATETIME DEFAULT NULL,
-    is_active TINYINT(1) DEFAULT 1,
+    is_active INT DEFAULT 1,
     FOREIGN KEY (book_id) REFERENCES book(book_id)
 );
 
@@ -207,6 +207,52 @@ create index idx_bill_date on bill(created_date);
 
 -- Khởi tạo vài dữ liệu mẫu --
 insert into role (role_name) values ('Quản lý'),('Nhân viên bán hàng');
+
+INSERT INTO action (action_id, action_code, action_name) VALUES
+(1, 'MANAGE_SELLING', 'Quản lý Bán hàng'),
+(2, 'MANAGE_CUSTOMER', 'Quản lý Khách hàng'),
+(3, 'MANAGE_PRODUCT', 'Quản lý Sản phẩm'),
+(4, 'MANAGE_AUTHOR', 'Quản lý Tác giả'),
+(5, 'MANAGE_CATEGORY', 'Quản lý Thể loại'),
+(6, 'MANAGE_SUPPLIER', 'Quản lý Nhà cung cấp'),
+(7, 'MANAGE_PRICE', 'Quản lý Giá Bán'),
+(8, 'MANAGE_PROMOTION', 'Quản lý Khuyến Mãi'),
+(9, 'MANAGE_IMPORT_TICKET', 'Quản Lý Phiếu Nhập'),
+(10, 'MANAGE_IMPORT', 'Quản Lý Nhập Hàng'),
+(11, 'MANAGE_INVENTORY', 'Quản lý Tồn kho'),
+(12, 'MANAGE_BILL', 'Quản lý Hóa đơn'),
+(13, 'MANAGE_EMPLOYEE', 'Quản Lý Nhân Viên'),
+(14, 'STATISTICS', 'Thống Kê'),
+(15, 'MANAGE_ACCOUNT', 'Quản Lý Tài Khoản'),
+(16, 'MANAGE_ROLE', 'Quản Lý Quyền');
+
+insert into permission(role_id, action_id, is_view, is_action) values
+(1, 1, 1, 1),
+(1, 2, 1, 1),
+(1, 3, 1, 1),
+(1, 4, 1, 1),
+(1, 5, 1, 1),
+(1, 6, 1, 1),
+(1, 7, 1, 1),
+(1, 8, 1, 1),
+(1, 9, 1, 1),
+(1, 10, 1, 1),
+(1, 11, 1, 1),
+(1, 12, 1, 1),
+(1, 13, 1, 1),
+(1, 14, 1, 1),
+(1, 15, 1, 1),
+(1, 16, 1, 1);
+
+insert into permission(role_id, action_id, is_view, is_action) values
+(2, 1, 1, 1),
+(2, 2, 1, 1),
+(2, 3, 1, 1),
+(2, 4, 1, 1),
+(2, 5, 1, 1),
+(2, 6, 1, 0),
+(2, 11, 1, 0),
+(2, 12, 1, 0);
 
 insert into employee (employee_name, employee_phone, birthday, base_salary, day_in, role_id) values
 ('Quản lý mẫu', '0914349584', '1999-04-15', 12000000, '2025-11-23', 1),
@@ -402,27 +448,6 @@ insert into payment_method(payment_method_name) values
 ('Chuyển khoản ngân hàng'),
 ('Thẻ tín dụng/Ghi nợ'),
 ('Ví điện tử (Momo/ZaloPay)');
-
-insert into action (action_code, action_name) values
-('VIEW_STATISTIC', 'Xem thống kê'),
-('MANAGE_EMPLOYEE', 'Quản lý nhân viên'),
-('MANAGE_PRODUCT', 'Quản lý sản phẩm'),
-('SELL_PRODUCT', 'Bán hàng'),
-('IMPORT_PRODUCT', 'Nhập hàng');
-
-insert into permission(role_id, action_id, is_view, is_action) values
-(1, 1, 1, 1),
-(1, 2, 1, 1),
-(1, 3, 1, 1),
-(1, 4, 1, 1),
-(1, 5, 1, 1);
-
-insert into permission(role_id, action_id, is_view, is_action) values
-(2, 1, 0, 0),
-(2, 2, 0, 0),
-(2, 3, 1, 0),
-(2, 4, 1, 1),
-(2, 5, 0, 0);
 
 insert into system_parameter(param_key, param_value, description) values
 ('VAT', '8', 'Thuế giá trị gia tăng mặc định (8%)'),
