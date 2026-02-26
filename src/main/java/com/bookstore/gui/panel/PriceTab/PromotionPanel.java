@@ -5,22 +5,31 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import com.bookstore.util.AppConstant;
-//import org.w3c.dom.events.MouseEvent;
 
+
+import com.bookstore.dto.*;
+import com.bookstore.dao.*;
 import com.bookstore.bus.*;
 
 public class PromotionPanel extends JPanel {
+    private JRadioButton rbTen, rbPhanTram, rbThoiGian;
+    private List<PromotionDTO> listPromotions;
+    private List<PromotionDTO> listHienThi;
+
     private PromotionBUS bus = new PromotionBUS();
     private JTable table;
-    private JPanel header;
+    private JPanel header,cardPanel;
     private WhiteBoxPanel centerBox, whiteBox;;
     private DefaultTableModel model;
     private JTextField txtTenKM, txtPhanTram;
     private JComboBox<String> cbTrangThai, cbChonSach;
-    private JTextField txtSearch;
+    private JTextField txtSearch, txtDateMin, txtDateMax;
     private JScrollPane scroll;
+    private boolean hasSearched = false;
+    private CardLayout searchCard = new CardLayout();
 
     public PromotionPanel() {
 
@@ -29,8 +38,13 @@ public class PromotionPanel extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
 
         initHeader();
-        //initTable();
-        //initForm();
+        loadData();
+
+        Timer statusTimer = new Timer(60000, e -> {
+            bus.updateAutoStatus();
+            capNhatBang(bus.getAll());
+        });
+        statusTimer.start();
     }
 
     class WhiteBoxPanel extends JPanel {
@@ -71,11 +85,18 @@ public class PromotionPanel extends JPanel {
     // 3 Label Radio mới thêm: Tên, Phần trăm, Thời gian
     JPanel filterBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
     filterBox.setOpaque(false);
-    JRadioButton rbTen = new JRadioButton("Tên", true);
-    JRadioButton rbPhanTram = new JRadioButton("Phần trăm");
-    JRadioButton rbThoiGian = new JRadioButton("Thời gian");
+    rbTen = new JRadioButton("Tên", true);
+    rbPhanTram = new JRadioButton("Phần trăm");
+    rbThoiGian = new JRadioButton("Thời gian");
+
+    rbTen.addActionListener(e -> searchCard.show(cardPanel, "NORMAL"));
+    rbPhanTram.addActionListener(e -> searchCard.show(cardPanel, "NORMAL"));
+    rbThoiGian.addActionListener(e -> searchCard.show(cardPanel, "DATE"));
+
     ButtonGroup bg = new ButtonGroup();
     bg.add(rbTen); bg.add(rbPhanTram); bg.add(rbThoiGian);
+
+
     filterBox.add(new JLabel("Tìm theo:"));
     filterBox.add(rbTen); filterBox.add(rbPhanTram); filterBox.add(rbThoiGian);
 
@@ -85,7 +106,47 @@ public class PromotionPanel extends JPanel {
     controlPanel.add(leftGroup, BorderLayout.WEST);
     
     // Nút thêm dạt sang phải
-    JButton btnAdd = new JButton("+ Thêm Khuyến Mãi");
+    JButton btnAdd = new JButton("+ Thêm Khuyến Mãi"){
+
+        @Override
+        protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
+        if (getModel().isArmed()) {
+            g2.setColor(getBackground().darker());
+        } else if (getModel().isRollover()) {
+            g2.setColor(getBackground().brighter());
+        } else {
+            g2.setColor(getBackground());
+        }
+        
+
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
+        
+        // 3. Vẽ chữ của nút
+        g2.setColor(getForeground());
+        g2.setFont(getFont());
+        FontMetrics fm = g2.getFontMetrics();
+        int x = (getWidth() - fm.stringWidth(getText())) / 2;
+        int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+        g2.drawString(getText(), x, y);
+        
+        g2.dispose();
+    }
+};
+    btnAdd.addActionListener(e -> {
+    JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(PromotionPanel.this);
+    PromotionDialog dialog = new PromotionDialog(parentFrame, "Thêm Khuyến Mãi Mới", null);
+    dialog.setVisible(true);
+    loadData();
+});
+
+    btnAdd.setContentAreaFilled(false);
+    btnAdd.setBorderPainted(false);
+    btnAdd.setFocusPainted(false);
+    btnAdd.setOpaque(false);
+
     btnAdd.setPreferredSize(new Dimension(180, 42));
     btnAdd.setBackground(new Color(35, 90, 180));
     btnAdd.setForeground(Color.WHITE);
@@ -104,54 +165,75 @@ public class PromotionPanel extends JPanel {
 }
 
     private JPanel createSearchWrapper() {
-    // 1. Dùng FlowLayout.LEFT để nhích cả cụm sang trái
     JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, -1, 0));
     wrapper.setOpaque(false);
     wrapper.setPreferredSize(new Dimension(450, 45));
 
-    // 2. Ô Icon Kính lúp (Giữ nguyên phong cách của Vy)
+    // 1. Ô Icon Kính lúp (Vẽ bo góc trái)
     JPanel iconBox = new JPanel(new GridBagLayout()) {
         @Override
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(new Color(180, 195, 180));
-            // Vẽ bo góc trái, lấn sang phải 20px để nối liền với ô nhập
             g2.fillRoundRect(0, 0, getWidth() + 20, getHeight(), 25, 25);
             g2.dispose();
         }
     };
     iconBox.setPreferredSize(new Dimension(50, 42));
     iconBox.setOpaque(false);
-
     java.net.URL imgURL = getClass().getResource("/icon/Thêm văn bản-Photoroom.png");
     if (imgURL != null) {
         iconBox.add(new JLabel(new ImageIcon(new ImageIcon(imgURL).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH))));
     }
 
-    // 3. Ô Nhập liệu (CHỈ VẼ NỀN, KHÔNG VẼ ĐÈ LÊN SUPER)
+    // 2. KHỞI TẠO CARDPANEL (Cái này quan trọng nè Vy)
+    cardPanel = new JPanel(searchCard);
+    cardPanel.setOpaque(false);
+
+    // --- CARD 1: Tìm kiếm thường (Tên, Phần trăm) ---
+    txtSearch = new JTextField();
+    setupTextFieldStyle(txtSearch, "Tìm kiếm chương trình...");
+    cardPanel.add(txtSearch, "NORMAL");
+
+    // --- CARD 2: Hai ô nhập ngày (Giao diện nhỏ gọn giống Ảnh 2) ---
+    JPanel dateGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5)); // FlowLayout để không bị giãn
+    dateGroup.setOpaque(false);
+    dateGroup.setBorder(null);
+    
+    txtDateMin = new JTextField();
+    txtDateMax = new JTextField();
+    Dimension dateSize = new Dimension(100, 30); // Ép kích thước nhỏ lại
+    txtDateMin.setPreferredSize(dateSize);
+    txtDateMax.setPreferredSize(dateSize);
+    
+    setupTextFieldStyle(txtDateMin, "Từ..."); 
+    setupTextFieldStyle(txtDateMax, "đến...");
+    
+    dateGroup.add(txtDateMin);
+    // Thêm một khoảng cách nhỏ giữa 2 ô
+    dateGroup.add(Box.createRigidArea(new Dimension(40, 0))); 
+    dateGroup.add(txtDateMax);
+    
+    cardPanel.add(dateGroup, "DATE");
+
+    // 3. Ô Nhập liệu (Nền xám bao bọc CardPanel)
     JPanel inputBackground = new JPanel(new BorderLayout()) {
         @Override
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(new Color(235, 235, 235));
-            // Vẽ lấn sang trái 20px để khớp với iconBox
             g2.fillRoundRect(-20, 0, getWidth() + 20, getHeight(), 25, 25);
             g2.dispose();
         }
     };
     inputBackground.setOpaque(false);
     inputBackground.setPreferredSize(new Dimension(300, 42));
-
-    // Nhét JTextField thuần vào trong cái nền vừa vẽ
-    txtSearch = new JTextField("Tìm kiếm chương trình...");
-    txtSearch.setOpaque(false);
-    txtSearch.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 15));
-    txtSearch.setFont(new Font("Segoe UI", Font.ITALIC, 13));
-    txtSearch.setBackground(new Color(0,0,0,0)); // Trong suốt tuyệt đối
+    inputBackground.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 15));
     
-    inputBackground.add(txtSearch, BorderLayout.CENTER);
+    // Nhét CardPanel vào lõi của nền xám
+    inputBackground.add(cardPanel, BorderLayout.CENTER);
 
     wrapper.add(iconBox);
     wrapper.add(inputBackground);
@@ -159,7 +241,7 @@ public class PromotionPanel extends JPanel {
 }
 
     private void initTable() {
-    String[] cols = {"ID", "Tên chương trình", "Ngày bắt đầu", "Ngày kết thúc", "Trạng thái", "Thao tác"};
+    String[] cols = {"ID", "Tên chương trình","Phần trăm", "Ngày bắt đầu", "Ngày kết thúc", "Trạng thái", "Thao tác"};
     model = new DefaultTableModel(cols, 0) {
         @Override
         public boolean isCellEditable(int row, int column) { return false; }
@@ -177,14 +259,14 @@ public class PromotionPanel extends JPanel {
             new Font("Segoe UI", Font.BOLD, 14), 
             new Color(17, 71, 50)
         ),
-        BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        BorderFactory.createEmptyBorder(8, 8, 8, 8)
     ));
 
-   table.addMouseListener(new java.awt.event.MouseAdapter() {
+   table.addMouseListener(new MouseAdapter() {
         private int lastSelectedRow = -1;
 
         @Override
-        public void mousePressed(java.awt.event.MouseEvent e) {
+        public void mousePressed(MouseEvent e) {
             int row = table.rowAtPoint(e.getPoint());
             if (row != -1 && row == lastSelectedRow) {
                 table.clearSelection();
@@ -192,81 +274,125 @@ public class PromotionPanel extends JPanel {
             } else {
                 lastSelectedRow = row;
             }
+
+            int column = table.columnAtPoint(e.getPoint());
+            if (column == 6 && row != -1) {
+                Rectangle rect = table.getCellRect(row, column, false);
+                int clickX = e.getX() - rect.x;
+
+                if (clickX > rect.width / 2) { 
+                    // NHẤN NÚT XÓA (Bên phải)
+                    int opt = JOptionPane.showConfirmDialog(null, "Xác nhận dừng chương trình?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                    if (opt == JOptionPane.YES_OPTION) {
+                        // Lấy ID từ cột 0 (ví dụ "KM1" -> "1")
+                        String idStr = table.getValueAt(row, 0).toString().substring(2);
+                        int id = Integer.parseInt(idStr);
+                        
+                        // Tìm đối tượng trong danh sách hiển thị
+                        PromotionDTO p = listPromotions.stream()
+                            .filter(item -> item.getPromotionId() == id)
+                            .findFirst().orElse(null);
+                        
+                        if (p != null) {
+                            p.setStatus(0);
+                            bus.updateStatus(p);
+                            loadData();
+                            JOptionPane.showMessageDialog(null, "Đã ngừng hoạt động chương trình!");
+                        }
+                    }
+                } else {
+                    String idStr = table.getValueAt(row, 0).toString().substring(2);
+                    int id = Integer.parseInt(idStr);
+    
+                    PromotionDTO p = listPromotions.stream()
+                        .filter(item -> item.getPromotionId() == id)
+                        .findFirst().orElse(null);
+
+                    if (p != null) {
+                // Fix lỗi: Dùng PromotionPanel.this thay vì this
+                        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(PromotionPanel.this);
+                        PromotionDialog dialog = new PromotionDialog(parentFrame, "Chỉnh Sửa Khuyến Mãi", p);
+                        dialog.setVisible(true);
+                        loadData();
+                    }
+                }
+            }
         }
     });
     
     table.setRowHeight(50);
-    table.setShowGrid(true); 
+    table.setShowGrid(false); 
     table.setGridColor(new Color(5,30,20));
-    table.setIntercellSpacing(new Dimension(1, 1));
+    table.setIntercellSpacing(new Dimension(0, 0));
 
     // Header màu xanh đậm đồng bộ app
-    table.getTableHeader().setBackground(new Color(17, 71, 50));
-    table.getTableHeader().setForeground(Color.WHITE);
+    table.getTableHeader().setBackground(new Color(225, 230, 225));
+    table.getTableHeader().setForeground(Color.BLACK);
     table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
-    table.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+    table.setBorder(null);
 
     // cac cot khac
     table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, 
-                boolean isSelected, boolean hasFocus, int row, int column) {
-            JLabel c = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            c.setHorizontalAlignment(SwingConstants.CENTER);
-        
-            if (isSelected) {
-                c.setBackground(new Color(200, 200, 200)); 
-                c.setForeground(Color.BLACK);
-            } else {
-                if (row % 2 == 0) { 
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value, 
+            boolean isSelected, boolean hasFocus, int row, int column) {
+        JLabel c = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        c.setHorizontalAlignment(SwingConstants.CENTER);
+        c.setOpaque(true);
+
+        if (isSelected) {
+            // Khi chọn: Nền Đen, Chữ Trắng, VIỀN TRẮNG
+            c.setBackground(new Color(17,71,50)); 
+            c.setForeground(Color.WHITE);
+            c.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, Color.WHITE)); 
+        } else {
+            c.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, new Color(150,155,150)));
+            if (row % 2 == 0) { 
                 c.setBackground(Color.WHITE);
                 c.setForeground(Color.BLACK);
             } else {
-                c.setBackground(new Color(17, 71, 50)); 
-                c.setForeground(Color.WHITE);
+                c.setBackground(new Color(180, 200, 180));
+                c.setForeground(Color.BLACK);
             }
-            }
-            return c;
         }
-    });
+        return c;
+    }
+});
 
     //cot cuoi
-    table.getColumnModel().getColumn(5).setCellRenderer(new DefaultTableCellRenderer() {
+    table.getColumnModel().getColumn(6).setCellRenderer(new DefaultTableCellRenderer() {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 10));
-        p.setOpaque(true); // Đảm bảo hiện màu nền
-        p.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK)); // Viền đen dưới
+        p.setOpaque(true);
 
         if (isSelected) {
-            p.setBackground(new Color(200, 200, 200)); // Màu click chọn
+            p.setBackground(new Color(17,71,50)); 
+            p.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.WHITE)); 
         } else {
+            p.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(150,155,150)));
             if (row % 2 == 0) { 
                 p.setBackground(Color.WHITE);
             } else {
-                p.setBackground(new Color(17, 71, 50));
+                p.setBackground(new Color(180, 200, 180));
             }
         }
 
         JButton btnEdit = new JButton("Sửa");
-        JButton btnChange = new JButton("Đổi");
+        JButton btnDelete = new JButton("Xóa");
 
         btnEdit.setBackground(new Color(240, 173, 78));
-        btnChange.setBackground(new Color(35, 90, 180));
-
-        for (JButton b : new JButton[]{btnEdit, btnChange}) {
+        btnDelete.setBackground(new Color(217, 83, 79));
+        
+        for (JButton b : new JButton[]{btnEdit, btnDelete}) {
             b.setForeground(Color.WHITE);
-            b.setPreferredSize(new Dimension(65, 30));
-            b.setFont(new Font("Segoe UI", Font.BOLD, 11));
+            b.setPreferredSize(new Dimension(50, 30));
+            b.setFont(new Font("Segoe UI", Font.BOLD, 9));
             p.add(b);
         }
         return p;
     }
 });
-
-
-    model.addRow(new Object[]{"KM1", "Mừng Xuân 2026 - Giảm giá Văn học", "01/02/2026", "28/02/2026", "Đang chạy", ""});
-    model.addRow(new Object[]{"KM2", "Xả kho Truyện Tranh - Flash Sale", "10/02/2026", "15/02/2026", "Đang chạy", ""});
 
     if (whiteBox != null && scroll != null) {
         whiteBox.add(scroll, BorderLayout.CENTER);
@@ -275,66 +401,102 @@ public class PromotionPanel extends JPanel {
     }
 
 }
-    private void initForm() {
-        JPanel form = new JPanel(new GridBagLayout());
-        form.setBackground(new Color(43, 45, 49));
-        form.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(60, 63, 65)),
-                BorderFactory.createEmptyBorder(20, 20, 20, 20)
-        ));
-        form.putClientProperty(FlatClientProperties.STYLE, "arc: 25");
+    
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 15, 15);
+    public void loadData() {
 
-        // --- Cột trái ---
-        gbc.gridx = 0; gbc.gridy = 0;
-        form.add(createLabel("Chương trình khuyến mãi:"), gbc);
-        txtTenKM = new JTextField();
-        gbc.gridy = 1;
-        form.add(txtTenKM, gbc);
-
-        gbc.gridy = 2;
-        form.add(createLabel("Ngày bắt đầu:"), gbc);
-        JTextField txtNgayBD = new JTextField("31/12/2023");
-        gbc.gridy = 3;
-        form.add(txtNgayBD, gbc);
-
-        // --- Cột giữa ---
-        gbc.gridx = 1; gbc.gridy = 0;
-        form.add(createLabel("Trạng thái:"), gbc);
-        cbTrangThai = new JComboBox<>(new String[]{"Đang hoạt động", "Ngừng hoạt động"});
-        gbc.gridy = 1;
-        form.add(cbTrangThai, gbc);
-
-        // --- Nút Lưu/Hủy ---
-        JPanel btnBox = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        btnBox.setOpaque(false);
-        JButton btnSave = new JButton("Lưu");
-        btnSave.setBackground(new Color(35, 90, 180));
-        JButton btnCancel = new JButton("Hủy");
-        btnBox.add(btnCancel); btnBox.add(btnSave);
-
-        gbc.gridx = 2; gbc.gridy = 5;
-        form.add(btnBox, gbc);
-
-        add(form, BorderLayout.SOUTH);
-    }
-
-    private JLabel createLabel(String text) {
-        JLabel label = new JLabel(text);
-        label.setForeground(new Color(200, 200, 200));
-        label.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        return label;
-    }
-
-    /*private void loadData() {
-        model.setRowCount(0);
-        List<Promotion> list = bus.getList();
-        for (Promotion p : list) {
-            model.addRow(new Object[]{p.id, p.name, p.startDate, p.endDate, p.status, "Sửa | Xóa"});
-        }
-    }*/
+    listPromotions = bus.getAll(); 
+    capNhatBang(listPromotions);
 }
 
+    private void SearchProcessing() {
+    String input = "";
+    String type = "Tên";
+    if (rbPhanTram.isSelected()) {
+        type = "Phần trăm";
+        input = txtSearch.getText().trim();
+        if (!input.isEmpty() && !input.matches("^[0-9.]+$")) {
+            JOptionPane.showMessageDialog(this, "Phần trăm phải là số!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    } else if (rbThoiGian.isSelected()) {
+        type = "Thời gian";
+        input = txtDateMin.getText().trim() + "|" + txtDateMax.getText().trim();
+        String regex = "^\\d{4}-\\d{2}-\\d{2}$";
+        if ((!txtDateMin.getText().isEmpty() && !txtDateMin.getText().matches(regex)) || 
+            (!txtDateMax.getText().isEmpty() && !txtDateMax.getText().matches(regex))) {
+            JOptionPane.showMessageDialog(this, "Ngày phải có dạng YYYY-MM-DD!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    } else {
+        input = txtSearch.getText().trim();
+    }
+
+    if (input.isEmpty() || input.equals("|")) {
+        if (hasSearched) {
+            capNhatBang(bus.getAll());
+            hasSearched = false;
+        } else {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập dữ liệu tìm kiếm!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+        }
+        return;
+    }
+
+    hasSearched = true;
+    listHienThi = bus.search(input, type);
+    capNhatBang(listHienThi);
+}
+
+    public void capNhatBang(List<PromotionDTO> list) {
+    model.setRowCount(0);
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    
+    for (PromotionDTO p : list) {
+        // Chuyển status 1 thành "Đang chạy", 0 thành "Ngừng hoạt động"
+        String trangThaiStr = (p.getStatus() == 1) ? "Đang chạy" : "Ngừng hoạt động";
+        
+        model.addRow(new Object[]{
+            "KM" + p.getPromotionId(),
+            p.getPromotionName(),
+            p.getPercent() + "%",
+            sdf.format(p.getStartDate()),
+            sdf.format(p.getEndDate()),
+            trangThaiStr,
+            ""                           
+        });
+    }
+}
+
+    private void setupTextFieldStyle(JTextField field, String placeholder) {
+    field.setOpaque(false);
+    field.setBackground(new Color(0, 0, 0, 0));
+    field.setBorder(null);
+    field.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+    field.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+    
+    field.addActionListener(e -> SearchProcessing());
+    field.addKeyListener(new java.awt.event.KeyAdapter() {
+        @Override
+        public void keyReleased(java.awt.event.KeyEvent e) { field.repaint(); }
+    });
+
+    field.setUI(new javax.swing.plaf.basic.BasicTextFieldUI() {
+        @Override
+        protected void paintSafely(Graphics g) {
+            super.paintSafely(g);
+            if (field.getText().isEmpty()) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(150, 150, 150)); // Màu xám nhạt
+                g2.setFont(field.getFont().deriveFont(Font.ITALIC)); // Chữ in nghiêng giống Ảnh 2
+                
+                FontMetrics fm = g2.getFontMetrics();
+                int y = (field.getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+                g2.drawString(placeholder, 5, y);
+                g2.dispose();
+            }
+        }
+    });
+}
+}

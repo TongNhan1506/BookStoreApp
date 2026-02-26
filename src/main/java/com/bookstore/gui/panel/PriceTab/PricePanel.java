@@ -19,7 +19,7 @@ public class PricePanel extends JPanel implements Refreshable {
     public PriceBUS bus = new PriceBUS();
 
     private JRadioButton rbPrice, rbName, rbAuthor, rbCategory;
-    private JPanel searchCard, tableCard, normalSearch, rangeSearch, inputCards;
+    private JPanel searchCard, tableCard, inputCards;
     private JTable table;
     private DefaultTableModel model;
     private JTextField txtSearch;
@@ -265,7 +265,7 @@ public class PricePanel extends JPanel implements Refreshable {
             if (!minStr.isEmpty()) Double.parseDouble(minStr);
             if (!maxStr.isEmpty()) Double.parseDouble(maxStr);
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chỉ nhậo số!", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Vui lòng chỉ nhập số!", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
             return;
         }
         input = minStr + "-" + maxStr;
