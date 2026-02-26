@@ -835,8 +835,9 @@ public class SellingPanel extends JPanel implements Refreshable {
                         savePath += ".pdf";
                     }
 
+                    String customerName = currentCustomer == null ? "Khách lẻ" : currentCustomer.getCustomerName();
                     List<Object[]> cartData = getCartDataFromTable();
-                    boolean isExported = BillPDFExporter.exportInvoice(savePath, newBillId, currentCustomer.getCustomerName(),
+                    boolean isExported = BillPDFExporter.exportInvoice(savePath, newBillId, customerName,
                             cartData, bill.getTotalBillPrice());
 
                     if (isExported) {
