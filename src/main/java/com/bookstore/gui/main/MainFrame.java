@@ -1,5 +1,6 @@
 package com.bookstore.gui.main;
 
+import com.bookstore.gui.panel.AccountTab.AccountTabbedPane;
 import com.bookstore.gui.panel.BillTab.BillPanel;
 import com.bookstore.gui.panel.EmployeeTab.EmployeePanel;
 import com.bookstore.gui.panel.ImportTab.ImportTabbedPane;
@@ -52,7 +53,7 @@ public class MainFrame extends JFrame {
         mainContentPanel.add(new BillPanel(), "BILL");
         mainContentPanel.add(new EmployeePanel(), "EMPLOYEE");
         mainContentPanel.add(createDummyPanel("Thống Kê"), "STATS");
-        mainContentPanel.add(createDummyPanel("Tài Khoản"), "ACCOUNT");
+        mainContentPanel.add(new AccountTabbedPane(), "ACCOUNT");
 
         add(mainContentPanel, BorderLayout.CENTER);
         cardLayout.show(mainContentPanel, "WELCOME");

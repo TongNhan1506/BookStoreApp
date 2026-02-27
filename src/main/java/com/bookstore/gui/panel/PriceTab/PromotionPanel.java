@@ -21,11 +21,9 @@ public class PromotionPanel extends JPanel {
 
     private PromotionBUS bus = new PromotionBUS();
     private JTable table;
-    private JPanel header,cardPanel;
-    private WhiteBoxPanel centerBox, whiteBox;;
+    private JPanel cardPanel;
+    private WhiteBoxPanel whiteBox;
     private DefaultTableModel model;
-    private JTextField txtTenKM, txtPhanTram;
-    private JComboBox<String> cbTrangThai, cbChonSach;
     private JTextField txtSearch, txtDateMin, txtDateMax;
     private JScrollPane scroll;
     private boolean hasSearched = false;
