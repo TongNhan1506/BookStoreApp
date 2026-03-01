@@ -9,12 +9,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.*;
 import java.util.List;
+import java.io.IOException;
 
 import com.bookstore.util.AppConstant;
 import com.bookstore.util.Refreshable;
 import com.bookstore.util.SearchableComboBox;
 import com.bookstore.bus.*;
 import com.bookstore.dto.*;
+import com.bookstore.util.ExcelUtil;
 
 public class ProductPanel extends JPanel implements Refreshable {
     private static final Color MAIN_COLOR = Color.decode(AppConstant.GREEN_COLOR_CODE);
@@ -135,11 +137,26 @@ public class ProductPanel extends JPanel implements Refreshable {
 
         searchRow.add(searchPanel, BorderLayout.CENTER);
 
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        actionPanel.setOpaque(false);
+
+        JButton importButton = createStyledButton("📥 IMPORT EXCEL", Color.decode("#1976D2"));
+        importButton.setPreferredSize(new Dimension(170, 38));
+        importButton.addActionListener(e -> importBooksFromExcel());
+        actionPanel.add(importButton);
+
+        JButton exportButton = createStyledButton("📤 EXPORT EXCEL", Color.decode("#8E24AA"));
+        exportButton.setPreferredSize(new Dimension(170, 38));
+        exportButton.addActionListener(e -> exportBooksToExcel());
+        actionPanel.add(exportButton);
+
 
         JButton addButton = createStyledButton("+ THÊM SÁCH", BUTTON_COLOR);
         addButton.setPreferredSize(new Dimension(160, 38));
         addButton.addActionListener(e -> showAddBookDialog());
-        searchRow.add(addButton, BorderLayout.EAST);
+        actionPanel.add(addButton);
+
+        searchRow.add(actionPanel, BorderLayout.EAST);
 
         topPanel.add(searchRow, BorderLayout.NORTH);
 
@@ -545,6 +562,190 @@ public class ProductPanel extends JPanel implements Refreshable {
         selectedTags.clear();
         updateTagButtonText();
         filterBooks();
+    }
+
+
+    private void exportBooksToExcel() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Chọn vị trí lưu file Excel");
+        fileChooser.setSelectedFile(new File("products.xlsx"));
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        File selectedFile = fileChooser.getSelectedFile();
+        if (!selectedFile.getName().toLowerCase().endsWith(".xlsx")) {
+            selectedFile = new File(selectedFile.getAbsolutePath() + ".xlsx");
+        }
+
+        List<ExcelUtil.ExcelBookRow> exportRows = new ArrayList<>();
+        for (BookDTO book : allBooks) {
+            ExcelUtil.ExcelBookRow row = new ExcelUtil.ExcelBookRow();
+            row.setBookName(book.getBookName());
+            row.setSellingPrice(book.getSellingPrice());
+            row.setQuantity(book.getQuantity());
+            row.setAuthorNames(getAuthorNamesForBook(book));
+            row.setCategoryName(getCategoryName(book.getCategoryId()));
+            row.setSupplierName(getSupplierName(book.getSupplierId()));
+            row.setStatus(book.getStatus());
+            row.setTranslator(book.getTranslator());
+            row.setTagDetail(book.getTagDetail());
+            row.setDescription(book.getDescription());
+            row.setImagePath(book.getImage());
+            exportRows.add(row);
+        }
+
+        try {
+            ExcelUtil.exportBooks(selectedFile, exportRows);
+            JOptionPane.showMessageDialog(this,
+                    "Export Excel thành công:\n" + selectedFile.getAbsolutePath(),
+                    "Thành công",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this,
+                    "Không thể export file Excel: " + e.getMessage(),
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void importBooksFromExcel() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Chọn file Excel để import");
+
+        int userSelection = fileChooser.showOpenDialog(this);
+        if (userSelection != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        File selectedFile = fileChooser.getSelectedFile();
+        List<String> errors = new ArrayList<>();
+        int successCount = 0;
+
+        try {
+            List<ExcelUtil.ExcelBookRow> importedRows = ExcelUtil.importBooks(selectedFile);
+            for (ExcelUtil.ExcelBookRow row : importedRows) {
+                try {
+                    BookDTO book = mapImportedRowToBook(row);
+                    String result = bookBUS.addBook(book);
+
+                    if (result.contains("thành công")) {
+                        bookBUS.addAuthorsToBook(book.getBookId(), book.getAuthorIdsList());
+                        successCount++;
+                    } else {
+                        errors.add("Dòng " + row.getSourceRow() + ": " + result);
+                    }
+                } catch (IllegalArgumentException ex) {
+                    errors.add("Dòng " + row.getSourceRow() + ": " + ex.getMessage());
+                }
+            }
+
+            loadDataFromDatabase();
+            filterBooks();
+
+            StringBuilder message = new StringBuilder();
+            message.append("Import thành công ").append(successCount).append(" sản phẩm.");
+
+            if (!errors.isEmpty()) {
+                message.append("\n\nCác dòng lỗi:");
+                int maxErrorToShow = Math.min(errors.size(), 8);
+                for (int i = 0; i < maxErrorToShow; i++) {
+                    message.append("\n- ").append(errors.get(i));
+                }
+                if (errors.size() > maxErrorToShow) {
+                    message.append("\n... và ").append(errors.size() - maxErrorToShow).append(" lỗi khác.");
+                }
+            }
+
+            JOptionPane.showMessageDialog(this,
+                    message.toString(),
+                    errors.isEmpty() ? "Thành công" : "Import hoàn tất",
+                    errors.isEmpty() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Không thể import file Excel: " + e.getMessage(),
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private BookDTO mapImportedRowToBook(ExcelUtil.ExcelBookRow row) {
+        BookDTO book = new BookDTO();
+        book.setBookName(row.getBookName());
+        book.setSellingPrice(row.getSellingPrice());
+        book.setQuantity(row.getQuantity());
+        book.setTranslator(row.getTranslator());
+        book.setImage(row.getImagePath());
+        book.setDescription(row.getDescription());
+        book.setStatus(row.getStatus());
+        book.setTagDetail(row.getTagDetail());
+
+        int categoryId = getCategoryIdByName(row.getCategoryName());
+        if (categoryId <= 0) {
+            throw new IllegalArgumentException("Không tìm thấy thể loại: " + row.getCategoryName());
+        }
+        book.setCategoryId(categoryId);
+
+        int supplierId = getSupplierIdByName(row.getSupplierName());
+        if (supplierId <= 0) {
+            throw new IllegalArgumentException("Không tìm thấy nhà cung cấp: " + row.getSupplierName());
+        }
+        book.setSupplierId(supplierId);
+
+        List<Integer> authorIds = getAuthorIdsByNames(row.getAuthorNames());
+        if (authorIds.isEmpty()) {
+            throw new IllegalArgumentException("Không tìm thấy tác giả hợp lệ trong cột tác giả");
+        }
+        book.getAuthorIdsList().addAll(authorIds);
+
+        return book;
+    }
+
+    private int getCategoryIdByName(String categoryName) {
+        if (categoryName == null) {
+            return -1;
+        }
+        for (CategoryDTO category : categories) {
+            if (categoryName.trim().equalsIgnoreCase(category.getCategoryName())) {
+                return category.getCategoryId();
+            }
+        }
+        return -1;
+    }
+
+    private int getSupplierIdByName(String supplierName) {
+        if (supplierName == null) {
+            return -1;
+        }
+        for (SupplierDTO supplier : suppliers) {
+            if (supplierName.trim().equalsIgnoreCase(supplier.getSupplierName())) {
+                return supplier.getSupplierId();
+            }
+        }
+        return -1;
+    }
+
+    private List<Integer> getAuthorIdsByNames(String authorNames) {
+        List<Integer> authorIds = new ArrayList<>();
+        if (authorNames == null || authorNames.trim().isEmpty()) {
+            return authorIds;
+        }
+
+        String[] names = authorNames.split(",");
+        for (String name : names) {
+            String normalizedName = name.trim();
+            if (normalizedName.isEmpty()) {
+                continue;
+            }
+            for (AuthorDTO author : authors) {
+                if (normalizedName.equalsIgnoreCase(author.getAuthorName()) && !authorIds.contains(author.getAuthorId())) {
+                    authorIds.add(author.getAuthorId());
+                }
+            }
+        }
+        return authorIds;
     }
 
 
