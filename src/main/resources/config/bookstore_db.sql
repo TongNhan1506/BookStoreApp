@@ -206,7 +206,11 @@ create index idx_inventory_book on inventory_log(book_id);
 create index idx_bill_date on bill(created_date);
 
 -- Khởi tạo vài dữ liệu mẫu --
-insert into role (role_name) values ('Quản lý'),('Nhân viên bán hàng');
+insert into role (role_name) values
+('Quản lý'),
+('Nhân viên bán hàng'),
+('Nhân viên nhập hàng'),
+('Nhân viên tài chính');
 
 INSERT INTO action (action_id, action_code, action_name) VALUES
 (1, 'MANAGE_SELLING', 'Quản lý Bán hàng'),
@@ -253,6 +257,14 @@ insert into permission(role_id, action_id, is_view, is_action) values
 (2, 6, 1, 0),
 (2, 11, 1, 0),
 (2, 12, 1, 0);
+
+insert into permission(role_id, action_id, is_view, is_action) values
+(3,),
+(),
+(),
+(),
+(),
+();
 
 insert into employee (employee_name, employee_phone, birthday, base_salary, day_in, role_id) values
 ('Quản lý mẫu', '0914349584', '1999-04-15', 12000000, '2025-11-23', 1),
