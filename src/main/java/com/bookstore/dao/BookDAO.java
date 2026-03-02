@@ -219,4 +219,32 @@ public class BookDAO {
         book.setAuthorsName(rs.getString("author_names"));
         return book;
     }
+
+    public List<BookDTO> getByCategory(int categoryId) {
+        List<BookDTO> list = new ArrayList<>();
+        String sql = "SELECT b.*, IFNULL(bp.selling_price, 0) AS current_selling_price, c.category_name, " +
+                "GROUP_CONCAT(DISTINCT a.author_name SEPARATOR ', ') as author_names, " +
+                "GROUP_CONCAT(DISTINCT ba.author_id SEPARATOR ',') as author_ids " +
+                "FROM book b " +
+                "LEFT JOIN price bp ON b.book_id = bp.book_id AND bp.is_active = 1 " +
+                "JOIN category c ON b.category_id = c.category_id " +
+                "LEFT JOIN book_author ba ON b.book_id = ba.book_id " +
+                "LEFT JOIN author a ON ba.author_id = a.author_id " +
+                "WHERE b.status = 1 AND b.category_id = ? " +
+                "GROUP BY b.book_id, bp.selling_price";
+
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, categoryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToBookDTO(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

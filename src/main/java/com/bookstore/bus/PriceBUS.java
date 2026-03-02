@@ -45,13 +45,17 @@ public class PriceBUS {
                 case "Giá":
                     try {
                         if (lowerKeyword.contains("-")) {
-                            String[] parts = lowerKeyword.split("-");
-                            double min = Double.parseDouble(parts[0].trim());
-                            double max = Double.parseDouble(parts[1].trim());
+                            String[] parts = lowerKeyword.split("-", -1);
+
+                            double min = (parts[0].trim().isEmpty()) ? 0 : Double.parseDouble(parts[0].trim());
+
+                            double max = (parts.length < 2 || parts[1].trim().isEmpty())
+                                    ? Double.MAX_VALUE : Double.parseDouble(parts[1].trim());
+
                             return p.getSellingPrice() >= min && p.getSellingPrice() <= max;
                         } else {
                             double price = Double.parseDouble(lowerKeyword);
-                            return p.getSellingPrice() == price;
+                            return p.getSellingPrice() <= price;
                         }
                     } catch (NumberFormatException e) {
                         return false;

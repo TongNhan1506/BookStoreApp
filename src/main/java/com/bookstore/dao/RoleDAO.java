@@ -32,7 +32,6 @@ public class RoleDAO {
         return list;
     }
 
-    // Thêm hàm này vào RoleDAO
     public int insertRole(com.bookstore.dto.RoleDTO role) {
         String sql = "INSERT INTO role (role_name) VALUES (?)";
         try (java.sql.Connection conn = com.bookstore.util.DatabaseConnection.getConnection();
@@ -44,18 +43,16 @@ public class RoleDAO {
             if (affectedRows > 0) {
                 try (java.sql.ResultSet rs = ps.getGeneratedKeys()) {
                     if (rs.next()) {
-                        return rs.getInt(1); // Trả về role_id mới tinh
+                        return rs.getInt(1);
                     }
                 }
             }
         } catch (Exception e) {
-            // Có thể bị lỗi do trùng tên (cột role_name đang set UNIQUE)
             e.printStackTrace();
         }
-        return 0; // Thất bại
+        return 0;
     }
 
-    // Trong RoleDAO.java
     public boolean updateRole(RoleDTO role) {
         String sql = "UPDATE role SET role_name = ? WHERE role_id = ?";
         try (Connection c = DatabaseConnection.getConnection();

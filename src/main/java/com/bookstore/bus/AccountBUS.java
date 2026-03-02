@@ -26,4 +26,12 @@ public class AccountBUS {
 
         return employeeDAO.selectById(acc.getEmployeeId());
     }
+
+    public AccountDTO selectByUsername(String username) {
+        return accountDAO.selectByUsername(username);
+    }
+
+    public boolean updateAccount(AccountDTO acc) {
+        return accountDAO.update(acc);
+    }
 }

@@ -19,10 +19,11 @@ public class PricePanel extends JPanel implements Refreshable {
     public PriceBUS bus = new PriceBUS();
 
     private JRadioButton rbPrice, rbName, rbAuthor, rbCategory;
-    private JPanel searchCard, tableCard;
+    private JPanel searchCard, tableCard, inputCards;
     private JTable table;
     private DefaultTableModel model;
     private JTextField txtSearch;
+    private JTextField txtMinPrice, txtMaxPrice;
 
     public PricePanel() {
         setLayout(new BorderLayout(0, 25));
@@ -146,34 +147,37 @@ public class PricePanel extends JPanel implements Refreshable {
                 return false;
             }
         });
-        leftBox.add(new JLabel("| Nhập tên sách"));
+        leftBox.add(new JLabel("| Nhập "));
 
         txtSearch = new JTextField();
-        txtSearch.setOpaque(false);
+        setupSearchBorderStyle(txtSearch, "Tìm kiếm sách...", true);
 
-        java.net.URL imgURL = getClass().getResource("/icon/Thêm văn bản-Photoroom.png");
-        final Image searchIcon = (imgURL != null)
-                ? new ImageIcon(imgURL).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH)
-                : null;
 
-        txtSearch.setBorder(new javax.swing.border.EmptyBorder(0, 35, 0, 10) {
-            @Override
-            public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        JPanel rangePanel = new JPanel(new GridLayout(1, 2, 5, 0));
+        rangePanel.setOpaque(false);
+        txtMinPrice = new JTextField();
+        txtMaxPrice = new JTextField();
+        setupSearchBorderStyle(txtMinPrice, "Giá từ...", false); // false = bỏ kính lúp
+        setupSearchBorderStyle(txtMaxPrice, "đến...", false);
+        rangePanel.add(txtMinPrice);
+        rangePanel.add(txtMaxPrice);
 
-                if (searchIcon != null) {
-                    g2.drawImage(searchIcon, x + 10, (height - 18) / 2, c);
-                }
 
-                if (txtSearch.getText().isEmpty()) {
-                    g2.setColor(Color.GRAY);
-                    g2.setFont(c.getFont().deriveFont(Font.ITALIC));
-                    g2.drawString("Tìm kiếm sách...", x + 35, (height + g2.getFontMetrics().getAscent()) / 2 - 2);
-                }
-                g2.dispose();
-            }
-        });
+        inputCards = new JPanel(new CardLayout());
+        inputCards.setOpaque(false);
+        inputCards.add(txtSearch, "NORMAL");
+        inputCards.add(rangePanel, "RANGE");
+
+
+        rbPrice.addActionListener(e -> ((CardLayout)inputCards.getLayout()).show(inputCards, "RANGE"));
+        ActionListener showNormal = e -> ((CardLayout)inputCards.getLayout()).show(inputCards, "NORMAL");
+        rbAuthor.addActionListener(showNormal);
+        rbName.addActionListener(showNormal);
+        rbCategory.addActionListener(showNormal);
+
+
+        txtMinPrice.addActionListener(e -> btnSearch.doClick());
+        txtMaxPrice.addActionListener(e -> btnSearch.doClick());
 
         txtSearch.revalidate();
         txtSearch.repaint();
@@ -218,7 +222,7 @@ public class PricePanel extends JPanel implements Refreshable {
         });
 
         searchWrapper.add(leftBox, BorderLayout.WEST);
-        searchWrapper.add(txtSearch, BorderLayout.CENTER);
+        searchWrapper.add(inputCards, BorderLayout.CENTER);
         searchWrapper.add(btnSearch, BorderLayout.EAST);
 
         JPanel searchBoxContainer = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -235,23 +239,52 @@ public class PricePanel extends JPanel implements Refreshable {
         searchCard.add(Box.createVerticalStrut(10));
         searchCard.add(searchBoxContainer);
 
-        btnSearch.addActionListener(e -> xuLyTimKiem());
+        btnSearch.addActionListener(e -> SearchProcessing());
     }
 
-    private void xuLyTimKiem() {
-        String input = txtSearch.getText().trim();
-
-        if (input.isEmpty()) {
-            refresh();
-            return;
-        }
-
+    private void SearchProcessing() {
         String type = "Tên";
         if (rbPrice.isSelected()) type = "Giá";
         else if (rbAuthor.isSelected()) type = "Tác giả";
         else if (rbCategory.isSelected()) type = "Thể loại";
 
+        String input = "";
+
+        if (type.equals("Giá")) {
+            String minStr = txtMinPrice.getText().trim();
+            String maxStr = txtMaxPrice.getText().trim();
+
+            if (minStr.isEmpty() && maxStr.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập khoảng giá cần tìm!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            try {
+                if (!minStr.isEmpty()) Double.parseDouble(minStr);
+                if (!maxStr.isEmpty()) Double.parseDouble(maxStr);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chỉ nhập số!", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            input = minStr + "-" + maxStr;
+        } else {
+            input = txtSearch.getText().trim();
+            if (input.isEmpty() || input.equals("Tìm kiếm chương trình...")) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập từ khóa tìm kiếm!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                refresh();
+                return;
+            }
+            if (input.matches("^[0-9]+$")) {
+                JOptionPane.showMessageDialog(this, type + " không được nhập số!", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
         this.listHienThi = bus.timKiemSach(listPrices, input, type);
+
+        if (listHienThi.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Không tìm thấy kết quả phù hợp!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        }
         capNhatBang(listHienThi);
     }
 
@@ -420,12 +453,6 @@ public class PricePanel extends JPanel implements Refreshable {
     }
 
     private void showEditPriceDialog(PriceDTO p) {
-//        String role = SharedData.getUserRole();
-//        if (!"Quản lý".equals(role)) {
-//            JOptionPane.showMessageDialog(this, "Chỉ Quản lý mới có quyền thay đổi giá bán!", "Từ chối truy cập", JOptionPane.WARNING_MESSAGE);
-//            return;
-//        }
-
         double currentPercent = p.getProfitRate() * 100;
         String res = JOptionPane.showInputDialog(this,
                 "Mức giá vốn hiện tại: " + String.format("%,.0f", p.getBasePrice()) + " VNĐ\nNhập % lợi nhuận mới:",
@@ -466,12 +493,6 @@ public class PricePanel extends JPanel implements Refreshable {
             return;
         }
 
-//        String role = SharedData.getUserRole();
-//        if (!"Quản lý".equals(role)) {
-//            JOptionPane.showMessageDialog(this, "Chỉ Quản lý mới có quyền cấu hình giá hàng loạt!", "Từ chối truy cập", JOptionPane.WARNING_MESSAGE);
-//            return;
-//        }
-
         String res = JOptionPane.showInputDialog(this, "Nhập % lợi nhuận áp dụng chung cho " + listHienThi.size() + " cuốn sách:");
         if (res != null && !res.trim().isEmpty()) {
             try {
@@ -488,5 +509,27 @@ public class PricePanel extends JPanel implements Refreshable {
                 JOptionPane.showMessageDialog(this, "Lỗi: Vui lòng nhập số hợp lệ!");
             }
         }
+    }
+
+    private void setupSearchBorderStyle(JTextField field, String placeholder, boolean showIcon) {
+        field.setOpaque(false);
+        java.net.URL imgURL = getClass().getResource("/icon/Thêm văn bản-Photoroom.png");
+        final Image searchIcon = (imgURL != null) ? new ImageIcon(imgURL).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH) : null;
+        int leftPadding = showIcon ? 35 : 15;
+
+        field.setBorder(new javax.swing.border.EmptyBorder(0, leftPadding, 0, 10) {
+            @Override
+            public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                if (showIcon && searchIcon != null) g2.drawImage(searchIcon, x + 10, (height - 18) / 2, c);
+                if (field.getText().isEmpty()) {
+                    g2.setColor(Color.GRAY);
+                    g2.setFont(c.getFont().deriveFont(Font.ITALIC));
+                    g2.drawString(placeholder, x + leftPadding, (height + g2.getFontMetrics().getAscent()) / 2 - 2);
+                }
+                g2.dispose();
+            }
+        });
     }
 }

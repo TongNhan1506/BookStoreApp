@@ -131,7 +131,7 @@ public class LoginFrame extends JFrame {
                 PermissionBUS permissionBUS = new PermissionBUS();
                 SharedData.userPermissions = permissionBUS.getPermissionsByRoleId(employee.getRoleId());
                 JOptionPane.showMessageDialog(this, "Xin chào " + employee.getEmployeeName() + "!",
-                        "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                        "Đăng nhập thành công", JOptionPane.INFORMATION_MESSAGE);
                 this.dispose();
                 new MainFrame().setVisible(true);
             }

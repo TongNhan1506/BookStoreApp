@@ -5,6 +5,7 @@ import com.bookstore.bus.PermissionBUS;
 import com.bookstore.dto.ActionDTO;
 import com.bookstore.dto.PermissionDTO;
 import com.bookstore.dto.RoleDTO;
+import com.bookstore.util.AppConstant;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -30,7 +31,7 @@ public class RoleDetailDialog extends JDialog {
     }
 
     private void initUI() {
-        setSize(600, 500);
+        setSize(600, 600);
         setLocationRelativeTo(getOwner());
         setLayout(new BorderLayout(0, 10));
 
@@ -67,8 +68,15 @@ public class RoleDetailDialog extends JDialog {
         };
 
         JTable table = new JTable(tableModel);
-        table.setRowHeight(30);
-        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        table.setRowHeight(35);
+        table.setShowGrid(true);
+        table.setSelectionBackground(Color.decode("#d4ffee"));
+        table.setSelectionForeground(Color.BLACK);
+        table.getTableHeader().setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 13));
+        table.getTableHeader().setResizingAllowed(false);
+        table.getTableHeader().setReorderingAllowed(false);
+        table.getTableHeader().setBackground(Color.decode(AppConstant.GREEN_COLOR_CODE));
+        table.getTableHeader().setForeground(Color.WHITE);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(new EmptyBorder(0, 15, 0, 15));

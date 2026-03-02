@@ -454,24 +454,18 @@ insert into system_parameter(param_key, param_value, description) values
 ('EARNED_POINTS_PER_10K', '100', 'Số điểm nhận được trên mỗi 10K mua');
 
 insert into promotion (promotion_name, percent, start_date, end_date, status) values
-('Mừng Xuân 2026 - Giảm giá Văn học', 20.00, '2026-02-01 00:00:00', '2026-02-28 23:59:59', 1),
+('Mừng Xuân 2026 - Giảm giá Văn học', 20.00, '2026-03-01 00:00:00', '2026-04-01 23:59:59', 1),
 ('Xả kho Truyện Tranh - Flash Sale', 50.00, '2026-02-10 00:00:00', '2026-02-15 23:59:59', 1),
 ('Tuần lễ Kỹ Năng Sống', 15.00, '2026-03-01 00:00:00', '2026-03-07 23:59:59', 1);
 
 INSERT INTO promotion_detail (promotion_id, book_id)
-SELECT 1, book_id
-FROM book
-WHERE category_id = 1;
+SELECT 1, book_id FROM book WHERE category_id = 1;
 
 INSERT INTO promotion_detail (promotion_id, book_id)
-SELECT 2, book_id
-FROM book
-WHERE category_id = 3;
+SELECT 2, book_id FROM book WHERE category_id = 3;
 
 INSERT INTO promotion_detail (promotion_id, book_id)
-SELECT 3, book_id
-FROM book
-WHERE category_id = 4;
+SELECT 3, book_id FROM book WHERE category_id = 4;
 
 INSERT INTO import_ticket (created_date, total_import_quantity, total_import_price, status, employee_id, supplier_id)
 VALUES ('2026-02-01 10:00:00', 100, 5000000, 2, 1, 1);

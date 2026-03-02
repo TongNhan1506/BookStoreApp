@@ -1,6 +1,7 @@
 package com.bookstore.gui.main;
 
 import com.bookstore.dto.PermissionDTO;
+import com.bookstore.gui.StatisticTab.StatisticPanel;
 import com.bookstore.gui.panel.AccountTab.AccountTabbedPane;
 import com.bookstore.gui.panel.BillTab.BillPanel;
 import com.bookstore.gui.panel.EmployeeTab.EmployeePanel;
@@ -55,7 +56,7 @@ public class MainFrame extends JFrame {
         mainContentPanel.add(new InventoryPanel(), "INVENTORY");
         mainContentPanel.add(new BillPanel(), "BILL");
         mainContentPanel.add(new EmployeePanel(), "EMPLOYEE");
-        mainContentPanel.add(createDummyPanel("Thống Kê"), "STATS");
+        mainContentPanel.add(new StatisticPanel(), "STATS");
         mainContentPanel.add(new AccountTabbedPane(), "ACCOUNT");
 
         add(mainContentPanel, BorderLayout.CENTER);
@@ -243,16 +244,6 @@ public class MainFrame extends JFrame {
                 "hoverBackground: #00A364;"
         );
         return btn;
-    }
-
-    private JPanel createDummyPanel(String text) {
-        JPanel p = new JPanel(new GridBagLayout());
-        p.setBackground(Color.WHITE);
-        JLabel lb = new JLabel(text);
-        lb.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 40));
-        lb.setForeground(Color.LIGHT_GRAY);
-        p.add(lb);
-        return p;
     }
 
     private void switchTab(String tabName) {

@@ -643,7 +643,7 @@ public class SellingPanel extends JPanel implements Refreshable {
 
         double promoPercent = promotionBUS.getPromotionPercentByBook(bookId);
         double oldPrice = selectedBook.getSellingPrice();
-        double newPrice = oldPrice * (1 - promoPercent / 100.0);
+        double newPrice = oldPrice * (1 - promoPercent / 100);
 
         boolean exists = false;
         for (int i = 0; i < cartModel.getRowCount(); i++) {
@@ -789,7 +789,7 @@ public class SellingPanel extends JPanel implements Refreshable {
         int paymentMethodId = paymentChoice + 1;
 
         double finalTotal = MoneyFormatter.toDouble(lbFinalTotal.getText());
-        int employeeId = SharedData.currentUser != null ? SharedData.currentUser.getEmployeeId() : 1;
+        int employeeId = SharedData.currentUser.getEmployeeId();
 
         int customerId = 0;
         int earnedPoints = 0;
@@ -932,7 +932,6 @@ public class SellingPanel extends JPanel implements Refreshable {
 
         btnViewBookDetail.addActionListener(e -> openBookDetailDialog());
         btnAddToCart.addActionListener(e -> addToCart());
-
         btnCustomer.addActionListener(e -> openCustomerSearchDialog());
         btnRefresh.addActionListener(e -> refreshCart());
         btnDelete.addActionListener(e -> deleteRowFromCart());

@@ -32,4 +32,20 @@ public class AccountDAO {
         }
         return acc;
     }
+
+    public boolean update(AccountDTO acc) {
+        try {
+            Connection c = DatabaseConnection.getConnection();
+            String sql = "UPDATE account SET password = ? WHERE username = ?";
+            PreparedStatement ps = c.prepareStatement(sql);
+            ps.setString(1, acc.getPassword());
+            ps.setString(2, acc.getUsername());
+            int result = ps.executeUpdate();
+            c.close();
+            return result > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
