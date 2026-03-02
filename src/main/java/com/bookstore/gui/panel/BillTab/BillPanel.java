@@ -10,14 +10,20 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import com.bookstore.bus.BillBUS;
+import com.bookstore.dto.BillDTO;
+import com.bookstore.util.Refreshable;
+import java.util.List;
 
 
-public class BillPanel extends JPanel {
-
+public class BillPanel extends JPanel implements Refreshable {
     private JLabel lbTotalQuantity, lbRevenue;
     private JTable table;
     private DefaultTableModel model;
+    private JSpinner spFrom;
+    private JSpinner spTo;
 
     private final Color MAIN_GREEN = Color.decode(AppConstant.GREEN_COLOR_CODE);
 
@@ -28,8 +34,16 @@ public class BillPanel extends JPanel {
 
         add(createStatisticPanel(),BorderLayout.NORTH);
         add(createCenterPanel(), BorderLayout.CENTER);
+
+        loadBillTable();
+        applyTodayFilter();
     }
 
+    @Override
+    public void refresh(){
+        loadBillTable();
+        applyTodayFilter();
+    }
 
     private JPanel createStatisticPanel(){
         JPanel panel = new JPanel(new GridLayout(1,2,20,0));
@@ -49,7 +63,6 @@ public class BillPanel extends JPanel {
 
         quantityBox.add(lbTitle1,BorderLayout.NORTH);
         quantityBox.add(lbTotalQuantity, BorderLayout.CENTER);
-
 
         JPanel revenueBox = new JPanel(new BorderLayout());
         revenueBox.setBackground(MAIN_GREEN);
@@ -72,7 +85,6 @@ public class BillPanel extends JPanel {
         return panel;
     }
 
-
     private JPanel createCenterPanel(){
         JPanel panel = new JPanel(new BorderLayout(10,10));
         panel.setBackground(Color.WHITE);
@@ -83,32 +95,31 @@ public class BillPanel extends JPanel {
         JLabel lbFrom = new JLabel("Từ:");
         lbFrom.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
         SpinnerDateModel fromModel = new SpinnerDateModel(new Date(), null, null,java.util.Calendar.DAY_OF_MONTH);
-        JSpinner spFrom = new JSpinner(fromModel);
+        spFrom = new JSpinner(fromModel);
         JSpinner.DateEditor fromEditor = new JSpinner.DateEditor(spFrom, "d/M/yyyy");
         spFrom.setEditor(fromEditor);
         spFrom.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 16));
 
-
         JLabel lbTo = new JLabel("Đến:");
         lbTo.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
         SpinnerDateModel toModel = new SpinnerDateModel(new Date(), null, null, java.util.Calendar.DAY_OF_MONTH);
-        JSpinner spTo = new JSpinner(toModel);
+        spTo = new JSpinner(toModel);
         JSpinner.DateEditor toEditor = new JSpinner.DateEditor(spTo,"d/M/yyyy");
         spTo.setEditor(toEditor);
         spTo.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 16));
-
 
         JTextField txtSearch = new JTextField(20);
         txtSearch.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 16));
         txtSearch.setBorder(BorderFactory.createTitledBorder("Tìm Kiếm theo mã hóa đơn, tên khách hàng, tên nhân viên"));
 
-
         JButton btnFilter = new JButton("Lọc");
         btnFilter.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD,16));
         btnFilter.setBackground(MAIN_GREEN);
-        btnFilter.setForeground(MAIN_GREEN);
-
-
+        btnFilter.setForeground(Color.white);
+        JButton btnReset = new JButton("Làm mới");
+        btnReset.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
+        btnReset.setBackground(Color.decode("#5674ff"));
+        btnReset.setForeground(Color.WHITE);
 
         filterPanel.add(lbFrom);
         filterPanel.add(spFrom);
@@ -116,32 +127,32 @@ public class BillPanel extends JPanel {
         filterPanel.add(spTo);
         filterPanel.add(txtSearch);
         filterPanel.add(btnFilter);
-
+        filterPanel.add(btnReset);
 
         panel.add(filterPanel, BorderLayout.NORTH);
 
-
-
-
         String[]columns = {"Mã Hóa Đơn", "Ngày Giờ Lập", "Nhân Viên Lập", "Khách Hàng", "Tổng Tiền"};
-
-        DefaultTableModel model = new DefaultTableModel(columns, 0);
-
-        model.addRow(new Object[]{"005", "13:05:05 - 1/1/2025", "Trần Anh Tài", "Hồ Tiên", 300000});
-        model.addRow(new Object[]{"004", "12:02:25 - 1/1/2025", "Trần Anh Tài", "Anh Thư", 250000});
-        model.addRow(new Object[]{"003", "10:05:45 - 1/1/2025", "Nguyễn Anh Thư", "Trần Hoàng", 300000});
-        model.addRow(new Object[]{"002", "09:02:24 - 1/1/2025", "Nguyễn Anh Thư", "Lương Trần", 250000});
-        model.addRow(new Object[]{"001", "07:25:04 - 1/1/2025", "Nguyễn Anh Thư", "Đỗ Thư", 100000});
-
+        model = new DefaultTableModel(columns, 0){
+            @Override
+            public boolean isCellEditable(int row, int columm){
+                return false;
+            }
+        };
         table = new JTable(model);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.getTableHeader().setReorderingAllowed(false);
+        table.setShowGrid(true);
+        table.setGridColor(Color.BLACK);
 
         JTableHeader header = table.getTableHeader();
         header.setOpaque(true);
         table.setRowHeight(35);
-        table.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
-        table.getTableHeader().setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
+        table.setShowGrid(true);
+        table.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 16));
+        table.getTableHeader().setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 16));
         table.getTableHeader().setBackground(MAIN_GREEN);
         table.getTableHeader().setForeground(Color.WHITE);
+        table.getTableHeader().setResizingAllowed(false);
 
         table.getTableHeader().setDefaultRenderer(
                 new DefaultTableCellRenderer() {
@@ -184,12 +195,19 @@ public class BillPanel extends JPanel {
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
         );
 
-
         panel.add(scrollPane, BorderLayout.CENTER);
 
+        btnReset.addActionListener(e->{
+            Date today = new Date();
+            spFrom.setValue(today);
+            spTo.setValue(today);
+            applyTodayFilter();
+        });
+
         btnFilter.addActionListener(e->{
-            final Date fromDate = (Date) spFrom.getValue();
-            final Date toDate = (Date) spTo.getValue();
+            Date fromDate = (Date) spFrom.getValue();
+            Date toDate = (Date) spTo.getValue();
+            String keyword = txtSearch.getText().trim();
 
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss - d/M/yyyy");
 
@@ -215,7 +233,6 @@ public class BillPanel extends JPanel {
         });
 
         return panel;
-
     }
 
     private void updateStatistics(){
@@ -231,6 +248,53 @@ public class BillPanel extends JPanel {
         lbRevenue.setText(MoneyFormatter.toVND(total));
     }
 
+    private void loadBillTable(){
+        if(model == null)
+            return;
+        model.setRowCount(0);
 
+        BillBUS billBUS = new BillBUS();
+        List<BillDTO> list = billBUS.getAllBills();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss - d/M/yyyy");
 
+        for (BillDTO bill : list){
+            String formattedDate = "";
+            if(bill.getCreatedDate() != null){
+                formattedDate = sdf.format(bill.getCreatedDate());
+            }
+
+            String customerName = bill.getCustomerName() == null ? "Khách lẻ" : bill.getCustomerName();
+            model.addRow(new Object[]{
+                    bill.getBillId(), formattedDate, bill.getEmployeeName(), customerName, bill.getTotalBillPrice()
+            });
+        }
+        updateStatistics();
+    }
+
+    private void applyTodayFilter(){
+        TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) table.getRowSorter();
+        Date today = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss - d/M/yyyy");
+
+        sorter.setRowFilter(new RowFilter<>(){
+            @Override
+            public boolean include (Entry<? extends DefaultTableModel, ? extends Integer> entry){
+                try{
+
+                    String dateStr = entry.getStringValue(1);
+                    Date billDate = sdf.parse(dateStr);
+                    Calendar c1 = Calendar.getInstance();
+                    Calendar c2 = Calendar.getInstance();
+
+                    c1.setTime(today);
+                    c2.setTime(billDate);
+
+                    return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR) && c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR);
+                }catch (Exception e){
+                    return false;
+                }
+            }
+        });
+        updateStatistics();
+    }
 }

@@ -8,8 +8,11 @@ public class BillDTO {
     private double totalBillPrice;
     private double tax;
     private int employeeId;
+    private String employeeName;
     private int customerId;
+    private String customerName;
     private int paymentMethodId;
+    private String paymentMethodName;
     private int earnedPoints;
 
     public BillDTO(int billId, Timestamp createdDate, double totalBillPrice, double tax, int employeeId, int customerId, int paymentMethodId, int earnedPoints) {
@@ -20,6 +23,20 @@ public class BillDTO {
         this.employeeId = employeeId;
         this.customerId = customerId;
         this.paymentMethodId = paymentMethodId;
+        this.earnedPoints = earnedPoints;
+    }
+
+    public BillDTO(int billId, Timestamp createdDate, double totalBillPrice, double tax, int employeeId, String employeeName, int customerId, String customerName, int paymentMethodId, String paymentMethodName, int earnedPoints) {
+        this.billId = billId;
+        this.createdDate = createdDate;
+        this.totalBillPrice = totalBillPrice;
+        this.tax = tax;
+        this.employeeId = employeeId;
+        this.employeeName = employeeName;
+        this.customerId = customerId;
+        this.customerName = customerName;
+        this.paymentMethodId = paymentMethodId;
+        this.paymentMethodName = paymentMethodName;
         this.earnedPoints = earnedPoints;
     }
 
@@ -63,12 +80,28 @@ public class BillDTO {
         this.employeeId = employeeId;
     }
 
+    public String getEmployeeName() {
+        return employeeName;
+    }
+
+    public void setEmployeeName(String employeeName) {
+        this.employeeName = employeeName;
+    }
+
     public int getCustomerId() {
         return customerId;
     }
 
     public void setCustomerId(int customerId) {
         this.customerId = customerId;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
 
     public int getPaymentMethodId() {
@@ -79,6 +112,14 @@ public class BillDTO {
         this.paymentMethodId = paymentMethodId;
     }
 
+    public String getPaymentMethodName() {
+        return paymentMethodName;
+    }
+
+    public void setPaymentMethodName(String paymentMethodName) {
+        this.paymentMethodName = paymentMethodName;
+    }
+
     public int getEarnedPoints() {
         return earnedPoints;
     }
@@ -87,7 +128,3 @@ public class BillDTO {
         this.earnedPoints = earnedPoints;
     }
 }
-
-
-
-

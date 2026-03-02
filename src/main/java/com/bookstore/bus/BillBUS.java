@@ -1,14 +1,10 @@
 package com.bookstore.bus;
 
 import com.bookstore.dao.BillDAO;
-import com.bookstore.dao.BookDAO;
-import com.bookstore.dao.CustomerDAO;
 import com.bookstore.dto.BillDTO;
 import com.bookstore.dto.BillDetailDTO;
 
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class BillBUS {
     private BillDAO billDAO = new BillDAO();

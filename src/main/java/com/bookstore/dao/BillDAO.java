@@ -56,7 +56,7 @@ public class BillDAO {
                 }
             }
             c.commit();
-            return rs.getInt(1);
+            return generatedBillId;
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -78,9 +78,11 @@ public class BillDAO {
 
     public List<BillDTO> getAllBills() {
         List<BillDTO> list = new ArrayList<>();
-        String sql = "SELECT bill_id, created_date, total_bill_price, tax, " +
-                "employee_id, customer_id, payment_method_id, earned_points " +
-                "FROM bill";
+        String sql = "SELECT *, employee_name, customer_name, payment_method_name " +
+                "FROM bill b " +
+                "JOIN employee e ON e.employee_id = b.employee_id " +
+                "LEFT JOIN customer c ON c.customer_id = b.customer_id " +
+                "JOIN payment_method pm ON pm.payment_method_id = b.payment_method_id";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -93,8 +95,11 @@ public class BillDAO {
                         rs.getDouble("total_bill_price"),
                         rs.getDouble("tax"),
                         rs.getInt("employee_id"),
+                        rs.getString("employee_name"),
                         rs.getInt("customer_id"),
+                        rs.getString("customer_name"),
                         rs.getInt("payment_method_id"),
+                        rs.getString("payment_method_name"),
                         rs.getInt("earned_points")
                 );
                 list.add(bill);
