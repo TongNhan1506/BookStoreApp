@@ -11,7 +11,6 @@ import java.util.List;
 import com.bookstore.bus.*;
 import com.bookstore.dto.*;
 import com.bookstore.util.Refreshable;
-import com.bookstore.util.SharedData;
 
 public class PricePanel extends JPanel implements Refreshable {
     private List<PriceDTO> listPrices;
@@ -24,6 +23,7 @@ public class PricePanel extends JPanel implements Refreshable {
     private DefaultTableModel model;
     private JTextField txtSearch;
     private JTextField txtMinPrice, txtMaxPrice;
+    private boolean hasSearched = false;
 
     public PricePanel() {
         setLayout(new BorderLayout(0, 25));
@@ -152,29 +152,25 @@ public class PricePanel extends JPanel implements Refreshable {
         txtSearch = new JTextField();
         setupSearchBorderStyle(txtSearch, "Tìm kiếm sách...", true);
 
-
         JPanel rangePanel = new JPanel(new GridLayout(1, 2, 5, 0));
         rangePanel.setOpaque(false);
         txtMinPrice = new JTextField();
         txtMaxPrice = new JTextField();
-        setupSearchBorderStyle(txtMinPrice, "Giá từ...", false); // false = bỏ kính lúp
+        setupSearchBorderStyle(txtMinPrice, "Giá từ...", false);
         setupSearchBorderStyle(txtMaxPrice, "đến...", false);
         rangePanel.add(txtMinPrice);
         rangePanel.add(txtMaxPrice);
-
 
         inputCards = new JPanel(new CardLayout());
         inputCards.setOpaque(false);
         inputCards.add(txtSearch, "NORMAL");
         inputCards.add(rangePanel, "RANGE");
 
-
-        rbPrice.addActionListener(e -> ((CardLayout)inputCards.getLayout()).show(inputCards, "RANGE"));
-        ActionListener showNormal = e -> ((CardLayout)inputCards.getLayout()).show(inputCards, "NORMAL");
+        rbPrice.addActionListener(e -> ((CardLayout) inputCards.getLayout()).show(inputCards, "RANGE"));
+        ActionListener showNormal = e -> ((CardLayout) inputCards.getLayout()).show(inputCards, "NORMAL");
         rbAuthor.addActionListener(showNormal);
         rbName.addActionListener(showNormal);
         rbCategory.addActionListener(showNormal);
-
 
         txtMinPrice.addActionListener(e -> btnSearch.doClick());
         txtMaxPrice.addActionListener(e -> btnSearch.doClick());
@@ -231,7 +227,6 @@ public class PricePanel extends JPanel implements Refreshable {
         searchBoxContainer.setMaximumSize(new Dimension(500, 45));
         searchBoxContainer.add(searchWrapper);
 
-
         searchCard.add(titleBox);
         searchCard.add(line);
         searchCard.add(Box.createVerticalStrut(15));
@@ -244,9 +239,12 @@ public class PricePanel extends JPanel implements Refreshable {
 
     private void SearchProcessing() {
         String type = "Tên";
-        if (rbPrice.isSelected()) type = "Giá";
-        else if (rbAuthor.isSelected()) type = "Tác giả";
-        else if (rbCategory.isSelected()) type = "Thể loại";
+        if (rbPrice.isSelected())
+            type = "Giá";
+        else if (rbAuthor.isSelected())
+            type = "Tác giả";
+        else if (rbCategory.isSelected())
+            type = "Thể loại";
 
         String input = "";
 
@@ -255,35 +253,47 @@ public class PricePanel extends JPanel implements Refreshable {
             String maxStr = txtMaxPrice.getText().trim();
 
             if (minStr.isEmpty() && maxStr.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập khoảng giá cần tìm!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập khoảng giá cần tìm!", "Thông báo",
+                        JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             try {
-                if (!minStr.isEmpty()) Double.parseDouble(minStr);
-                if (!maxStr.isEmpty()) Double.parseDouble(maxStr);
+                if (!minStr.isEmpty())
+                    Double.parseDouble(minStr);
+                if (!maxStr.isEmpty())
+                    Double.parseDouble(maxStr);
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Vui lòng chỉ nhập số!", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Vui lòng chỉ nhập số!", "Lỗi nhập liệu",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
             input = minStr + "-" + maxStr;
         } else {
             input = txtSearch.getText().trim();
+
             if (input.isEmpty() || input.equals("Tìm kiếm chương trình...")) {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập từ khóa tìm kiếm!", "Thông báo", JOptionPane.WARNING_MESSAGE);
-                refresh();
+                if (hasSearched) {
+                    refresh();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Vui lòng nhập từ khóa tìm kiếm!", "Thông báo",
+                            JOptionPane.WARNING_MESSAGE);
+                }
                 return;
             }
             if (input.matches("^[0-9]+$")) {
-                JOptionPane.showMessageDialog(this, type + " không được nhập số!", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, type + " không được nhập số!", "Lỗi nhập liệu",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
         }
 
         this.listHienThi = bus.timKiemSach(listPrices, input, type);
+        hasSearched = true;
 
         if (listHienThi.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Không tìm thấy kết quả phù hợp!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Không tìm thấy kết quả phù hợp!", "Thông báo",
+                    JOptionPane.INFORMATION_MESSAGE);
         }
         capNhatBang(listHienThi);
     }
@@ -319,7 +329,7 @@ public class PricePanel extends JPanel implements Refreshable {
         btnLoiNhuan.addActionListener(e -> showEditAllBooksProfitDialog());
         toolbar.add(btnLoiNhuan, BorderLayout.WEST);
 
-        JPanel whiteBox = new JPanel(new BorderLayout()){
+        JPanel whiteBox = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -333,8 +343,9 @@ public class PricePanel extends JPanel implements Refreshable {
         whiteBox.setBackground(Color.WHITE);
         whiteBox.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        String[] columns = {"Tên sách", "Tác giả", "Thể loại", "Giá vốn trung bình", "Lợi nhuận", "Giá bán hiện tại", "Thao tác"};
-        model = new DefaultTableModel(columns, 0){
+        String[] columns = { "Tên sách", "Tác giả", "Thể loại", "Giá vốn trung bình", "Lợi nhuận", "Giá bán hiện tại",
+                "Thao tác" };
+        model = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -346,8 +357,7 @@ public class PricePanel extends JPanel implements Refreshable {
         JScrollPane scroll1 = new JScrollPane(table);
         scroll1.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder("Danh sách định giá hệ thống"),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)
-        ));
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
         scroll1.getViewport().setBackground(Color.WHITE);
 
         table.addMouseListener(new MouseAdapter() {
@@ -355,7 +365,8 @@ public class PricePanel extends JPanel implements Refreshable {
             public void mouseClicked(MouseEvent e) {
                 int col = table.columnAtPoint(e.getPoint());
                 int row = table.getSelectedRow();
-                if (row == -1) return;
+                if (row == -1)
+                    return;
 
                 if (e.getClickCount() == 2) {
                     table.clearSelection();
@@ -379,12 +390,14 @@ public class PricePanel extends JPanel implements Refreshable {
     }
 
     private void capNhatBang(List<PriceDTO> list) {
-        if (model == null) return;
+        if (model == null)
+            return;
         model.setRowCount(0);
-        if (list == null || list.isEmpty()) return;
+        if (list == null || list.isEmpty())
+            return;
 
         for (PriceDTO p : list) {
-            model.addRow(new Object[]{
+            model.addRow(new Object[] {
                     p.getBookName(),
                     p.getAuthorName() != null ? p.getAuthorName() : "Nhiều tác giả",
                     p.getCategoryName() != null ? p.getCategoryName() : "Khác",
@@ -400,7 +413,7 @@ public class PricePanel extends JPanel implements Refreshable {
         t.setShowGrid(true);
         Color vachKe = new Color(200, 210, 200);
         t.setGridColor(vachKe);
-        t.setIntercellSpacing(new Dimension(1,1));
+        t.setIntercellSpacing(new Dimension(1, 1));
         t.setRowHeight(45);
 
         t.getTableHeader().setBackground(new Color(225, 230, 225));
@@ -412,10 +425,11 @@ public class PricePanel extends JPanel implements Refreshable {
             public Component getTableCellRendererComponent(JTable table, Object value,
                                                            boolean isSelected, boolean hasFocus, int row, int column) {
 
-                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                        column);
 
                 if (isSelected) {
-                    label.setBackground(new Color(17,71,50));
+                    label.setBackground(new Color(17, 71, 50));
                     label.setForeground(Color.WHITE);
                 } else {
                     label.setForeground(Color.BLACK);
@@ -431,10 +445,11 @@ public class PricePanel extends JPanel implements Refreshable {
 
         t.getColumnModel().getColumn(6).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                                                           boolean hasFocus, int row, int column) {
                 JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 7));
 
-                Color bg = isSelected ? new Color(17,71,50) : (row % 2 != 0 ? new Color(180, 200, 180) : Color.WHITE);
+                Color bg = isSelected ? new Color(17, 71, 50) : (row % 2 != 0 ? new Color(180, 200, 180) : Color.WHITE);
                 p.setBackground(bg);
                 p.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(200, 210, 200)));
 
@@ -458,7 +473,8 @@ public class PricePanel extends JPanel implements Refreshable {
                 "Mức giá vốn hiện tại: " + String.format("%,.0f", p.getBasePrice()) + " VNĐ\nNhập % lợi nhuận mới:",
                 currentPercent);
 
-        if (res == null || res.trim().isEmpty()) return;
+        if (res == null || res.trim().isEmpty())
+            return;
 
         try {
             double newPercent = Double.parseDouble(res);
@@ -493,7 +509,8 @@ public class PricePanel extends JPanel implements Refreshable {
             return;
         }
 
-        String res = JOptionPane.showInputDialog(this, "Nhập % lợi nhuận áp dụng chung cho " + listHienThi.size() + " cuốn sách:");
+        String res = JOptionPane.showInputDialog(this,
+                "Nhập % lợi nhuận áp dụng chung cho " + listHienThi.size() + " cuốn sách:");
         if (res != null && !res.trim().isEmpty()) {
             try {
                 double newPercent = Double.parseDouble(res);
@@ -514,7 +531,9 @@ public class PricePanel extends JPanel implements Refreshable {
     private void setupSearchBorderStyle(JTextField field, String placeholder, boolean showIcon) {
         field.setOpaque(false);
         java.net.URL imgURL = getClass().getResource("/icon/Thêm văn bản-Photoroom.png");
-        final Image searchIcon = (imgURL != null) ? new ImageIcon(imgURL).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH) : null;
+        final Image searchIcon = (imgURL != null)
+                ? new ImageIcon(imgURL).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH)
+                : null;
         int leftPadding = showIcon ? 35 : 15;
 
         field.setBorder(new javax.swing.border.EmptyBorder(0, leftPadding, 0, 10) {
@@ -522,7 +541,8 @@ public class PricePanel extends JPanel implements Refreshable {
             public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                if (showIcon && searchIcon != null) g2.drawImage(searchIcon, x + 10, (height - 18) / 2, c);
+                if (showIcon && searchIcon != null)
+                    g2.drawImage(searchIcon, x + 10, (height - 18) / 2, c);
                 if (field.getText().isEmpty()) {
                     g2.setColor(Color.GRAY);
                     g2.setFont(c.getFont().deriveFont(Font.ITALIC));

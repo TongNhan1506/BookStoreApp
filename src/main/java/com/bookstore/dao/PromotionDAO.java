@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PromotionDAO {
-    public double getPromotionPercentByBook(int bookId) {
+    public double getPromotionPercentByBookId(int bookId) {
         double percent = 0;
         String sql = "SELECT p.percent FROM promotion p " +
                 "JOIN promotion_detail pd ON p.promotion_id = pd.promotion_id " +

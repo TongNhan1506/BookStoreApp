@@ -166,9 +166,10 @@ create table import_ticket (
     created_date datetime default current_timestamp,
     total_import_quantity int default 0,
     total_import_price decimal(15, 0),
-    status int default 1, -- 0: đã hủy, 1: chờ duyệt, 2: đã nhập
+    status int default 1,
     employee_id int not null,
     supplier_id int not null,
+    approver_id int,
     foreign key (employee_id) references employee(employee_id),
     foreign key (supplier_id) references supplier(supplier_id)
 );
@@ -259,20 +260,42 @@ insert into permission(role_id, action_id, is_view, is_action) values
 (2, 12, 1, 0);
 
 insert into permission(role_id, action_id, is_view, is_action) values
-(3,),
-(),
-(),
-(),
-(),
-();
+(3, 3, 1, 1),
+(3, 8, 1, 0),
+(3, 9, 1, 1),
+(3, 10, 1, 1),
+(3, 11, 1, 0),
+(3, 12, 1, 0),
+(3, 14, 1, 0);
+
+insert into permission(role_id, action_id, is_view, is_action) values
+(4, 12, 1, 1),
+(4, 14, 1, 1),
+(4, 11, 1, 1),
+(4, 6, 1, 1),
+(4, 7, 1, 1),
+(4, 8, 1, 1),
+(4, 13, 1, 1),
+(4, 14, 1, 1),
+(4, 3, 1, 0);
 
 insert into employee (employee_name, employee_phone, birthday, base_salary, day_in, role_id) values
-('Quản lý mẫu', '0914349584', '1999-04-15', 12000000, '2025-11-23', 1),
-('Nhân viên bán hàng mẫu', '0934129959', '2004-06-18', 7000000, '2025-12-11', 2);
+('Nguyễn Thị Hồng Anh - Quản Lý', '0914349584', '2000-04-15', 12000000, '2025-11-23', 1),
+('Ngọc Quý - Nhân viên bán hàng', '0934129959', '2004-06-18', 8000000, '2025-12-11', 2),
+('Tòng Nhân - Nhân viên nhập hàng', '0912357394', '2002-04-11', 7500000, '2025-02-17', 3),
+('Ý Vy - Nhân viên tài chính', '0993840948', '2001-02-04', 10000000, '2024-10-21', 4),
+('Ngọc - Nhân viên bán hàng', '0998929485', '2000-08-12', 8000000, '2025-5-15', 2),
+('Tuệ San - Nhân viên tài chính', '0959697395', '2003-06-20', 10000000, '2024-07-07', 4),
+('Quý Nhân Vy Ngọc San - Admin', '0975797209', '1999-06-10', 20000000, '2023-09-10', 1);
 
 insert into account (username, password, employee_id) values
-('admin', 'admin', 1),
-('banhang', 'banhang', 2);
+('honganh', '0914349584', 1),
+('ngocquy', '0934129959', 2),
+('tongnhan', '0912357394', 3),
+('yvy', '0993840948', 4),
+('ngoc', '0998929485', 5),
+('tuesan', '0959697395', 6),
+('admin', 'admin', 7);
 
 insert into supplier (supplier_name, supplier_address, supplier_phone) values
     ('NXB Trẻ', '161B Lý Chính Thắng, Phường Xuân Hoà , TP. Hồ Chí Minh', '0842839316289'),
@@ -382,8 +405,8 @@ insert into author (author_name, nationality) values
     ('Neil Gaiman', 'Anh');
 
 insert into book (book_name, selling_price, quantity, translator, image, description, status, category_id, supplier_id, tag_detail) values
-('Bàn Có Năm Chỗ Ngồi', 0, 100, NULL, "bàn_có_năm_chỗ_ngồi.jpg", 'Bàn có năm chỗ ngồi xoay quanh câu chuyện tình bạn giữa 5 người bạn. Đó là Huy, Hiền, Quang, Đại, Bảy – họ là năm người bạn với năm cá tính và hoàn cảnh khác nhau cùng chung trong một lớp học. Những trò nghịch ngợm trẻ con đôi khi gây ra mâu thuẫn, nhưng trên tất cả đó là những đứa trẻ ham học, giàu lòng nhân ái và biết quan tâm đến bạn bè. Cảm thông với hoàn cảnh của nhau, từng người nghĩ ra cách giúp đỡ bạn theo khả năng của mình để tình bạn ấy lớn dần theo năm tháng. Mọi thứ trong sách như đưa người đọc được sống lại cái thời còn cắp sách tới trường và tái hiện lại mọi thứ vậy.', 1, 1, 1, 'Truyện dài, Tình bạn, Thiếu nhi, Nguyễn Nhật Ánh'),
-('Thằng Quỷ Nhỏ', 0, 100, NULL, "thằng_quỷ_nhỏ.jpg", 'Chuông reo, cả lớp xếp hàng. Nga bước ra khỏi lớp và trước khi đứng vào hàng sau lưng Hạnh, nó khẽ đưa mắt nhìn lướt qua đám con trai xếp hàng kế bên, kín đáo dò xem nhân vật nào là thằng quỷ nhỏ, nhưng nó không thể đoán định được. Những khuôn mặt vui nhộn và rạng rỡ kia chẳng có gì khả nghi. Hay "hắn" mang biệt danh đó là do "hắn" phá phách không ai chịu nổi? Nga thầm nghĩ và lại liếc sang dãy con trai, tò mò quan sát.', 1, 1, 1, 'Truyện dài, Tình bạn, Thiếu nhi, Nguyễn Nhật Ánh'),
+('Bàn Có Năm Chỗ Ngồi', 0, 0, NULL, "bàn_có_năm_chỗ_ngồi.jpg", 'Bàn có năm chỗ ngồi xoay quanh câu chuyện tình bạn giữa 5 người bạn. Đó là Huy, Hiền, Quang, Đại, Bảy – họ là năm người bạn với năm cá tính và hoàn cảnh khác nhau cùng chung trong một lớp học. Những trò nghịch ngợm trẻ con đôi khi gây ra mâu thuẫn, nhưng trên tất cả đó là những đứa trẻ ham học, giàu lòng nhân ái và biết quan tâm đến bạn bè. Cảm thông với hoàn cảnh của nhau, từng người nghĩ ra cách giúp đỡ bạn theo khả năng của mình để tình bạn ấy lớn dần theo năm tháng. Mọi thứ trong sách như đưa người đọc được sống lại cái thời còn cắp sách tới trường và tái hiện lại mọi thứ vậy.', 1, 1, 1, 'Truyện dài, Tình bạn, Thiếu nhi, Nguyễn Nhật Ánh'),
+('Thằng Quỷ Nhỏ', 0, 0, NULL, "thằng_quỷ_nhỏ.jpg", 'Chuông reo, cả lớp xếp hàng. Nga bước ra khỏi lớp và trước khi đứng vào hàng sau lưng Hạnh, nó khẽ đưa mắt nhìn lướt qua đám con trai xếp hàng kế bên, kín đáo dò xem nhân vật nào là thằng quỷ nhỏ, nhưng nó không thể đoán định được. Những khuôn mặt vui nhộn và rạng rỡ kia chẳng có gì khả nghi. Hay "hắn" mang biệt danh đó là do "hắn" phá phách không ai chịu nổi? Nga thầm nghĩ và lại liếc sang dãy con trai, tò mò quan sát.', 1, 1, 1, 'Truyện dài, Tình bạn, Thiếu nhi, Nguyễn Nhật Ánh'),
 ('Út Quyên Và Tôi', 0, 0, NULL, NULL, 'Nếu chẳng may được sinh ra trên cõi đời này, bạn hãy cầu mong mình là người cuối cùng xuất hiện trong gia đình, sau một lô lốc những kẻ làm anh làm chị khác. Đừng nôn nóng, cũng đừng vội vàng. Hãy chờ bọn họ xô đẩy, chen lấn nhau chui ra hết, lúc đó bạn hãy thong thả đặt chân lên mặt đất, ung dung cất tiếng khóc chào đời và hùng hồn tuyên bố:"Ta là con út".', 1, 1, 1, 'Truyện ngắn, Gia đình, Nguyễn Nhật Ánh'),
 ('Và Khi Tro Bụi', 0, 0, NULL, NULL, 'Người đàn bà đi tìm cái chết bằng một cách rất lạ, chị sống cuộc sống của một hành khách trên những chuyến tàu xa, và tình cờ được chứng kiến một bi kịch gia đình… Câu chuyện khiến người đọc ngạt thở, chuyện được kể bằng một giọng văn điềm tĩnh, nhưng có thể thấy rõ niềm đau giấu bên trong sự tỉnh táo lành lạnh đó. Niềm đau không khó cắt nghĩa, có thể chia sẻ, nhưng không dễ giải tỏa.', 1, 1, 1, 'Truyện ngắn, Bi kịch'),
 ('Ghét,Thân,Thương,Yêu,Cưới', 0, 0, 'Trần Hạnh, Đặng Xuân Thảo, Hạnh Mai', NULL, 'Mỗi khi nhấc một tập truyện mới của Alice Munro lên, người ta luôn biết điều gì đang chờ đợi mình. Vẫn những thị trấn nhỏ và những thành phố mới ở Ontario và British Columbia. Vẫn những người trẻ đầy gai góc và mâu thuẫn. Vẫn những người già đối mặt với cái chết và mối tình muộn. Vẫn giọng kể thấu suốt sắc lạnh của một người quan sát tỉ mỉ tinh tường. Ấy thế nhưng, dường như mỗi trang lại mang đến một loạt những điều ta không hề lường trước: hành động bất ngờ, cảm xúc bất ngờ, ngôn ngữ bất ngờ, chi tiết bất ngờ. Và cốt truyện thì luôn quá tinh vi phức tạp để có thể tóm tắt lại.Hãy đọc chín truyện ngắn trong Ghét Thân Thương Yêu Cưới. Đó là cách duy nhất để thật sự hiểu những điều kỳ diệu mà bậc phù thủy tâm lý và ngôn từ Alice Munro tạo tác nên', 1, 1, 2, 'Truyện ngắn, Tình cảm'),
@@ -479,31 +502,93 @@ SELECT 2, book_id FROM book WHERE category_id = 3;
 INSERT INTO promotion_detail (promotion_id, book_id)
 SELECT 3, book_id FROM book WHERE category_id = 4;
 
-INSERT INTO import_ticket (created_date, total_import_quantity, total_import_price, status, employee_id, supplier_id)
-VALUES ('2026-02-01 10:00:00', 100, 5000000, 2, 1, 1);
+INSERT INTO import_ticket (created_date, total_import_quantity, total_import_price, status, employee_id, supplier_id, approver_id)
+VALUES ('2026-02-01 10:00:00', 500, 428000, 2, 1, 1, 1);
 
 INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
-VALUES (LAST_INSERT_ID(), 1, 100, 50000);
+VALUES (1, 1, 18, 52000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (1, 2, 69, 20000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (1, 3, 26, 80000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (1, 4, 70, 59000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (1, 28, 110, 107000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (1, 29, 207, 110000);
+
+INSERT INTO import_ticket (created_date, total_import_quantity, total_import_price, status, employee_id, supplier_id, approver_id)
+VALUES ('2026-03-01 3:00:00', 764, 437000, 2, 1, 2, 1);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (2, 5, 33, 44000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (2, 6, 26, 78000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (2, 14, 39, 90000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (2, 18, 188, 25000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (2, 19, 157, 35000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (2, 22, 199, 66000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (2, 27, 122, 99000);
+
+INSERT INTO import_ticket (created_date, total_import_quantity, total_import_price, status, employee_id, supplier_id, approver_id)
+VALUES ('2026-04-12 6:20:00', 430, 227, 2, 1, 4, 1);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (4, 15, 116, 30000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (4, 20, 178, 49000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (4, 21, 59, 60000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (4, 26, 77, 88000);
+
+INSERT INTO import_ticket (created_date, total_import_quantity, total_import_price, status, employee_id, supplier_id, approver_id)
+VALUES ('2026-02-22 6:20:00', 286, 127000, 2, 1, 6, 1);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (6, 8, 90, 12000);
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (6, 9, 29, 25000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (6, 10, 71, 30000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (6, 11, 19, 15000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (6, 12, 67, 20000);
+
+INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
+VALUES (6, 13, 10, 25000);
 
 INSERT INTO price (book_id, base_price, profit_rate, selling_price, effective_date, is_active)
 VALUES (1, 50000, 0.20, 60000, '2026-02-01 10:00:00', 1);
-
-INSERT INTO import_ticket (created_date, total_import_quantity, total_import_price, status, employee_id, supplier_id)
-VALUES ('2026-02-15 14:30:00', 50, 2800000, 2, 1, 1);
-
-INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
-VALUES (LAST_INSERT_ID(), 1, 50, 56000);
 
 UPDATE price SET is_active = 0, end_date = '2026-02-15 14:30:00' WHERE book_id = 1 AND is_active = 1;
 
 INSERT INTO price (book_id, base_price, profit_rate, selling_price, effective_date, is_active)
 VALUES (1, 52000, 0.20, 62400, '2026-02-15 14:30:00', 1);
-
-INSERT INTO import_ticket (created_date, total_import_quantity, total_import_price, status, employee_id, supplier_id)
-VALUES ('2026-02-25 09:15:00', 50, 2400000, 2, 1, 1);
-
-INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
-VALUES (LAST_INSERT_ID(), 1, 50, 48000);
 
 UPDATE price SET is_active = 0, end_date = '2026-02-25 09:15:00' WHERE book_id = 1 AND is_active = 1;
 

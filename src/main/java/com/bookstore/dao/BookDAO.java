@@ -11,7 +11,7 @@ public class BookDAO {
     public List<BookDTO> selectAllBooks() {
         List<BookDTO> list = new ArrayList<>();
         String sql = "SELECT b.*, IFNULL(bp.selling_price, 0) AS current_selling_price, c.category_name, " +
-                "GROUP_CONCAT(DISTINCT a.author_name SEPARATOR ', ') as author_names, " +
+                "GROUP_CONCAT(DISTINCT a.author_name SEPARATOR ',') as author_names, " +
                 "GROUP_CONCAT(DISTINCT ba.author_id SEPARATOR ',') as author_ids " +
                 "FROM book b " +
                 "LEFT JOIN price bp ON b.book_id = bp.book_id AND bp.is_active = 1 " +
@@ -26,34 +26,6 @@ public class BookDAO {
 
             while (rs.next()) {
                 list.add(mapResultSetToBookDTO(rs));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public List<BookDTO> searchByName(String bookname) {
-        List<BookDTO> list = new ArrayList<>();
-        String sql = "SELECT b.*, IFNULL(bp.selling_price, 0) AS current_selling_price, c.category_name, " +
-                "GROUP_CONCAT(DISTINCT a.author_name SEPARATOR ', ') as author_names, " +
-                "GROUP_CONCAT(DISTINCT ba.author_id SEPARATOR ',') as author_ids " +
-                "FROM book b " +
-                "LEFT JOIN price bp ON b.book_id = bp.book_id AND bp.is_active = 1 " +
-                "JOIN category c ON b.category_id = c.category_id " +
-                "LEFT JOIN book_author ba ON b.book_id = ba.book_id " +
-                "LEFT JOIN author a ON ba.author_id = a.author_id " +
-                "WHERE b.status = 1 AND b.book_name LIKE ? " +
-                "GROUP BY b.book_id, bp.selling_price";
-
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-
-            ps.setString(1, "%" + bookname + "%");
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(mapResultSetToBookDTO(rs));
-                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -152,20 +124,6 @@ public class BookDAO {
             ps.setInt(2, bookId);
             ps.executeUpdate();
         }
-    }
-
-    public boolean existsByName(String bookname) {
-        String sql = "SELECT * FROM book WHERE book_name = ?";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, bookname);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     public int getQuantityByID(int bookId) {

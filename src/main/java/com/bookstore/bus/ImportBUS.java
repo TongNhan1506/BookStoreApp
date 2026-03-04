@@ -18,6 +18,10 @@ public class ImportBUS {
         return importDAO.getAll();
     }
 
+    public List<ImportDetailDTO> getDetailsByImportId(int importId) {
+        return detailDAO.getDetailsByImportId(importId);
+    }
+
     public boolean importBooks(ImportTicketDTO importDTO, ImportDetailDTO[] details) {
         int newImportID = importDAO.add(importDTO);
         if (newImportID != -1) {
@@ -25,14 +29,26 @@ public class ImportBUS {
                 if (detail != null) {
                     detail.setImportID(newImportID);
                     detailDAO.add(detail);
-
-                    // Cập nhật tồn kho
-                    int currentStock = bookDAO.getQuantityByID(detail.getBookID());
-                    bookDAO.updateQuantity(detail.getBookID(), currentStock + detail.getQuantity());
                 }
             }
             return true;
         }
         return false;
+    }
+
+    public boolean approveImport(int importId, int approverId) {
+        if (importDAO.updateStatus(importId, 2, approverId)) {
+            List<ImportDetailDTO> details = detailDAO.getDetailsByImportId(importId);
+            for (ImportDetailDTO d : details) {
+                int currentStock = bookDAO.getQuantityByID(d.getBookID());
+                bookDAO.updateQuantity(d.getBookID(), currentStock + d.getQuantity());
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public boolean cancelImport(int importId, int approverId) {
+        return importDAO.updateStatus(importId, 0, approverId);
     }
 }

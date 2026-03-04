@@ -5,7 +5,7 @@ public class ImportDetailDTO {
     private int bookID;
     private int quantity;
     private double price; // Giá nhập
-
+    private String bookName;
     public ImportDetailDTO() {}
 
     public ImportDetailDTO(int importID, int bookID, int quantity, double price) {
@@ -20,6 +20,9 @@ public class ImportDetailDTO {
 
     public int getBookID() { return bookID; }
     public void setBookID(int bookID) { this.bookID = bookID; }
+
+    public String getBookName() { return bookName; }
+    public void setBookName(String bookName) { this.bookName = bookName; }
 
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }

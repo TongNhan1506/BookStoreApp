@@ -1,4 +1,5 @@
 package com.bookstore.gui.panel.PriceTab;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.*;
@@ -6,7 +7,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.text.SimpleDateFormat;
 import java.util.List;
-
 
 import com.bookstore.dto.*;
 import com.bookstore.bus.*;
@@ -84,18 +84,21 @@ public class PromotionPanel extends JPanel {
         rbThoiGian.addActionListener(e -> searchCard.show(cardPanel, "DATE"));
 
         ButtonGroup bg = new ButtonGroup();
-        bg.add(rbTen); bg.add(rbPhanTram); bg.add(rbThoiGian);
-
+        bg.add(rbTen);
+        bg.add(rbPhanTram);
+        bg.add(rbThoiGian);
 
         filterBox.add(new JLabel("Tìm theo:"));
-        filterBox.add(rbTen); filterBox.add(rbPhanTram); filterBox.add(rbThoiGian);
+        filterBox.add(rbTen);
+        filterBox.add(rbPhanTram);
+        filterBox.add(rbThoiGian);
 
         leftGroup.add(filterBox);
         leftGroup.add(createSearchWrapper());
 
         controlPanel.add(leftGroup, BorderLayout.WEST);
 
-        JButton btnAdd = new JButton("+ Thêm Khuyến Mãi"){
+        JButton btnAdd = new JButton("+ Thêm Khuyến Mãi") {
 
             @Override
             protected void paintComponent(Graphics g) {
@@ -109,7 +112,6 @@ public class PromotionPanel extends JPanel {
                 } else {
                     g2.setColor(getBackground());
                 }
-
 
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
                 g2.setColor(getForeground());
@@ -169,7 +171,8 @@ public class PromotionPanel extends JPanel {
         iconBox.setOpaque(false);
         java.net.URL imgURL = getClass().getResource("/icon/Thêm văn bản-Photoroom.png");
         if (imgURL != null) {
-            iconBox.add(new JLabel(new ImageIcon(new ImageIcon(imgURL).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH))));
+            iconBox.add(new JLabel(
+                    new ImageIcon(new ImageIcon(imgURL).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH))));
         }
 
         cardPanel = new JPanel(searchCard);
@@ -220,10 +223,13 @@ public class PromotionPanel extends JPanel {
     }
 
     private void initTable() {
-        String[] cols = {"ID", "Tên chương trình","Phần trăm", "Ngày bắt đầu", "Ngày kết thúc", "Trạng thái", "Thao tác"};
+        String[] cols = { "ID", "Tên chương trình", "Phần trăm", "Ngày bắt đầu", "Ngày kết thúc", "Trạng thái",
+                "Thao tác" };
         model = new DefaultTableModel(cols, 0) {
             @Override
-            public boolean isCellEditable(int row, int column) { return false; }
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
         };
         table = new JTable(model);
 
@@ -231,15 +237,13 @@ public class PromotionPanel extends JPanel {
         scroll.getViewport().setBackground(Color.WHITE);
         scroll.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder(
-                        BorderFactory.createLineBorder(new Color(200,200,200), 1),
+                        BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
                         " Bảng Khuyến Mãi ",
                         TitledBorder.CENTER,
                         TitledBorder.TOP,
                         new Font("Segoe UI", Font.BOLD, 14),
-                        new Color(17, 71, 50)
-                ),
-                BorderFactory.createEmptyBorder(8, 8, 8, 8)
-        ));
+                        new Color(17, 71, 50)),
+                BorderFactory.createEmptyBorder(8, 8, 8, 8)));
 
         table.addMouseListener(new MouseAdapter() {
             private int lastSelectedRow = -1;
@@ -256,40 +260,23 @@ public class PromotionPanel extends JPanel {
 
                 int column = table.columnAtPoint(e.getPoint());
                 if (column == 6 && row != -1) {
-                    Rectangle rect = table.getCellRect(row, column, false);
-                    int clickX = e.getX() - rect.x;
 
-                    if (clickX > rect.width / 2) {
-                        int opt = JOptionPane.showConfirmDialog(null, "Xác nhận dừng chương trình?", "Xác nhận", JOptionPane.YES_NO_OPTION);
-                        if (opt == JOptionPane.YES_OPTION) {
-                            String idStr = table.getValueAt(row, 0).toString().substring(2);
-                            int id = Integer.parseInt(idStr);
+                    String idStr = table.getValueAt(row, 0).toString().substring(2);
+                    int id = Integer.parseInt(idStr);
 
-                            PromotionDTO p = listPromotions.stream()
-                                    .filter(item -> item.getPromotionId() == id)
-                                    .findFirst().orElse(null);
-
-                            if (p != null) {
-                                p.setStatus(0);
-                                bus.updateStatus(p);
-                                loadData();
-                                JOptionPane.showMessageDialog(null, "Đã ngừng hoạt động chương trình!");
-                            }
+                    PromotionDTO p = null;
+                    for (PromotionDTO item : listPromotions) {
+                        if (item.getPromotionId() == id) {
+                            p = item;
+                            break;
                         }
-                    } else {
-                        String idStr = table.getValueAt(row, 0).toString().substring(2);
-                        int id = Integer.parseInt(idStr);
+                    }
 
-                        PromotionDTO p = listPromotions.stream()
-                                .filter(item -> item.getPromotionId() == id)
-                                .findFirst().orElse(null);
-
-                        if (p != null) {
-                            JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(PromotionPanel.this);
-                            PromotionDialog dialog = new PromotionDialog(parentFrame, "Chỉnh Sửa Khuyến Mãi", p);
-                            dialog.setVisible(true);
-                            loadData();
-                        }
+                    if (p != null) {
+                        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(PromotionPanel.this);
+                        PromotionDialog dialog = new PromotionDialog(parentFrame, "Chỉnh Sửa Khuyến Mãi", p);
+                        dialog.setVisible(true);
+                        loadData();
                     }
                 }
             }
@@ -297,7 +284,7 @@ public class PromotionPanel extends JPanel {
 
         table.setRowHeight(50);
         table.setShowGrid(false);
-        table.setGridColor(new Color(5,30,20));
+        table.setGridColor(new Color(5, 30, 20));
         table.setIntercellSpacing(new Dimension(0, 0));
         table.getTableHeader().setBackground(new Color(225, 230, 225));
         table.getTableHeader().setForeground(Color.BLACK);
@@ -308,16 +295,17 @@ public class PromotionPanel extends JPanel {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
                                                            boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel c = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                JLabel c = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                        column);
                 c.setHorizontalAlignment(SwingConstants.CENTER);
                 c.setOpaque(true);
 
                 if (isSelected) {
-                    c.setBackground(new Color(17,71,50));
+                    c.setBackground(new Color(17, 71, 50));
                     c.setForeground(Color.WHITE);
                     c.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, Color.WHITE));
                 } else {
-                    c.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, new Color(150,155,150)));
+                    c.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, new Color(150, 155, 150)));
                     if (row % 2 == 0) {
                         c.setBackground(Color.WHITE);
                         c.setForeground(Color.BLACK);
@@ -332,15 +320,16 @@ public class PromotionPanel extends JPanel {
 
         table.getColumnModel().getColumn(6).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                                                           boolean hasFocus, int row, int column) {
                 JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 10));
                 p.setOpaque(true);
 
                 if (isSelected) {
-                    p.setBackground(new Color(17,71,50));
+                    p.setBackground(new Color(17, 71, 50));
                     p.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.WHITE));
                 } else {
-                    p.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(150,155,150)));
+                    p.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(150, 155, 150)));
                     if (row % 2 == 0) {
                         p.setBackground(Color.WHITE);
                     } else {
@@ -349,12 +338,10 @@ public class PromotionPanel extends JPanel {
                 }
 
                 JButton btnEdit = new JButton("Sửa");
-                JButton btnDelete = new JButton("Xóa");
 
                 btnEdit.setBackground(new Color(240, 173, 78));
-                btnDelete.setBackground(new Color(217, 83, 79));
 
-                for (JButton b : new JButton[]{btnEdit, btnDelete}) {
+                for (JButton b : new JButton[] { btnEdit }) {
                     b.setForeground(Color.WHITE);
                     b.setPreferredSize(new Dimension(50, 30));
                     b.setFont(new Font("Segoe UI", Font.BOLD, 9));
@@ -371,7 +358,6 @@ public class PromotionPanel extends JPanel {
         }
 
     }
-
 
     public void loadData() {
 
@@ -407,7 +393,8 @@ public class PromotionPanel extends JPanel {
                 capNhatBang(bus.selectAllPromotions());
                 hasSearched = false;
             } else {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập dữ liệu tìm kiếm!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập dữ liệu tìm kiếm!", "Thông báo",
+                        JOptionPane.WARNING_MESSAGE);
             }
             return;
         }
@@ -425,7 +412,7 @@ public class PromotionPanel extends JPanel {
         for (PromotionDTO p : list) {
             String trangThaiStr = (p.getStatus() == 1) ? "Đang chạy" : "Ngừng hoạt động";
 
-            model.addRow(new Object[]{
+            model.addRow(new Object[] {
                     "KM" + p.getPromotionId(),
                     p.getPromotionName(),
                     p.getPercent() + "%",
@@ -447,7 +434,9 @@ public class PromotionPanel extends JPanel {
         field.addActionListener(e -> SearchProcessing());
         field.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
-            public void keyReleased(java.awt.event.KeyEvent e) { field.repaint(); }
+            public void keyReleased(java.awt.event.KeyEvent e) {
+                field.repaint();
+            }
         });
 
         field.setUI(new javax.swing.plaf.basic.BasicTextFieldUI() {

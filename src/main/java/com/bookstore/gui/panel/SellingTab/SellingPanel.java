@@ -641,7 +641,7 @@ public class SellingPanel extends JPanel implements Refreshable {
             return;
         }
 
-        double promoPercent = promotionBUS.getPromotionPercentByBook(bookId);
+        double promoPercent = promotionBUS.getPromotionPercentByBookId(bookId);
         double oldPrice = selectedBook.getSellingPrice();
         double newPrice = oldPrice * (1 - promoPercent / 100);
 

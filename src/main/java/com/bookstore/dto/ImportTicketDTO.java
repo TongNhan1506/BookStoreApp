@@ -5,16 +5,16 @@ import java.sql.Timestamp;
 public class ImportTicketDTO {
     private int importID;
     private int employeeID;
-    private String employeeName; // Tên nhân viên
+    private String employeeName;
     private int supplierID;
-    private String supplierName; // Tên nhà cung cấp
+    private String supplierName;
+    private String approverName;
     private double totalPrice;
     private Timestamp createdDate;
     private int status;
 
     public ImportTicketDTO() {}
 
-    // Constructor đầy đủ để lấy dữ liệu hiển thị lên bảng
     public ImportTicketDTO(int importID, String supplierName, Timestamp createdDate, String employeeName, double totalPrice, int status) {
         this.importID = importID;
         this.supplierName = supplierName;
@@ -24,14 +24,12 @@ public class ImportTicketDTO {
         this.status = status;
     }
 
-    // Constructor dùng để INSERT (Tạo phiếu nhập mới)
     public ImportTicketDTO(int employeeID, int supplierID, double totalPrice) {
         this.employeeID = employeeID;
         this.supplierID = supplierID;
         this.totalPrice = totalPrice;
     }
 
-    // --- GETTER & SETTER (Phải đúng tên như này) ---
     public int getImportID() { return importID; }
     public void setImportID(int importID) { this.importID = importID; }
 
@@ -55,4 +53,7 @@ public class ImportTicketDTO {
 
     public int getStatus() { return status; }
     public void setStatus(int status) { this.status = status; }
+
+    public String getApproverName() {return approverName; }
+    public void setApproverName(String approverName) {this.approverName = approverName;}
 }

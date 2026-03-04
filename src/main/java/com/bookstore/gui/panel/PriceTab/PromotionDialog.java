@@ -20,6 +20,8 @@ public class PromotionDialog extends JDialog {
     private PromotionBUS bus = new PromotionBUS();
     private PromotionDTO data;
     private boolean isEdit;
+    private List<Integer> currentlySelectedIds = new ArrayList<>();
+    private JComboBox<String> cbStatus = new JComboBox<>();
 
     public PromotionDialog(JFrame parent, String title, PromotionDTO dto) {
         super(parent, title, true);
@@ -30,7 +32,16 @@ public class PromotionDialog extends JDialog {
         txtSearchBook.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                loadBookList(bus.suggestBooksByPromotionName(txtSearchBook.getText()));
+
+                saveCurrentSelection();
+
+                String keyword = txtSearchBook.getText().trim();
+                loadBookList(bus.suggestBooksByPromotionName(keyword));
+
+                restoreSelection();
+
+                bookTable.revalidate();
+                bookTable.repaint();
             }
         });
 
@@ -54,7 +65,8 @@ public class PromotionDialog extends JDialog {
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        txtID = new JTextField(); txtID.setEditable(false);
+        txtID = new JTextField();
+        txtID.setEditable(false);
         txtTen = new JTextField();
         txtPercent = new JTextField();
         txtSearchBook = new JTextField();
@@ -63,29 +75,67 @@ public class PromotionDialog extends JDialog {
         spEnd = new JSpinner(new SpinnerDateModel());
         spEnd.setEditor(new JSpinner.DateEditor(spEnd, "yyyy-MM-dd HH:mm:ss"));
 
-        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0; infoPanel.add(new JLabel("Mã KM:"), gbc);
-        gbc.gridx = 1; gbc.weightx = 0.5; infoPanel.add(txtID, gbc);
-        gbc.gridx = 2; gbc.weightx = 0; infoPanel.add(new JLabel("Tên chương trình:"), gbc);
-        gbc.gridx = 3; gbc.weightx = 0.5; infoPanel.add(txtTen, gbc);
+        cbStatus = new JComboBox<>(new String[] { "Ngừng hoạt động", "Đang chạy" });
 
-        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0; infoPanel.add(new JLabel("Phần trăm (%):"), gbc);
-        gbc.gridx = 1; gbc.weightx = 0.5; infoPanel.add(txtPercent, gbc);
-        gbc.gridx = 2; gbc.weightx = 0; infoPanel.add(new JLabel("Tìm sách:"), gbc);
-        gbc.gridx = 3; gbc.weightx = 0.5; infoPanel.add(txtSearchBook, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 0;
+        infoPanel.add(new JLabel("Mã KM:"), gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 0.5;
+        infoPanel.add(txtID, gbc);
+        gbc.gridx = 2;
+        gbc.weightx = 0;
+        infoPanel.add(new JLabel("Tên chương trình:"), gbc);
+        gbc.gridx = 3;
+        gbc.weightx = 0.5;
+        infoPanel.add(txtTen, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0; infoPanel.add(new JLabel("Ngày bắt đầu:"), gbc);
-        gbc.gridx = 1; gbc.weightx = 0.5; infoPanel.add(spStart, gbc);
-        gbc.gridx = 2; gbc.weightx = 0; infoPanel.add(new JLabel("Ngày kết thúc:"), gbc);
-        gbc.gridx = 3; gbc.weightx = 0.5; infoPanel.add(spEnd, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 0;
+        infoPanel.add(new JLabel("Phần trăm (%):"), gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 0.5;
+        infoPanel.add(txtPercent, gbc);
+        gbc.gridx = 2;
+        gbc.weightx = 0;
+        infoPanel.add(new JLabel("Tìm sách:"), gbc);
+        gbc.gridx = 3;
+        gbc.weightx = 0.5;
+        infoPanel.add(txtSearchBook, gbc);
 
-        String[] cols = {"Chọn", "Mã sách", "Tên sách", "Thể loại"};
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.weightx = 0;
+        infoPanel.add(new JLabel("Ngày bắt đầu:"), gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 0.5;
+        infoPanel.add(spStart, gbc);
+        gbc.gridx = 2;
+        gbc.weightx = 0;
+        infoPanel.add(new JLabel("Ngày kết thúc:"), gbc);
+        gbc.gridx = 3;
+        gbc.weightx = 0.5;
+        infoPanel.add(spEnd, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        infoPanel.add(new JLabel("Trạng thái:"), gbc);
+        gbc.gridx = 1;
+        infoPanel.add(cbStatus, gbc);
+
+        String[] cols = { "Chọn", "Mã sách", "Tên sách", "Thể loại" };
         bookModel = new DefaultTableModel(cols, 0) {
             @Override
             public Class<?> getColumnClass(int columnIndex) {
                 return (columnIndex == 0) ? Boolean.class : String.class;
             }
+
             @Override
-            public boolean isCellEditable(int row, int col) { return col == 0; }
+            public boolean isCellEditable(int row, int col) {
+                return col == 0;
+            }
         };
         bookTable = new JTable(bookModel);
 
@@ -106,14 +156,16 @@ public class PromotionDialog extends JDialog {
 
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
         JButton btnSave = new JButton("Lưu dữ liệu");
-        btnSave.setBackground(new Color(35, 90, 180)); btnSave.setForeground(Color.WHITE);
+        btnSave.setBackground(new Color(35, 90, 180));
+        btnSave.setForeground(Color.WHITE);
         btnSave.setPreferredSize(new Dimension(120, 35));
         btnSave.addActionListener(e -> saveAction());
 
         JButton btnCancel = new JButton("Hủy");
         btnCancel.setPreferredSize(new Dimension(100, 35));
         btnCancel.addActionListener(e -> dispose());
-        btnPanel.add(btnCancel); btnPanel.add(btnSave);
+        btnPanel.add(btnCancel);
+        btnPanel.add(btnSave);
 
         add(infoPanel, BorderLayout.NORTH);
         add(new JScrollPane(bookTable), BorderLayout.CENTER);
@@ -122,9 +174,13 @@ public class PromotionDialog extends JDialog {
 
     private void loadBookList(List<BookDTO> books) {
         bookModel.setRowCount(0);
-        for (BookDTO b : books) {
-            bookModel.addRow(new Object[]{false, b.getBookId(), b.getBookName(), b.getCategoryName()});
+        if (books == null || books.isEmpty()) {
+            return;
         }
+        for (BookDTO b : books) {
+            bookModel.addRow(new Object[] { false, b.getBookId(), b.getBookName(), b.getCategoryName() });
+        }
+        bookModel.fireTableDataChanged();
     }
 
     private void fillData() {
@@ -133,11 +189,13 @@ public class PromotionDialog extends JDialog {
         txtPercent.setText(String.valueOf(data.getPercent()));
         spStart.setValue(data.getStartDate());
         spEnd.setValue(data.getEndDate());
+        cbStatus.setSelectedIndex(data.getStatus());
 
         List<Integer> selectedIds = bus.getSelectedBookIds(data.getPromotionId());
         for (int i = 0; i < bookModel.getRowCount(); i++) {
             int bookId = (Integer) bookModel.getValueAt(i, 1);
-            if (selectedIds.contains(bookId)) bookModel.setValueAt(true, i, 0);
+            if (selectedIds.contains(bookId))
+                bookModel.setValueAt(true, i, 0);
         }
     }
 
@@ -153,34 +211,52 @@ public class PromotionDialog extends JDialog {
             double percent = Double.parseDouble(percentStr);
             Timestamp start = new Timestamp(((java.util.Date) spStart.getValue()).getTime());
             Timestamp end = new Timestamp(((java.util.Date) spEnd.getValue()).getTime());
+            int status = cbStatus.getSelectedIndex();
 
             if (start.after(end)) {
                 JOptionPane.showMessageDialog(this, "Ngày bắt đầu phải trước ngày kết thúc!");
                 return;
             }
 
-            List<Integer> selectedBookIds = new ArrayList<>();
-            for (int i = 0; i < bookModel.getRowCount(); i++) {
-                if ((Boolean) bookModel.getValueAt(i, 0)) {
-                    selectedBookIds.add((Integer) bookModel.getValueAt(i, 1));
-                }
-            }
+            saveCurrentSelection();
+            List<Integer> selectedBookIds = new ArrayList<>(currentlySelectedIds);
 
             if (selectedBookIds.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn ít nhất một cuốn sách!");
                 return;
             }
 
-            if (bus.savePromotion(isEdit, data, name, percent, start, end, selectedBookIds)) {
+            if (bus.savePromotion(isEdit, data, name, percent, start, end, status, selectedBookIds)) {
                 JOptionPane.showMessageDialog(this, "Lưu thành công!");
                 dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Lưu thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
+
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Phần trăm phải là số!");
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    private void saveCurrentSelection() {
+        for (int i = 0; i < bookModel.getRowCount(); i++) {
+            int id = (Integer) bookModel.getValueAt(i, 1);
+            boolean isChecked = (Boolean) bookModel.getValueAt(i, 0);
+            if (isChecked && !currentlySelectedIds.contains(id))
+                currentlySelectedIds.add(id);
+            else if (!isChecked && currentlySelectedIds.contains(id))
+                currentlySelectedIds.remove((Integer) id);
+        }
+    }
+
+    private void restoreSelection() {
+        for (int i = 0; i < bookModel.getRowCount(); i++) {
+            int id = (Integer) bookModel.getValueAt(i, 1);
+            if (currentlySelectedIds.contains(id))
+                bookModel.setValueAt(true, i, 0);
         }
     }
 }

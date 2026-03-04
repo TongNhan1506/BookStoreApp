@@ -7,15 +7,15 @@ import com.bookstore.dto.PromotionDTO;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PromotionBUS {
     private PromotionDAO promotionDAO = new PromotionDAO();
     private BookDAO bookDAO = new BookDAO();
 
-    public double getPromotionPercentByBook(int bookId) {
-        return promotionDAO.getPromotionPercentByBook(bookId);
+    public double getPromotionPercentByBookId(int bookId) {
+        return promotionDAO.getPromotionPercentByBookId(bookId);
     }
 
     public List<PromotionDTO> selectAllPromotions() {
@@ -24,31 +24,48 @@ public class PromotionBUS {
 
     public List<PromotionDTO> search(String keyword, String type) {
         List<PromotionDTO> all = promotionDAO.selectAllPromotions();
-        if (keyword == null || keyword.isEmpty()) return all;
+        if (keyword == null || keyword.isEmpty())
+            return all;
+
+        List<PromotionDTO> result = new ArrayList<>();
         String lowerKeyword = keyword.toLowerCase();
 
-        return all.stream().filter(p -> {
+        for (PromotionDTO p : all) {
+            boolean match = false;
             switch (type) {
                 case "Tên":
-                    return p.getPromotionName().toLowerCase().contains(lowerKeyword);
+                    match = p.getPromotionName().toLowerCase().contains(lowerKeyword);
+                    break;
                 case "Phần trăm":
                     try {
                         double percent = Double.parseDouble(lowerKeyword);
-                        return p.getPercent() == percent;
-                    } catch (Exception e) { return false; }
+                        match = (p.getPercent() == percent);
+                    } catch (Exception e) {
+                        match = false;
+                    }
+                    break;
                 case "Thời gian":
                     try {
                         String[] dates = lowerKeyword.split("\\|");
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
                         long startLimit = (dates[0].isEmpty()) ? 0 : sdf.parse(dates[0]).getTime();
-                        long endLimit = (dates.length < 2 || dates[1].isEmpty()) ? Long.MAX_VALUE : sdf.parse(dates[1]).getTime();
-                        return p.getStartDate().getTime() >= startLimit && p.getEndDate().getTime() <= endLimit;
-                    } catch (Exception e) { return false; }
+                        long endLimit = (dates.length < 2 || dates[1].isEmpty()) ? Long.MAX_VALUE
+                                : sdf.parse(dates[1]).getTime();
+                        match = (p.getStartDate().getTime() >= startLimit && p.getEndDate().getTime() <= endLimit);
+                    } catch (Exception e) {
+                        match = false;
+                    }
+                    break;
                 default:
-                    return true;
+                    match = true;
+                    break;
             }
-        }).collect(Collectors.toList());
+
+            if (match) {
+                result.add(p);
+            }
+        }
+        return result;
     }
 
     public void updateAutoStatus() {
@@ -71,9 +88,12 @@ public class PromotionBUS {
     public List<BookDTO> suggestBooksByPromotionName(String promoName) {
         String name = promoName.toLowerCase();
         int categoryId = -1;
-        if (name.contains("văn học")) categoryId = 1;
-        else if (name.contains("truyện tranh")) categoryId = 3;
-        else if (name.contains("kỹ năng")) categoryId = 4;
+        if (name.contains("văn học"))
+            categoryId = 1;
+        else if (name.contains("truyện tranh"))
+            categoryId = 3;
+        else if (name.contains("kỹ năng"))
+            categoryId = 4;
 
         if (categoryId != -1) {
             return bookDAO.getByCategory(categoryId);
@@ -85,22 +105,22 @@ public class PromotionBUS {
         promotionDAO.updateStatus(p);
     }
 
-    public boolean savePromotion(boolean isEdit, PromotionDTO dto, String name, double percent, Timestamp start, Timestamp end, List<Integer> bookIds) {
+    public boolean savePromotion(boolean isEdit, PromotionDTO dto, String name, double percent, Timestamp start,
+                                 Timestamp end, int status, List<Integer> bookIds) {
         if (!isEdit) {
-            // Tạo DTO mới để Thêm
-            PromotionDTO newPromo = new PromotionDTO(0, name, percent, start, end, 1);
-            int newId = promotionDAO.add(newPromo); // Hàm add này trả về ID vừa chèn
+
+            PromotionDTO newPromo = new PromotionDTO(0, name, percent, start, end, status);
+            int newId = promotionDAO.add(newPromo);
             if (newId > 0) {
                 return promotionDAO.savePromotionDetails(newId, bookIds);
             }
         } else {
-            // Cập nhật DTO cũ
             dto.setPromotionName(name);
             dto.setPercent(percent);
             dto.setStartDate(start);
             dto.setEndDate(end);
+            dto.setStatus(status);
             if (promotionDAO.update(dto)) {
-                // Xóa chi tiết cũ và lưu lại chi tiết mới cho đồng bộ
                 promotionDAO.deletePromotionDetails(dto.getPromotionId());
                 return promotionDAO.savePromotionDetails(dto.getPromotionId(), bookIds);
             }
