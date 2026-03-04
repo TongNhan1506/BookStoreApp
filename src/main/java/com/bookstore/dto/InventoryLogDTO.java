@@ -6,7 +6,7 @@ public class InventoryLogDTO {
     private String action;
     private int changeQuantity;
     private int remainQuantity;
-    private String referenceId;
+    private int referenceId;
     private Timestamp createdDate;
     private int bookId;
     private String bookName;
@@ -21,8 +21,8 @@ public class InventoryLogDTO {
     public void setChangeQuantity(int changeQuantity) { this.changeQuantity = changeQuantity; }
     public int getRemainQuantity() { return remainQuantity; }
     public void setRemainQuantity(int remainQuantity) { this.remainQuantity = remainQuantity; }
-    public String getReferenceId() { return referenceId; }
-    public void setReferenceId(String referenceId) { this.referenceId = referenceId; }
+    public int getReferenceId() { return referenceId; }
+    public void setReferenceId(int referenceId) { this.referenceId = referenceId; }
     public Timestamp getCreatedDate() { return createdDate; }
     public void setCreatedDate(Timestamp createdDate) { this.createdDate = createdDate; }
     public int getBookId() { return bookId; }

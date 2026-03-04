@@ -3,8 +3,11 @@ package com.bookstore.bus;
 import com.bookstore.dao.BookDAO;
 import com.bookstore.dao.ImportDAO;
 import com.bookstore.dao.ImportDetailDAO;
+import com.bookstore.dao.PriceDAO;
 import com.bookstore.dto.ImportTicketDTO;
 import com.bookstore.dto.ImportDetailDTO;
+import com.bookstore.dto.InventoryLogDTO;
+import com.bookstore.dto.PriceDTO;
 
 import java.util.List; // <--- QUAN TRỌNG: Thêm dòng này để sửa lỗi 'cannot find symbol class List'
 
@@ -13,6 +16,8 @@ public class ImportBUS {
     private ImportDAO importDAO = new ImportDAO();
     private ImportDetailDAO detailDAO = new ImportDetailDAO();
     private BookDAO bookDAO = new BookDAO();
+    private InventoryLogBUS logBUS = new InventoryLogBUS();
+    private PriceDAO priceDAO = new PriceDAO();
 
     public List<ImportTicketDTO> getAllImports() {
         return importDAO.getAll();
@@ -38,10 +43,51 @@ public class ImportBUS {
 
     public boolean approveImport(int importId, int approverId) {
         if (importDAO.updateStatus(importId, 2, approverId)) {
-            List<ImportDetailDTO> details = detailDAO.getDetailsByImportId(importId);
+            java.util.List<ImportDetailDTO> details = detailDAO.getDetailsByImportId(importId);
+
             for (ImportDetailDTO d : details) {
                 int currentStock = bookDAO.getQuantityByID(d.getBookID());
-                bookDAO.updateQuantity(d.getBookID(), currentStock + d.getQuantity());
+                int newStock = currentStock + d.getQuantity();
+
+                PriceDTO currentPrice = priceDAO.getActivePriceByBookId(d.getBookID());
+
+                if (currentPrice != null) {
+                    double oldBasePrice = currentPrice.getBasePrice();
+                    double importPrice = d.getPrice();
+
+                    double totalOldValue = currentStock * oldBasePrice;
+                    double totalImportValue = d.getQuantity() * importPrice;
+
+                    double newBasePrice = (totalOldValue + totalImportValue) / newStock;
+
+                    if (Math.abs(newBasePrice - oldBasePrice) > 1.0) {
+                        double profitRate = currentPrice.getProfitRate();
+                        double newSellingPrice = newBasePrice * (1 + profitRate);
+
+                        priceDAO.deactivatePrice(d.getBookID());
+
+                        PriceDTO newPriceObj = new PriceDTO();
+                        newPriceObj.setBookId(d.getBookID());
+                        newPriceObj.setBasePrice(newBasePrice);
+                        newPriceObj.setProfitRate(profitRate);
+                        newPriceObj.setSellingPrice(Math.round(newSellingPrice));
+                        newPriceObj.setEffectiveDate(new java.sql.Timestamp(System.currentTimeMillis()));
+                        newPriceObj.setIsActive(1);
+
+                        priceDAO.addPrice(newPriceObj);
+                    }
+                }
+
+                bookDAO.updateQuantity(d.getBookID(), newStock);
+
+                InventoryLogDTO log = new InventoryLogDTO();
+                log.setAction("Nhập hàng");
+                log.setChangeQuantity(d.getQuantity());
+                log.setRemainQuantity(newStock);
+                log.setReferenceId(importId);
+                log.setBookId(d.getBookID());
+
+                logBUS.addLog(log);
             }
             return true;
         }

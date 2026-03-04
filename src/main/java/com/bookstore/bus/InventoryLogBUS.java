@@ -5,5 +5,10 @@ import java.util.List;
 
 public class InventoryLogBUS {
     private InventoryLogDAO dao = new InventoryLogDAO();
+
     public List<InventoryLogDTO> getAll() { return dao.getAll(); }
+
+    public boolean addLog(InventoryLogDTO dto) {
+        return dao.insert(dto);
+    }
 }

@@ -582,15 +582,15 @@ VALUES (6, 12, 67, 20000);
 INSERT INTO import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
 VALUES (6, 13, 10, 25000);
 
-INSERT INTO price (book_id, base_price, profit_rate, selling_price, effective_date, is_active)
-VALUES (1, 50000, 0.20, 60000, '2026-02-01 10:00:00', 1);
-
-UPDATE price SET is_active = 0, end_date = '2026-02-15 14:30:00' WHERE book_id = 1 AND is_active = 1;
-
-INSERT INTO price (book_id, base_price, profit_rate, selling_price, effective_date, is_active)
-VALUES (1, 52000, 0.20, 62400, '2026-02-15 14:30:00', 1);
-
-UPDATE price SET is_active = 0, end_date = '2026-02-25 09:15:00' WHERE book_id = 1 AND is_active = 1;
-
-INSERT INTO price (book_id, base_price, profit_rate, selling_price, effective_date, is_active)
-VALUES (1, 51000, 0.25, 63750, '2026-02-25 09:15:00', 1);
+--INSERT INTO price (book_id, base_price, profit_rate, selling_price, effective_date, is_active)
+--VALUES (1, 50000, 0.20, 60000, '2026-02-01 10:00:00', 1);
+--
+--UPDATE price SET is_active = 0, end_date = '2026-02-15 14:30:00' WHERE book_id = 1 AND is_active = 1;
+--
+--INSERT INTO price (book_id, base_price, profit_rate, selling_price, effective_date, is_active)
+--VALUES (1, 52000, 0.20, 62400, '2026-02-15 14:30:00', 1);
+--
+--UPDATE price SET is_active = 0, end_date = '2026-02-25 09:15:00' WHERE book_id = 1 AND is_active = 1;
+--
+--INSERT INTO price (book_id, base_price, profit_rate, selling_price, effective_date, is_active)
+--VALUES (1, 51000, 0.25, 63750, '2026-02-25 09:15:00', 1);
