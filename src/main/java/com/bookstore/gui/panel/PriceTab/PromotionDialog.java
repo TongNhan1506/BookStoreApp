@@ -1,6 +1,7 @@
 package com.bookstore.gui.panel.PriceTab;
 
 import com.bookstore.bus.*;
+import com.bookstore.dao.*;
 import com.bookstore.dto.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -13,11 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PromotionDialog extends JDialog {
+    private JComboBox<String> cbCategory;
+    private CategoryBUS categoryBUS = new CategoryBUS();
     private JTextField txtID, txtTen, txtPercent, txtSearchBook;
     private JSpinner spStart, spEnd;
     private JTable bookTable;
     private DefaultTableModel bookModel;
     private PromotionBUS bus = new PromotionBUS();
+    private BookDAO bookDAO = new BookDAO();
     private PromotionDTO data;
     private boolean isEdit;
     private List<Integer> currentlySelectedIds = new ArrayList<>();
@@ -32,17 +36,31 @@ public class PromotionDialog extends JDialog {
         txtSearchBook.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-
                 saveCurrentSelection();
-
                 String keyword = txtSearchBook.getText().trim();
-                loadBookList(bus.suggestBooksByPromotionName(keyword));
 
+                cbCategory.setSelectedIndex(0);
+
+                loadBookList(bus.suggestBooksByName(keyword));
                 restoreSelection();
-
-                bookTable.revalidate();
-                bookTable.repaint();
             }
+        });
+
+        cbCategory.addActionListener(e -> {
+            saveCurrentSelection();
+            String categoryName = (String) cbCategory.getSelectedItem();
+
+            txtSearchBook.setText("");
+
+            if (cbCategory.getSelectedIndex() == 0) {
+
+                loadBookList(bus.suggestBooksByPromotionName(""));
+            } else {
+
+                loadBookList(bookDAO.getByCategoryName(categoryName));
+            }
+
+            restoreSelection();
         });
 
         if (isEdit) {
@@ -74,56 +92,31 @@ public class PromotionDialog extends JDialog {
         spStart.setEditor(new JSpinner.DateEditor(spStart, "yyyy-MM-dd HH:mm:ss"));
         spEnd = new JSpinner(new SpinnerDateModel());
         spEnd.setEditor(new JSpinner.DateEditor(spEnd, "yyyy-MM-dd HH:mm:ss"));
-
         cbStatus = new JComboBox<>(new String[] { "Ngừng hoạt động", "Đang chạy" });
+        cbCategory = new JComboBox<>();
+        cbCategory.addItem("Tất cả thể loại");
+        for (CategoryDTO cat : categoryBUS.selectAllCategories())
+            cbCategory.addItem(cat.getCategoryName());
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 0;
-        infoPanel.add(new JLabel("Mã KM:"), gbc);
-        gbc.gridx = 1;
-        gbc.weightx = 0.5;
-        infoPanel.add(txtID, gbc);
-        gbc.gridx = 2;
-        gbc.weightx = 0;
-        infoPanel.add(new JLabel("Tên chương trình:"), gbc);
-        gbc.gridx = 3;
-        gbc.weightx = 0.5;
-        infoPanel.add(txtTen, gbc);
+        addComponent(infoPanel, new JLabel("Mã KM:"), 0, 0, 0, 0);
+        addComponent(infoPanel, txtID, 1, 0, 1.0, 0);
+        addComponent(infoPanel, new JLabel("Tên chương trình:"), 2, 0, 0, 0);
+        addComponent(infoPanel, txtTen, 3, 0, 1.0, 0);
 
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.weightx = 0;
-        infoPanel.add(new JLabel("Phần trăm (%):"), gbc);
-        gbc.gridx = 1;
-        gbc.weightx = 0.5;
-        infoPanel.add(txtPercent, gbc);
-        gbc.gridx = 2;
-        gbc.weightx = 0;
-        infoPanel.add(new JLabel("Tìm sách:"), gbc);
-        gbc.gridx = 3;
-        gbc.weightx = 0.5;
-        infoPanel.add(txtSearchBook, gbc);
+        addComponent(infoPanel, new JLabel("Phần trăm (%):"), 0, 1, 0, 0);
+        addComponent(infoPanel, txtPercent, 1, 1, 1.0, 0);
+        addComponent(infoPanel, new JLabel("Tìm sách:"), 2, 1, 0, 0);
+        addComponent(infoPanel, txtSearchBook, 3, 1, 1.0, 0);
 
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.weightx = 0;
-        infoPanel.add(new JLabel("Ngày bắt đầu:"), gbc);
-        gbc.gridx = 1;
-        gbc.weightx = 0.5;
-        infoPanel.add(spStart, gbc);
-        gbc.gridx = 2;
-        gbc.weightx = 0;
-        infoPanel.add(new JLabel("Ngày kết thúc:"), gbc);
-        gbc.gridx = 3;
-        gbc.weightx = 0.5;
-        infoPanel.add(spEnd, gbc);
+        addComponent(infoPanel, new JLabel("Thể loại:"), 0, 2, 0, 0);
+        addComponent(infoPanel, cbCategory, 1, 2, 1.0, 0);
+        addComponent(infoPanel, new JLabel("Ngày bắt đầu:"), 2, 2, 0, 0);
+        addComponent(infoPanel, spStart, 3, 2, 1.0, 0);
 
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        infoPanel.add(new JLabel("Trạng thái:"), gbc);
-        gbc.gridx = 1;
-        infoPanel.add(cbStatus, gbc);
+        addComponent(infoPanel, new JLabel("Ngày kết thúc:"), 0, 3, 0, 0);
+        addComponent(infoPanel, spEnd, 1, 3, 1.0, 0);
+        addComponent(infoPanel, new JLabel("Trạng thái:"), 2, 3, 0, 0);
+        addComponent(infoPanel, cbStatus, 3, 3, 1.0, 0);
 
         String[] cols = { "Chọn", "Mã sách", "Tên sách", "Thể loại" };
         bookModel = new DefaultTableModel(cols, 0) {
@@ -183,6 +176,16 @@ public class PromotionDialog extends JDialog {
         bookModel.fireTableDataChanged();
     }
 
+    private void addComponent(JPanel panel, Component comp, int x, int y, double weightx, int gridwidth) {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = x;
+        gbc.gridy = y;
+        gbc.weightx = weightx;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
+        panel.add(comp, gbc);
+    }
+
     private void fillData() {
         txtID.setText("KM" + data.getPromotionId());
         txtTen.setText(data.getPromotionName());
@@ -201,6 +204,7 @@ public class PromotionDialog extends JDialog {
 
     private void saveAction() {
         try {
+
             String name = txtTen.getText().trim();
             String percentStr = txtPercent.getText().trim();
             if (name.isEmpty() || percentStr.isEmpty()) {
@@ -216,6 +220,14 @@ public class PromotionDialog extends JDialog {
             if (start.after(end)) {
                 JOptionPane.showMessageDialog(this, "Ngày bắt đầu phải trước ngày kết thúc!");
                 return;
+            }
+
+            if (data != null) {
+                data.setPromotionName(name);
+                data.setPercent(percent);
+                data.setStartDate(start);
+                data.setEndDate(end);
+                data.setStatus(status);
             }
 
             saveCurrentSelection();

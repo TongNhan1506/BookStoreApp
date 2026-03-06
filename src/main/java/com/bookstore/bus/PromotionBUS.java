@@ -96,13 +96,9 @@ public class PromotionBUS {
             categoryId = 4;
 
         if (categoryId != -1) {
-            return bookDAO.getByCategory(categoryId);
+            return bookDAO.getByCategoryId(categoryId);
         }
         return bookDAO.selectAllBooks();
-    }
-
-    public void updateStatus(PromotionDTO p) {
-        promotionDAO.updateStatus(p);
     }
 
     public boolean savePromotion(boolean isEdit, PromotionDTO dto, String name, double percent, Timestamp start,
@@ -130,5 +126,11 @@ public class PromotionBUS {
 
     public List<Integer> getSelectedBookIds(int promoId) {
         return promotionDAO.getSelectedBookIds(promoId);
+    }
+
+    public List<BookDTO> suggestBooksByName(String keyword) {
+        if (keyword == null || keyword.isEmpty())
+            return bookDAO.selectAllBooks();
+        return bookDAO.searchByName(keyword);
     }
 }

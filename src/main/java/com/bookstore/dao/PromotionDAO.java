@@ -122,14 +122,15 @@ public class PromotionDAO {
     }
 
     public boolean update(PromotionDTO p) {
-        String sql = "UPDATE promotion SET promotion_name=?, percent=?, start_date=?, end_date=? WHERE promotion_id=?";
+        String sql = "UPDATE promotion SET promotion_name=?, percent=?, start_date=?, end_date=?, status=? WHERE promotion_id=?";
         try (Connection c = DatabaseConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, p.getPromotionName());
             ps.setDouble(2, p.getPercent());
             ps.setTimestamp(3, p.getStartDate());
             ps.setTimestamp(4, p.getEndDate());
-            ps.setInt(5, p.getPromotionId());
+            ps.setInt(5, p.getStatus());
+            ps.setInt(6, p.getPromotionId());
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();

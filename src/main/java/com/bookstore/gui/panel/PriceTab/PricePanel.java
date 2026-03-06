@@ -7,10 +7,12 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import com.bookstore.bus.*;
 import com.bookstore.dto.*;
 import com.bookstore.util.Refreshable;
+import com.bookstore.util.SharedData;
 
 public class PricePanel extends JPanel implements Refreshable {
     private List<PriceDTO> listPrices;
@@ -530,10 +532,7 @@ public class PricePanel extends JPanel implements Refreshable {
 
     private void setupSearchBorderStyle(JTextField field, String placeholder, boolean showIcon) {
         field.setOpaque(false);
-        java.net.URL imgURL = getClass().getResource("/icon/Thêm văn bản-Photoroom.png");
-        final Image searchIcon = (imgURL != null)
-                ? new ImageIcon(imgURL).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH)
-                : null;
+        final FlatSVGIcon searchIcon = showIcon ? new FlatSVGIcon("icon/search_icon.svg", 18, 18) : null;
         int leftPadding = showIcon ? 35 : 15;
 
         field.setBorder(new javax.swing.border.EmptyBorder(0, leftPadding, 0, 10) {
@@ -541,8 +540,11 @@ public class PricePanel extends JPanel implements Refreshable {
             public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                if (showIcon && searchIcon != null)
-                    g2.drawImage(searchIcon, x + 10, (height - 18) / 2, c);
+
+                if (showIcon && searchIcon != null) {
+                    searchIcon.paintIcon(c, g2, x + 10, (height - 18) / 2);
+                }
+
                 if (field.getText().isEmpty()) {
                     g2.setColor(Color.GRAY);
                     g2.setFont(c.getFont().deriveFont(Font.ITALIC));

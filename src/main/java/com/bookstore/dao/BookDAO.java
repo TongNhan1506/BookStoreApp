@@ -116,16 +116,6 @@ public class BookDAO {
         return false;
     }
 
-    public void decreaseQuantity(Connection c, int bookId, int quantitySold) throws SQLException {
-        String sql = "UPDATE book SET quantity = quantity - ? WHERE book_id = ?";
-        // Chú ý: Chỉ đóng PreparedStatement, KHÔNG đóng Connection ở đây
-        try (PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, quantitySold);
-            ps.setInt(2, bookId);
-            ps.executeUpdate();
-        }
-    }
-
     public int getQuantityByID(int bookId) {
         int quantity = 0;
         String sql = "SELECT quantity FROM book WHERE book_id = ?";
@@ -178,7 +168,7 @@ public class BookDAO {
         return book;
     }
 
-    public List<BookDTO> getByCategory(int categoryId) {
+    public List<BookDTO> getByCategoryId(int categoryId) {
         List<BookDTO> list = new ArrayList<>();
         String sql = "SELECT b.*, IFNULL(bp.selling_price, 0) AS current_selling_price, c.category_name, " +
                 "GROUP_CONCAT(DISTINCT a.author_name SEPARATOR ', ') as author_names, " +
@@ -195,6 +185,63 @@ public class BookDAO {
              PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setInt(1, categoryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToBookDTO(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<BookDTO> getByCategoryName(String categoryName) {
+        List<BookDTO> list = new ArrayList<>();
+
+        String sql = "SELECT b.*, IFNULL(bp.selling_price, 0) AS current_selling_price, c.category_name, " +
+                "GROUP_CONCAT(DISTINCT a.author_name SEPARATOR ', ') as author_names, " +
+                "GROUP_CONCAT(DISTINCT ba.author_id SEPARATOR ',') as author_ids " +
+                "FROM book b " +
+                "LEFT JOIN price bp ON b.book_id = bp.book_id AND bp.is_active = 1 " +
+                "JOIN category c ON b.category_id = c.category_id " +
+                "LEFT JOIN book_author ba ON b.book_id = ba.book_id " +
+                "LEFT JOIN author a ON ba.author_id = a.author_id " +
+                "WHERE b.status = 1 AND c.category_name = ? " +
+                "GROUP BY b.book_id, bp.selling_price";
+
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setString(1, categoryName);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToBookDTO(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<BookDTO> searchByName(String bookname) {
+        List<BookDTO> list = new ArrayList<>();
+        String sql = "SELECT b.*, IFNULL(bp.selling_price, 0) AS current_selling_price, c.category_name, " +
+                "GROUP_CONCAT(DISTINCT a.author_name SEPARATOR ', ') as author_names, " +
+                "GROUP_CONCAT(DISTINCT ba.author_id SEPARATOR ',') as author_ids " +
+                "FROM book b " +
+                "LEFT JOIN price bp ON b.book_id = bp.book_id AND bp.is_active = 1 " +
+                "JOIN category c ON b.category_id = c.category_id " +
+                "LEFT JOIN book_author ba ON b.book_id = ba.book_id " +
+                "LEFT JOIN author a ON ba.author_id = a.author_id " +
+                "WHERE b.status = 1 AND b.book_name LIKE ? " +
+                "GROUP BY b.book_id, bp.selling_price";
+
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setString(1, "%" + bookname + "%");
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     list.add(mapResultSetToBookDTO(rs));

@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import com.bookstore.dto.*;
 import com.bookstore.bus.*;
@@ -169,10 +170,9 @@ public class PromotionPanel extends JPanel {
         };
         iconBox.setPreferredSize(new Dimension(50, 42));
         iconBox.setOpaque(false);
-        java.net.URL imgURL = getClass().getResource("/icon/Thêm văn bản-Photoroom.png");
+        java.net.URL imgURL = getClass().getResource("/icon/search_icon.svg");
         if (imgURL != null) {
-            iconBox.add(new JLabel(
-                    new ImageIcon(new ImageIcon(imgURL).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH))));
+            iconBox.add(new JLabel(new com.formdev.flatlaf.extras.FlatSVGIcon("icon/search_icon.svg", 18, 18)));
         }
 
         cardPanel = new JPanel(searchCard);
