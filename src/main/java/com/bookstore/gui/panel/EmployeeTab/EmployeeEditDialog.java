@@ -181,7 +181,7 @@ public class EmployeeEditDialog extends JDialog {
     private void saveEmployee() {
         try {
             EmployeeDTO temp = new EmployeeDTO();
-            temp.setEmployeeId(employee.getEmployeeId()); // ID cũ
+            temp.setEmployeeId(employee.getEmployeeId());
             temp.setEmployeeName(txtName.getText().trim());
             temp.setEmployeePhone(txtPhone.getText().trim());
 

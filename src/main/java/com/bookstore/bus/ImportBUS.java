@@ -27,20 +27,6 @@ public class ImportBUS {
         return detailDAO.getDetailsByImportId(importId);
     }
 
-    public boolean importBooks(ImportTicketDTO importDTO, ImportDetailDTO[] details) {
-        int newImportID = importDAO.add(importDTO);
-        if (newImportID != -1) {
-            for (ImportDetailDTO detail : details) {
-                if (detail != null) {
-                    detail.setImportID(newImportID);
-                    detailDAO.add(detail);
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
     public boolean approveImport(int importId, int approverId) {
         if (importDAO.updateStatus(importId, 2, approverId)) {
             java.util.List<ImportDetailDTO> details = detailDAO.getDetailsByImportId(importId);

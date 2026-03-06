@@ -140,8 +140,7 @@ public class AccountPanel extends JPanel {
 
         btnAdd.addActionListener(e -> {
             AccountFormDialog dialog = new AccountFormDialog(
-                    (Frame) SwingUtilities.getWindowAncestor(this), "Thêm tài khoản", this
-            );
+                    (Frame) SwingUtilities.getWindowAncestor(this), this, null);
             dialog.setVisible(true);
         });
 
@@ -377,25 +376,31 @@ public class AccountPanel extends JPanel {
         JButton btnSave = new JButton("Lưu");
         JButton btnCancel = new JButton("Hủy");
 
-        btnSave.addActionListener(e -> {
-            AccountDTO updatedAcc = new AccountDTO(
-                    txtUser.getText(),
-                    txtPass.getText(),
-                    0,
-                    1);
-
-            if (accountBUS.updateAccount(updatedAcc)) {
-                JOptionPane.showMessageDialog(this, "Lưu thành công!");
-                loadAdminData();
-                dialog.dispose();
-            } else {
-                JOptionPane.showMessageDialog(this, "Lưu thất bại!");
-            }
-        });
-
         btnCancel.addActionListener(e -> dialog.dispose());
         btnPanel.add(btnCancel);
         btnPanel.add(btnSave);
+
+        btnSave.addActionListener(e -> {
+            AccountDTO updatedAcc = new AccountDTO(
+                    txtUser.getText().trim(),
+                    txtPass.getText().trim(),
+                    0,
+                    1
+            );
+
+            String newPassword = txtPass.getText().trim();
+            boolean isChangePassword = !newPassword.isEmpty();
+
+            String message = accountBUS.updateAccount(updatedAcc, isChangePassword);
+
+            if (message.equals("Cập nhật tài khoản thành công!")) {
+                JOptionPane.showMessageDialog(this, message);
+                dialog.dispose();
+                loadAdminData();
+            } else {
+                JOptionPane.showMessageDialog(this, message, "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
         dialog.add(form, BorderLayout.CENTER);
         dialog.add(btnPanel, BorderLayout.SOUTH);
@@ -424,32 +429,36 @@ public class AccountPanel extends JPanel {
         model.setRowCount(0);
 
         for (AccountDTO acc : listAccountGoc) {
-
             if ("admin".equalsIgnoreCase(acc.getUsername())) {
                 continue;
             }
-            if (acc.getEmployeeId() == 0) continue;
 
             EmployeeDTO emp = empDAO.selectById(acc.getEmployeeId());
+
             String empName = (emp != null) ? emp.getEmployeeName() : "N/A";
+            String empRole = (emp != null) ? emp.getRoleName() : "N/A";
+            String statusStr = "N/A";
+            if (emp != null) {
+                statusStr = (emp.getStatus() == 1) ? "Đang làm việc" : "Ngưng làm việc";
+            }
+
             model.addRow(new Object[] {
                     empName,
                     acc.getUsername(),
                     "******",
-                    empName,
-                    (acc.getStatus() == 1 ? "Đang làm việc" : "Ngưng làm việc"),
+                    empRole,
+                    statusStr,
                     "Sửa"
             });
         }
     }
 
     private void openEditDialog(int row) {
-        String name = table.getValueAt(row, 0).toString();
         String user = table.getValueAt(row, 1).toString();
         AccountDTO acc = accountBUS.selectByUsername(user);
         EmployeeDTO emp = empDAO.selectById(acc.getEmployeeId());
 
-        AccountFormDialog dialog = new AccountFormDialog((Frame) SwingUtilities.getWindowAncestor(this), "Sửa tài khoản", this);
+        AccountFormDialog dialog = new AccountFormDialog((Frame) SwingUtilities.getWindowAncestor(this), this, acc);
         dialog.setDataToForm(acc, emp);
         dialog.setVisible(true);
     }

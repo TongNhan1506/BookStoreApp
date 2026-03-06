@@ -31,19 +31,22 @@ public class AccountBUS {
         return accountDAO.selectByUsername(username);
     }
 
-    public boolean updateAccount(AccountDTO acc) {
-        return accountDAO.update(acc);
+    public String updateAccount(AccountDTO acc, boolean isChangePassword) {
+        if (acc.getUsername() == null || acc.getUsername().trim().isEmpty()) {
+            return "Tên đăng nhập không hợp lệ!";
+        }
+
+        boolean success = accountDAO.updateAccount(acc, isChangePassword);
+
+        if (success) {
+            return "Cập nhật tài khoản thành công!";
+        } else {
+            return "Cập nhật thất bại. Vui lòng kiểm tra lại hệ thống!";
+        }
     }
 
     public String addAccount(AccountDTO acc) {
-
         if (acc.getUsername().trim().isEmpty()) return "Username không được để trống!";
-
-
-        String passwordPattern = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@&#*%]).{8,}$";
-        if (!acc.getPassword().matches(passwordPattern)) {
-            return "Mật khẩu phải ít nhất 8 ký tự, bao gồm chữ, số và ký tự đặc biệt (!,@,&,#,*,%)!";
-        }
 
         if (accountDAO.selectByUsername(acc.getUsername()) != null) {
             return "Username này đã tồn tại!";

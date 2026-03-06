@@ -6,6 +6,7 @@ import com.bookstore.util.DatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,9 @@ public class AccountDAO {
 
         try {
             Connection c = DatabaseConnection.getConnection();
-            String sql = "SELECT * FROM account WHERE username = ? ";
+            String sql = "SELECT a.* FROM account a " +
+                    "JOIN employee e ON a.employee_id = e.employee_id " +
+                    "WHERE a.status = 1 AND a.username = ? AND e.status = 1 ";
             PreparedStatement ps = c.prepareStatement(sql);
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
@@ -35,17 +38,30 @@ public class AccountDAO {
         return acc;
     }
 
-    public boolean update(AccountDTO acc) {
-        try {
-            Connection c = DatabaseConnection.getConnection();
-            String sql = "UPDATE account SET password = ? WHERE username = ?";
-            PreparedStatement ps = c.prepareStatement(sql);
-            ps.setString(1, acc.getPassword());
-            ps.setString(2, acc.getUsername());
-            int result = ps.executeUpdate();
-            c.close();
-            return result > 0;
-        } catch (Exception e) {
+    public boolean updateAccount(AccountDTO acc, boolean isChangePassword) {
+        String sql;
+
+        if (isChangePassword) {
+            sql = "UPDATE account SET password = ?, status = ? WHERE username = ?";
+        } else {
+            sql = "UPDATE account SET status = ? WHERE username = ?";
+        }
+
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            if (isChangePassword) {
+                ps.setString(1, acc.getPassword());
+                ps.setInt(2, acc.getStatus());
+                ps.setString(3, acc.getUsername());
+            } else {
+                ps.setInt(1, acc.getStatus());
+                ps.setString(2, acc.getUsername());
+            }
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }

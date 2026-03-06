@@ -1,7 +1,6 @@
 package com.bookstore.gui.panel.InventoryTab;
 
 import com.bookstore.bus.BookBUS;
-import com.bookstore.bus.InventoryLogBUS;
 import com.bookstore.dto.BookDTO;
 import com.bookstore.util.AppConstant;
 import com.bookstore.util.Refreshable;
@@ -16,7 +15,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -25,15 +23,13 @@ import java.util.Set;
 public class InventoryPanel extends JPanel implements Refreshable {
     private JTable table;
     private DefaultTableModel tableModel;
+    private BookBUS bookBUS = new BookBUS();
     private List<BookDTO> currentList = new ArrayList<>();
 
     private JLabel lbTotalBooks, lbCategories, lbLowStock;
-    private JTextField txtSearch, txtDateFrom, txtDateTo;
+    private JTextField txtSearch;
     private JComboBox<String> cboStatus;
     private JButton btnResetFilter;
-
-    private BookBUS bookBUS = new BookBUS();
-    private InventoryLogBUS inventoryLogBUS = new InventoryLogBUS();
 
     public InventoryPanel() {
         initUI();
@@ -79,6 +75,18 @@ public class InventoryPanel extends JPanel implements Refreshable {
         titleContainer.add(lbTitle);
         titleContainer.add(lbSubtitle);
         panel.add(titleContainer, BorderLayout.WEST);
+
+        JButton btnLog = new JButton("Biến Động Tồn Kho (Thẻ Kho)");
+        btnLog.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 14));
+        btnLog.setForeground(Color.WHITE);
+        btnLog.setBackground(Color.decode("#1976D2"));
+        btnLog.putClientProperty(FlatClientProperties.STYLE, "arc: 10; margin: 5,15,5,15; borderWidth: 0;");
+        btnLog.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnLog.addActionListener(e -> {
+            new InventoryLogDialog(SwingUtilities.getWindowAncestor(this)).setVisible(true);
+        });
+        panel.add(btnLog, BorderLayout.EAST);
+
         return panel;
     }
 
@@ -88,24 +96,14 @@ public class InventoryPanel extends JPanel implements Refreshable {
         panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
         txtSearch = new JTextField();
-        txtSearch.setPreferredSize(new Dimension(250, 45));
+        txtSearch.setPreferredSize(new Dimension(300, 45));
         txtSearch.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Tìm kiếm sách...");
         txtSearch.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, new FlatSVGIcon("icon/search_icon.svg").derive(20,20));
         txtSearch.putClientProperty(FlatClientProperties.STYLE, "arc: 15;");
 
         cboStatus = new JComboBox<>(new String[]{"Tất cả trạng thái", "Đủ hàng", "Sắp hết hàng", "Hết hàng"});
-        cboStatus.setPreferredSize(new Dimension(180, 45));
+        cboStatus.setPreferredSize(new Dimension(200, 45));
         cboStatus.putClientProperty(FlatClientProperties.STYLE, "arc: 15;");
-
-        txtDateFrom = new JTextField();
-        txtDateFrom.setPreferredSize(new Dimension(150, 45));
-        txtDateFrom.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Từ ngày (dd/mm)");
-        txtDateFrom.putClientProperty(FlatClientProperties.STYLE, "arc: 15;");
-
-        txtDateTo = new JTextField();
-        txtDateTo.setPreferredSize(new Dimension(150, 45));
-        txtDateTo.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Đến ngày");
-        txtDateTo.putClientProperty(FlatClientProperties.STYLE, "arc: 15;");
 
         btnResetFilter = new JButton("Làm mới");
         btnResetFilter.setPreferredSize(new Dimension(100, 45));
@@ -116,8 +114,6 @@ public class InventoryPanel extends JPanel implements Refreshable {
 
         panel.add(txtSearch);
         panel.add(cboStatus);
-        panel.add(txtDateFrom);
-        panel.add(txtDateTo);
         panel.add(btnResetFilter);
 
         DocumentListener dl = new DocumentListener() {
@@ -126,12 +122,10 @@ public class InventoryPanel extends JPanel implements Refreshable {
             public void changedUpdate(DocumentEvent e) { filterData(); }
         };
         txtSearch.getDocument().addDocumentListener(dl);
-        txtDateFrom.getDocument().addDocumentListener(dl);
-        txtDateTo.getDocument().addDocumentListener(dl);
         cboStatus.addActionListener(e -> filterData());
 
         btnResetFilter.addActionListener(e -> {
-            txtSearch.setText(""); txtDateFrom.setText(""); txtDateTo.setText("");
+            txtSearch.setText("");
             cboStatus.setSelectedIndex(0);
         });
 
@@ -206,7 +200,6 @@ public class InventoryPanel extends JPanel implements Refreshable {
         lbTitle.setBorder(new EmptyBorder(20, 20, 10, 20));
         panel.add(lbTitle, BorderLayout.NORTH);
 
-        // Các cột theo đúng yêu cầu của bạn
         String[] columns = {"SÁCH", "DANH MỤC", "TÁC GIẢ", "TỒN KHO", "TRẠNG THÁI"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override public boolean isCellEditable(int row, int column) { return false; }
@@ -224,7 +217,6 @@ public class InventoryPanel extends JPanel implements Refreshable {
         table.setFocusable(false);
         table.setBorder(BorderFactory.createEmptyBorder());
 
-        // Custom Renderer cho từng cột
         table.getColumnModel().getColumn(0).setCellRenderer(new BookInfoRenderer());
         table.getColumnModel().getColumn(1).setCellRenderer(new CategoryRenderer());
         table.getColumnModel().getColumn(3).setCellRenderer(new StockRenderer());
@@ -293,7 +285,6 @@ public class InventoryPanel extends JPanel implements Refreshable {
             panel.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
 
             if (value instanceof BookDTO book) {
-
                 JLabel lbIcon = new JLabel();
                 lbIcon.setPreferredSize(new Dimension(45, 60));
                 lbIcon.setOpaque(true);

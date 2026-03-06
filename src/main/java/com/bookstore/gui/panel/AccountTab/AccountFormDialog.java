@@ -13,11 +13,15 @@ public class AccountFormDialog extends JDialog {
     private AccountPanel parentPanel;
     private JTextField txtName, txtUsername, txtPassword, txtRole;
     private JRadioButton radActive, radInactive;
-    private JButton btnSave;
+    private JButton btnCreate, btnSave;
 
-    public AccountFormDialog(Frame parent, String title, AccountPanel panel) {
-        super(parent, title, true);
+    private AccountDTO account;
+
+    public AccountFormDialog(Frame parent, AccountPanel panel, AccountDTO account) {
+        super(parent, account == null ? "Thêm Tài Khoản Mới" : "Chỉnh Sửa Tài Khoản", true);
         this.parentPanel = panel;
+        this.account = account;
+
         setLayout(new BorderLayout());
 
         JPanel mainPanel = new JPanel(new GridLayout(6, 2, 15, 15));
@@ -50,15 +54,24 @@ public class AccountFormDialog extends JDialog {
         mainPanel.add(new JLabel("Trạng thái:"));
         mainPanel.add(statusPanel);
 
+        btnCreate = new JButton("Tạo mới");
+        btnCreate.setBackground(Color.BLACK);
+        btnCreate.setForeground(Color.WHITE);
+        btnCreate.setPreferredSize(new Dimension(100, 35));
+
         btnSave = new JButton("Lưu");
         btnSave.setBackground(Color.BLACK);
         btnSave.setForeground(Color.WHITE);
-
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnSave.setPreferredSize(new Dimension(100, 35));
-        bottomPanel.add(btnSave);
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-        btnSave.addActionListener(e -> {
+        if (account == null) {
+            bottomPanel.add(btnCreate);
+        } else {
+            bottomPanel.add(btnSave);
+        }
+
+        btnCreate.addActionListener(e -> {
             AccountDTO newAcc = getDataFromForm();
 
             String message = accountBUS.addAccount(newAcc);
@@ -79,6 +92,26 @@ public class AccountFormDialog extends JDialog {
 
         pack();
         setLocationRelativeTo(parent);
+
+        btnSave.addActionListener(e -> {
+            AccountDTO updatedAcc = getDataFromForm();
+
+            String newPassword = txtPassword.getText().trim();
+            boolean isChangePassword = !newPassword.isEmpty();
+
+            String message = accountBUS.updateAccount(updatedAcc, isChangePassword);
+
+            if (message.equals("Cập nhật tài khoản thành công!")) {
+                JOptionPane.showMessageDialog(this, message);
+                this.dispose();
+
+                if (parentPanel != null) {
+                    parentPanel.loadAccountData();
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, message, "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        });
     }
 
     public AccountDTO getDataFromForm() {

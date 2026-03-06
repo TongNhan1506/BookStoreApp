@@ -16,7 +16,10 @@ public class EmployeeDAO {
 
         try {
             Connection c = DatabaseConnection.getConnection();
-            String sql = "SELECT * FROM employee WHERE employee_id = ? ";
+            String sql = "SELECT e.*, r.role_name " +
+                    "FROM employee e " +
+                    "JOIN role r ON r.role_id = e.role_id " +
+                    "WHERE employee_id = ? ";
             PreparedStatement ps = c.prepareStatement(sql);
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
@@ -25,7 +28,9 @@ public class EmployeeDAO {
                 employee = new EmployeeDTO();
                 employee.setEmployeeId(rs.getInt("employee_id"));
                 employee.setEmployeeName(rs.getString("employee_name"));
+                employee.setStatus(rs.getInt("status"));
                 employee.setRoleId(rs.getInt("role_id"));
+                employee.setRoleName(rs.getString("r.role_name"));
             }
             DatabaseConnection.closeConnection(c);
         } catch (Exception e) {
