@@ -69,18 +69,20 @@ public class ImportDAO {
         }
         return list;
     }
+
     public boolean updateStatus(int importId, int newStatus, int approverId) {
         boolean result = false;
         try {
-            java.sql.Connection c = com.bookstore.util.DatabaseConnection.getConnection();
-            String sql = "UPDATE import_ticket SET status = ?, approver_id = ? WHERE import_ticket_id = ?";
-            java.sql.PreparedStatement ps = c.prepareStatement(sql);
+            Connection c = DatabaseConnection.getConnection();
+            String sql = "UPDATE import_ticket SET status = ?, approver_id = ?, approved_date = NOW() WHERE import_ticket_id = ?";
+
+            PreparedStatement ps = c.prepareStatement(sql);
             ps.setInt(1, newStatus);
             ps.setInt(2, approverId);
             ps.setInt(3, importId);
 
             if (ps.executeUpdate() > 0) result = true;
-            com.bookstore.util.DatabaseConnection.closeConnection(c);
+            DatabaseConnection.closeConnection(c);
         } catch (Exception e) {
             e.printStackTrace();
         }

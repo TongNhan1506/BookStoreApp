@@ -9,23 +9,23 @@ public class PriceDTO {
     private double profitRate;
     private double sellingPrice;
     private Timestamp effectiveDate;
-    private Timestamp end_date;
-    private int is_active;
+    private Timestamp endDate;
+    private int isActive;
     private String bookName;
     private String authorName;
     private String categoryName;
 
     public PriceDTO() {}
 
-    public PriceDTO(int priceId, int bookId, double basePrice, double profitRate, double sellingPrice, Timestamp effectiveDate, Timestamp end_date, int is_active) {
+    public PriceDTO(int priceId, int bookId, double basePrice, double profitRate, double sellingPrice, Timestamp effectiveDate, Timestamp endDate, int isActive) {
         this.priceId = priceId;
         this.bookId = bookId;
         this.basePrice = basePrice;
         this.profitRate = profitRate;
         this.sellingPrice = sellingPrice;
         this.effectiveDate = effectiveDate;
-        this.end_date = end_date;
-        this.is_active = is_active;
+        this.endDate = endDate;
+        this.isActive = isActive;
     }
 
     public PriceDTO(int bookId, double basePrice, double profitRate, double sellingPrice, String bookName, String authorName, String categoryName) {
@@ -86,20 +86,20 @@ public class PriceDTO {
         this.effectiveDate = effectiveDate;
     }
 
-    public Timestamp getEnd_date() {
-        return end_date;
+    public Timestamp getEndDate() {
+        return endDate;
     }
 
-    public void setEnd_date(Timestamp end_date) {
-        this.end_date = end_date;
+    public void setEndDate(Timestamp endDate) {
+        this.endDate = endDate;
     }
 
-    public int getIs_active() {
-        return is_active;
+    public int getIsActive() {
+        return isActive;
     }
 
-    public void setIs_active(int is_active) {
-        this.is_active = is_active;
+    public void setIsActive(int isActive) {
+        this.isActive = isActive;
     }
 
     public String getBookName() {

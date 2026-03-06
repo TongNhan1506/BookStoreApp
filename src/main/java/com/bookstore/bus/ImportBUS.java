@@ -54,13 +54,14 @@ public class ImportBUS {
                 if (currentPrice != null) {
                     double oldBasePrice = currentPrice.getBasePrice();
                     double importPrice = d.getPrice();
+                    System.out.println("Import Price: " + importPrice);
 
                     double totalOldValue = currentStock * oldBasePrice;
                     double totalImportValue = d.getQuantity() * importPrice;
 
                     double newBasePrice = (totalOldValue + totalImportValue) / newStock;
 
-                    if (Math.abs(newBasePrice - oldBasePrice) > 1.0) {
+                    if (Math.round(newBasePrice) != Math.round(oldBasePrice)) {
                         double profitRate = currentPrice.getProfitRate();
                         double newSellingPrice = newBasePrice * (1 + profitRate);
 
@@ -76,6 +77,20 @@ public class ImportBUS {
 
                         priceDAO.addPrice(newPriceObj);
                     }
+                } else {
+                    double initialImportPrice = d.getPrice();
+                    double defaultProfitRate = 0.25; // Lợi nhuận mặc định 25% (Hoặc lấy từ System Parameter)
+                    double initialSellingPrice = initialImportPrice * (1 + defaultProfitRate);
+
+                    PriceDTO newPriceObj = new PriceDTO();
+                    newPriceObj.setBookId(d.getBookID());
+                    newPriceObj.setBasePrice(initialImportPrice);
+                    newPriceObj.setProfitRate(defaultProfitRate);
+                    newPriceObj.setSellingPrice(Math.round(initialSellingPrice));
+                    newPriceObj.setEffectiveDate(new java.sql.Timestamp(System.currentTimeMillis()));
+                    newPriceObj.setIsActive(1);
+
+                    priceDAO.addPrice(newPriceObj);
                 }
 
                 bookDAO.updateQuantity(d.getBookID(), newStock);

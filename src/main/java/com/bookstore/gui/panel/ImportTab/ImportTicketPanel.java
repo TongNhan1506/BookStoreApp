@@ -31,6 +31,7 @@ public class ImportTicketPanel extends JPanel implements Refreshable {
     private JTextField txtSearch, txtDateFrom, txtDateTo;
     private JComboBox<String> cboStatusFilter;
     private JButton btnResetFilter;
+    private JCheckBox chkSelectAll;
 
     private JLabel lbTotalCount, lbCompletedCount, lbPendingCount, lbCanceledCount;
 
@@ -57,8 +58,10 @@ public class ImportTicketPanel extends JPanel implements Refreshable {
         midTop.add(createStatsPanel(), BorderLayout.CENTER);
 
         topPanel.add(midTop, BorderLayout.CENTER);
+
         add(topPanel, BorderLayout.NORTH);
         add(createTablePanel(), BorderLayout.CENTER);
+        add(createBottomActionPanel(), BorderLayout.SOUTH);
     }
 
     private JPanel createHeader() {
@@ -172,8 +175,7 @@ public class ImportTicketPanel extends JPanel implements Refreshable {
             FlatSVGIcon.ColorFilter filter = new FlatSVGIcon.ColorFilter(oldColor -> Color.decode(iconColor));
             svgIcon.setColorFilter(filter);
             lbIcon.setIcon(svgIcon.derive(24, 24));
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         card.add(leftPanel, BorderLayout.CENTER);
         card.add(lbIcon, BorderLayout.EAST);
@@ -186,8 +188,20 @@ public class ImportTicketPanel extends JPanel implements Refreshable {
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createLineBorder(Color.decode("#EEEEEE")));
 
-        String[] columns = {"MÃ PHIẾU", "NHÀ CUNG CẤP", "NGÀY NHẬP", "NGƯỜI LẬP", "TỔNG TIỀN", "TRẠNG THÁI", "THAO TÁC"};
-        tableModel = new DefaultTableModel(columns, 0) { @Override public boolean isCellEditable(int row, int col) { return false; } };
+        String[] columns = {"", "MÃ PHIẾU", "NHÀ CUNG CẤP", "NGÀY NHẬP", "NGƯỜI LẬP", "TỔNG TIỀN", "TRẠNG THÁI", "THAO TÁC"};
+
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int col) {
+                return col == 0;
+            }
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 0) return Boolean.class;
+                return super.getColumnClass(columnIndex);
+            }
+        };
+
         table = new JTable(tableModel);
         table.setRowHeight(50);
         table.getTableHeader().setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 12));
@@ -195,13 +209,17 @@ public class ImportTicketPanel extends JPanel implements Refreshable {
         table.getTableHeader().setForeground(Color.WHITE);
         table.setSelectionBackground(Color.decode("#d4ffee"));
         table.setSelectionForeground(Color.BLACK);
-        table.getColumnModel().getColumn(5).setCellRenderer(new StatusRenderer());
-        table.getColumnModel().getColumn(6).setCellRenderer(new ActionRenderer());
+
+        table.getColumnModel().getColumn(0).setMaxWidth(40);
+        table.getColumnModel().getColumn(0).setMinWidth(40);
+
+        table.getColumnModel().getColumn(6).setCellRenderer(new StatusRenderer());
+        table.getColumnModel().getColumn(7).setCellRenderer(new ActionRenderer());
 
         table.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) {
-                if (table.columnAtPoint(e.getPoint()) == 6) {
-                    String idStr = table.getValueAt(table.rowAtPoint(e.getPoint()), 0).toString().replace("PN", "");
+                if (table.columnAtPoint(e.getPoint()) == 7) {
+                    String idStr = table.getValueAt(table.rowAtPoint(e.getPoint()), 1).toString().replace("PN", "");
                     int id = Integer.parseInt(idStr);
                     ImportTicketDTO selected = currentList.stream().filter(t -> t.getImportID() == id).findFirst().orElse(null);
                     if(selected != null) {
@@ -219,13 +237,124 @@ public class ImportTicketPanel extends JPanel implements Refreshable {
         return panel;
     }
 
+    private JPanel createBottomActionPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(new EmptyBorder(10, 0, 0, 0));
+
+        JPanel pLeft = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        pLeft.setBackground(Color.WHITE);
+
+        chkSelectAll = new JCheckBox("Chọn tất cả");
+        chkSelectAll.setBackground(Color.WHITE);
+        chkSelectAll.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 15));
+        chkSelectAll.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        chkSelectAll.addActionListener(e -> {
+            boolean isSelected = chkSelectAll.isSelected();
+            for (int i = 0; i < tableModel.getRowCount(); i++) {
+                int status = (int) tableModel.getValueAt(i, 6);
+                if (status == 1) {
+                    tableModel.setValueAt(isSelected, i, 0);
+                } else {
+                    tableModel.setValueAt(false, i, 0);
+                }
+            }
+        });
+        pLeft.add(chkSelectAll);
+
+        JPanel pRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+        pRight.setBackground(Color.WHITE);
+
+        JButton btnCancelSelected = new JButton("Hủy các phiếu đã chọn");
+        btnCancelSelected.setBackground(Color.decode("#D32F2F"));
+        btnCancelSelected.setForeground(Color.WHITE);
+        btnCancelSelected.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 14));
+        btnCancelSelected.putClientProperty(FlatClientProperties.STYLE, "arc: 10; borderWidth: 0;");
+        btnCancelSelected.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        JButton btnApproveSelected = new JButton("Duyệt các phiếu đã chọn");
+        btnApproveSelected.setBackground(Color.decode(AppConstant.GREEN_COLOR_CODE));
+        btnApproveSelected.setForeground(Color.WHITE);
+        btnApproveSelected.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 14));
+        btnApproveSelected.putClientProperty(FlatClientProperties.STYLE, "arc: 10; borderWidth: 0;");
+        btnApproveSelected.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        pRight.add(btnCancelSelected);
+        pRight.add(btnApproveSelected);
+
+        panel.add(pLeft, BorderLayout.WEST);
+        panel.add(pRight, BorderLayout.EAST);
+
+        btnApproveSelected.addActionListener(e -> {
+            int currentRoleId = SharedData.currentUser != null ? SharedData.currentUser.getRoleId() : 1;
+            if (currentRoleId != 1) {
+                JOptionPane.showMessageDialog(this, "Chỉ Admin mới có quyền duyệt phiếu nhập!");
+                return;
+            }
+            processMultipleTickets(true);
+        });
+
+        btnCancelSelected.addActionListener(e -> {
+            processMultipleTickets(false);
+        });
+
+        return panel;
+    }
+
+    private void processMultipleTickets(boolean isApproveAction) {
+        List<Integer> validIds = new ArrayList<>();
+        int totalSelected = 0;
+
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            boolean isChecked = (boolean) tableModel.getValueAt(i, 0);
+            if (isChecked) {
+                totalSelected++;
+                int status = (int) tableModel.getValueAt(i, 6);
+                if (status == 1) {
+                    String idStr = tableModel.getValueAt(i, 1).toString().replace("PN", "");
+                    validIds.add(Integer.parseInt(idStr));
+                }
+            }
+        }
+
+        if (totalSelected == 0) {
+            JOptionPane.showMessageDialog(this, "Vui lòng tick chọn ít nhất 1 phiếu!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (validIds.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Các phiếu bạn chọn đều đã hoàn thành hoặc đã bị hủy. Chỉ có thể xử lý phiếu Đang chờ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String actionName = isApproveAction ? "DUYỆT" : "HỦY";
+        String msg = "Bạn đã chọn " + totalSelected + " phiếu, nhưng chỉ có " + validIds.size() + " phiếu hợp lệ (Đang chờ).\n\nBạn có chắc chắn muốn " + actionName + " " + validIds.size() + " phiếu này?";
+
+        if (JOptionPane.showConfirmDialog(this, msg, "Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            int approverId = SharedData.currentUser != null ? SharedData.currentUser.getEmployeeId() : 1;
+            int successCount = 0;
+
+            for (int id : validIds) {
+                if (isApproveAction) {
+                    if (importBUS.approveImport(id, approverId)) successCount++;
+                } else {
+                    if (importBUS.cancelImport(id, approverId)) successCount++;
+                }
+            }
+            JOptionPane.showMessageDialog(this, "Đã " + actionName.toLowerCase() + " thành công " + successCount + "/" + validIds.size() + " phiếu hợp lệ.");
+            refresh();
+        }
+    }
+
     private void loadData() {
         currentList = importBUS.getAllImports();
         filterData();
     }
 
     private void filterData() {
+        if (chkSelectAll != null) chkSelectAll.setSelected(false);
         tableModel.setRowCount(0);
+
         String keyword = txtSearch.getText().trim().toLowerCase();
         int statusIdx = cboStatusFilter.getSelectedIndex();
         int targetStatus = (statusIdx == 1) ? 1 : (statusIdx == 2) ? 2 : (statusIdx == 3) ? 0 : -1;
@@ -245,8 +374,7 @@ public class ImportTicketPanel extends JPanel implements Refreshable {
                 toDate = sdf.parse(dateToStr);
                 toDate.setTime(toDate.getTime() + (24 * 60 * 60 * 1000) - 1);
             }
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
 
         int total = 0, completed = 0, pending = 0, canceled = 0;
 
@@ -262,15 +390,12 @@ public class ImportTicketPanel extends JPanel implements Refreshable {
             boolean matchDate = true;
             java.util.Date createdDate = dto.getCreatedDate();
 
-            if (fromDate != null && createdDate.before(fromDate)) {
-                matchDate = false;
-            }
-            if (toDate != null && createdDate.after(toDate)) {
-                matchDate = false;
-            }
+            if (fromDate != null && createdDate.before(fromDate)) matchDate = false;
+            if (toDate != null && createdDate.after(toDate)) matchDate = false;
 
             if (matchKey && matchStatus && matchDate) {
                 tableModel.addRow(new Object[]{
+                        false,
                         pnStr,
                         dto.getSupplierName(),
                         dateStr,

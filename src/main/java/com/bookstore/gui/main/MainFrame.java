@@ -1,7 +1,7 @@
     package com.bookstore.gui.main;
 
     import com.bookstore.dto.PermissionDTO;
-    import com.bookstore.gui.StatisticTab.StatisticPanel;
+    import com.bookstore.gui.StatisticTab.StatisticsTabbedPane;
     import com.bookstore.gui.panel.AccountTab.AccountTabbedPane;
     import com.bookstore.gui.panel.BillTab.BillPanel;
     import com.bookstore.gui.panel.EmployeeTab.EmployeePanel;
@@ -60,7 +60,7 @@
             mainContentPanel.add(new InventoryPanel(), "INVENTORY");
             mainContentPanel.add(new BillPanel(), "BILL");
             mainContentPanel.add(new EmployeePanel(), "EMPLOYEE");
-            mainContentPanel.add(new StatisticPanel(), "STATS");
+            mainContentPanel.add(new StatisticsTabbedPane(), "STATS");
             mainContentPanel.add(new AccountTabbedPane(), "ACCOUNT");
 
             add(mainContentPanel, BorderLayout.CENTER);

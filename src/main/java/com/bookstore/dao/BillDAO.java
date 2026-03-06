@@ -12,11 +12,18 @@ public class BillDAO {
     public int createBillTransaction(BillDTO bill, List<BillDetailDTO> details) {
         String sqlBill = "INSERT INTO bill(total_bill_price, tax, employee_id, customer_id, payment_method_id, earned_points) VALUES (?, ?, ?, ?, ?, ?)";
         String sqlDetail = "INSERT INTO bill_detail (bill_id, book_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
+        String sqlCheckStock = "SELECT quantity FROM book WHERE book_id = ? FOR UPDATE";
+        String sqlUpdateStock = "UPDATE book SET quantity = quantity - ? WHERE book_id = ?";
+        String sqlLog = "INSERT INTO inventory_log (action, change_quantity, remain_quantity, reference_id, book_id) VALUES (?, ?, ?, ?, ?)";
 
         Connection c = null;
         PreparedStatement psBill = null;
         PreparedStatement psDetail = null;
+        PreparedStatement psCheck = null;
+        PreparedStatement psUpdate = null;
+        PreparedStatement psLog = null;
         ResultSet rs = null;
+        ResultSet rsStock = null;
 
         try {
             c = DatabaseConnection.getConnection();
@@ -29,7 +36,7 @@ public class BillDAO {
             if (bill.getCustomerId() > 0) {
                 psBill.setInt(4, bill.getCustomerId());
             } else {
-                psBill.setNull(4, java.sql.Types.INTEGER);
+                psBill.setNull(4, Types.INTEGER);
             }
             psBill.setInt(5, bill.getPaymentMethodId());
             psBill.setInt(6, bill.getEarnedPoints());
@@ -43,7 +50,9 @@ public class BillDAO {
 
             if (generatedBillId > 0) {
                 psDetail = c.prepareStatement(sqlDetail);
-                BookDAO bookDAO = new BookDAO();
+                psCheck = c.prepareStatement(sqlCheckStock);
+                psUpdate = c.prepareStatement(sqlUpdateStock);
+                psLog = c.prepareStatement(sqlLog);
 
                 for (BillDetailDTO detail : details) {
                     psDetail.setInt(1, generatedBillId);
@@ -52,9 +61,79 @@ public class BillDAO {
                     psDetail.setDouble(4, detail.getUnitPrice());
                     psDetail.executeUpdate();
 
-                    bookDAO.decreaseQuantity(c, detail.getBookId(), detail.getQuantity());
+                    psCheck.setInt(1, detail.getBookId());
+                    rsStock = psCheck.executeQuery();
+                    int currentStock = 0;
+                    if (rsStock.next()) {
+                        currentStock = rsStock.getInt("quantity");
+                    }
+                    rsStock.close();
+
+                    if (currentStock < detail.getQuantity()) {
+                        throw new SQLException("Sách ID " + detail.getBookId() + " không đủ tồn kho! (Còn: " + currentStock + ", Khách mua: " + detail.getQuantity() + ")");
+                    }
+
+                    int remainQuantity = currentStock - detail.getQuantity();
+
+                    psUpdate.setInt(1, detail.getQuantity());
+                    psUpdate.setInt(2, detail.getBookId());
+                    psUpdate.executeUpdate();
+
+                    psLog.setString(1, "Bán hàng");
+                    psLog.setInt(2, -detail.getQuantity());
+                    psLog.setInt(3, remainQuantity);
+                    psLog.setInt(4, generatedBillId);
+                    psLog.setInt(5, detail.getBookId());
+                    psLog.executeUpdate();
+                }
+
+                if (bill.getCustomerId() > 0 && bill.getEarnedPoints() > 0) {
+                    String sqlUpdatePoint = "UPDATE customer SET point = point + ? WHERE customer_id = ?";
+                    try (PreparedStatement psUpdatePoint = c.prepareStatement(sqlUpdatePoint)) {
+                        psUpdatePoint.setInt(1, bill.getEarnedPoints());
+                        psUpdatePoint.setInt(2, bill.getCustomerId());
+                        psUpdatePoint.executeUpdate();
+                    }
+
+                    String sqlCheckRank = "SELECT c.point, c.rank_id, r.min_point " +
+                            "FROM customer c JOIN membership_rank r ON c.rank_id = r.rank_id " +
+                            "WHERE c.customer_id = ?";
+                    int currentPoint = 0;
+                    int currentRankId = 0;
+
+                    try (PreparedStatement psCheckRank = c.prepareStatement(sqlCheckRank)) {
+                        psCheckRank.setInt(1, bill.getCustomerId());
+                        ResultSet rsRank = psCheckRank.executeQuery();
+                        if (rsRank.next()) {
+                            currentPoint = rsRank.getInt("point");
+                            currentRankId = rsRank.getInt("rank_id");
+                        }
+                        rsRank.close();
+                    }
+
+                    String sqlFindNewRank = "SELECT rank_id FROM membership_rank WHERE min_point <= ? ORDER BY min_point DESC LIMIT 1";
+                    int newRankId = currentRankId;
+
+                    try (PreparedStatement psFindRank = c.prepareStatement(sqlFindNewRank)) {
+                        psFindRank.setInt(1, currentPoint);
+                        ResultSet rsNewRank = psFindRank.executeQuery();
+                        if (rsNewRank.next()) {
+                            newRankId = rsNewRank.getInt("rank_id");
+                        }
+                        rsNewRank.close();
+                    }
+
+                    if (newRankId != currentRankId) {
+                        String sqlUpdateRank = "UPDATE customer SET rank_id = ? WHERE customer_id = ?";
+                        try (PreparedStatement psUpdateRank = c.prepareStatement(sqlUpdateRank)) {
+                            psUpdateRank.setInt(1, newRankId);
+                            psUpdateRank.setInt(2, bill.getCustomerId());
+                            psUpdateRank.executeUpdate();
+                        }
+                    }
                 }
             }
+
             c.commit();
             return generatedBillId;
 
@@ -69,7 +148,11 @@ public class BillDAO {
             }
             return 0;
         } finally {
+            try { if (rsStock != null) rsStock.close(); } catch (Exception e) {}
             try { if (rs != null) rs.close(); } catch (Exception e) {}
+            try { if (psLog != null) psLog.close(); } catch (Exception e) {}
+            try { if (psUpdate != null) psUpdate.close(); } catch (Exception e) {}
+            try { if (psCheck != null) psCheck.close(); } catch (Exception e) {}
             try { if (psDetail != null) psDetail.close(); } catch (Exception e) {}
             try { if (psBill != null) psBill.close(); } catch (Exception e) {}
             try { if (c != null) { c.setAutoCommit(true); c.close(); } } catch (Exception e) {}

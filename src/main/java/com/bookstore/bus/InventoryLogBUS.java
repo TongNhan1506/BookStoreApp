@@ -8,7 +8,7 @@ public class InventoryLogBUS {
 
     public List<InventoryLogDTO> getAll() { return dao.getAll(); }
 
-    public boolean addLog(InventoryLogDTO dto) {
-        return dao.insert(dto);
+    public void addLog(InventoryLogDTO dto) {
+        dao.insert(dto);
     }
 }

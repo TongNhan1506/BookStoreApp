@@ -1,6 +1,7 @@
 package com.bookstore.gui.panel.InventoryTab;
 
 import com.bookstore.bus.BookBUS;
+import com.bookstore.bus.InventoryLogBUS;
 import com.bookstore.dto.BookDTO;
 import com.bookstore.util.AppConstant;
 import com.bookstore.util.Refreshable;
@@ -24,13 +25,15 @@ import java.util.Set;
 public class InventoryPanel extends JPanel implements Refreshable {
     private JTable table;
     private DefaultTableModel tableModel;
-    private BookBUS bookBUS = new BookBUS();
     private List<BookDTO> currentList = new ArrayList<>();
 
     private JLabel lbTotalBooks, lbCategories, lbLowStock;
     private JTextField txtSearch, txtDateFrom, txtDateTo;
     private JComboBox<String> cboStatus;
     private JButton btnResetFilter;
+
+    private BookBUS bookBUS = new BookBUS();
+    private InventoryLogBUS inventoryLogBUS = new InventoryLogBUS();
 
     public InventoryPanel() {
         initUI();

@@ -1,5 +1,7 @@
 package com.bookstore.dao;
 import com.bookstore.dto.InventoryLogDTO;
+import com.bookstore.util.DatabaseConnection;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +10,7 @@ public class InventoryLogDAO {
     public List<InventoryLogDTO> getAll() {
         List<InventoryLogDTO> list = new ArrayList<>();
         try {
-            Connection c = com.bookstore.util.DatabaseConnection.getConnection();
+            Connection c = DatabaseConnection.getConnection();
             String sql = "SELECT l.*, b.book_name FROM inventory_log l JOIN book b ON l.book_id = b.book_id ORDER BY l.created_date DESC";
             PreparedStatement ps = c.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -24,14 +26,14 @@ public class InventoryLogDAO {
                 dto.setBookName(rs.getString("book_name"));
                 list.add(dto);
             }
-            com.bookstore.util.DatabaseConnection.closeConnection(c);
+            DatabaseConnection.closeConnection(c);
         } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
     public boolean insert(InventoryLogDTO dto) {
         boolean result = false;
         try {
-            Connection c = com.bookstore.util.DatabaseConnection.getConnection();
+            Connection c = DatabaseConnection.getConnection();
             String sql = "INSERT INTO inventory_log (action, change_quantity, remain_quantity, reference_id, book_id) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement ps = c.prepareStatement(sql);
 
@@ -42,7 +44,7 @@ public class InventoryLogDAO {
             ps.setInt(5, dto.getBookId());
 
             result = ps.executeUpdate() > 0;
-            com.bookstore.util.DatabaseConnection.closeConnection(c);
+            DatabaseConnection.closeConnection(c);
         } catch (Exception e) {
             e.printStackTrace();
         }

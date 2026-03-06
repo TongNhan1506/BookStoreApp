@@ -117,7 +117,7 @@ public class ProductPanel extends JPanel implements Refreshable {
         JPanel searchRow = new JPanel(new BorderLayout(15, 0));
 
         searchField = new JTextField();
-        searchField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        searchField.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 14));
         searchField.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER_COLOR, 1),
                 BorderFactory.createEmptyBorder(8, 12, 8, 12)
@@ -1134,9 +1134,11 @@ public class ProductPanel extends JPanel implements Refreshable {
 
     private Image getBookCoverImage(BookDTO book, int width, int height) {
         if (book != null && book.getImage() != null && !book.getImage().trim().isEmpty()) {
-            File imageFile = new File(book.getImage());
+            String imagePath = "data/book_covers/" + book.getImage();
+            File imageFile = new File(imagePath);
+
             if (imageFile.exists()) {
-                ImageIcon icon = new ImageIcon(book.getImage());
+                ImageIcon icon = new ImageIcon(imagePath);
                 if (icon.getIconWidth() > 0 && icon.getIconHeight() > 0) {
                     return icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
                 }

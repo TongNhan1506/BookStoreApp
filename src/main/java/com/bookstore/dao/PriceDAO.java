@@ -93,6 +93,64 @@ public class PriceDAO {
         }
     }
 
+    public PriceDTO getActivePriceByBookId(int bookId) {
+        String sql = "SELECT * FROM price WHERE book_id = ? AND is_active = 1";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, bookId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    PriceDTO price = new PriceDTO();
+                    price.setPriceId(rs.getInt("price_id"));
+                    price.setBookId(rs.getInt("book_id"));
+                    price.setBasePrice(rs.getDouble("base_price"));
+                    price.setProfitRate(rs.getDouble("profit_rate"));
+                    price.setSellingPrice(rs.getDouble("selling_price"));
+                    price.setEffectiveDate(rs.getTimestamp("effective_date"));
+                    price.setIsActive(rs.getInt("is_active"));
+                    return price;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean deactivatePrice(int bookId) {
+        String sql = "UPDATE price SET is_active = 0, end_date = NOW() WHERE book_id = ? AND is_active = 1";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, bookId);
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean addPrice(PriceDTO price) {
+        String sql = "INSERT INTO price (book_id, base_price, profit_rate, selling_price, effective_date, is_active) " +
+                "VALUES (?, ?, ?, ?, NOW(), 1)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, price.getBookId());
+            ps.setDouble(2, price.getBasePrice());
+            ps.setDouble(3, price.getProfitRate());
+            ps.setDouble(4, price.getSellingPrice());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public boolean updateBulkPrice(List<PriceDTO> listToUpdate, double newProfitRate) {
         Connection conn = null;
         try {

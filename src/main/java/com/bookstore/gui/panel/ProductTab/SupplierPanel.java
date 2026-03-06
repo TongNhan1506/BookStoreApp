@@ -6,6 +6,8 @@ import com.bookstore.dto.BookDTO;
 import com.bookstore.dto.SupplierDTO;
 import com.bookstore.util.AppConstant;
 import com.bookstore.util.Refreshable;
+import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -93,13 +95,11 @@ public class SupplierPanel extends JPanel implements Refreshable {
         JPanel searchPanel = new JPanel(new BorderLayout(10, 0));
         searchPanel.setBackground(Color.WHITE);
 
-        JLabel searchIcon = new JLabel("🔍");
-        searchIcon.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        searchPanel.add(searchIcon, BorderLayout.WEST);
-
         searchField = new JTextField();
         searchField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         searchField.setBorder(createInputBorder());
+        searchField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON, new FlatSVGIcon("icon/search_icon.svg").derive(20, 20));
+        searchField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Nhập từ khóa tìm kiếm...");
         searchField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
