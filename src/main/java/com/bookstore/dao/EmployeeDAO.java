@@ -71,26 +71,53 @@ public class EmployeeDAO {
         return list;
     }
 
-    public boolean updateEmployee(EmployeeDTO e) {
-        String sql = "UPDATE employee SET employee_name = ?, employee_phone = ?, birthday = ?, " +
-                "base_salary = ?, salary_factor = ?, status = ?, role_id = ? WHERE employee_id = ?";
-        try (java.sql.Connection conn = DatabaseConnection.getConnection();
-             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+    public boolean updateEmployee(EmployeeDTO emp) {
+        Connection c = null;
+        PreparedStatement psEmp = null;
+        PreparedStatement psAcc = null;
 
-            ps.setString(1, e.getEmployeeName());
-            ps.setString(2, e.getEmployeePhone());
-            ps.setDate(3, e.getBirthday() != null ? new java.sql.Date(e.getBirthday().getTime()) : null);
-            ps.setDouble(4, e.getBaseSalary());
-            ps.setDouble(5, e.getSalaryFactor());
-            ps.setInt(6, e.getStatus());
-            ps.setInt(7, e.getRoleId());
-            ps.setInt(8, e.getEmployeeId());
+        try {
+            c = DatabaseConnection.getConnection();
+            c.setAutoCommit(false);
 
-            return ps.executeUpdate() > 0;
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            String sqlEmp = "UPDATE employee SET employee_name = ?, employee_phone = ?, birthday = ?, " +
+                    "base_salary = ?, role_id = ?, status = ? WHERE employee_id = ?";
+            psEmp = c.prepareStatement(sqlEmp);
+            psEmp.setString(1, emp.getEmployeeName());
+            psEmp.setString(2, emp.getEmployeePhone());
+            psEmp.setDate(3, emp.getBirthday() != null ? new java.sql.Date(emp.getBirthday().getTime()) : null);
+            psEmp.setDouble(4, emp.getBaseSalary());
+            psEmp.setInt(5, emp.getRoleId());
+            psEmp.setInt(6, emp.getStatus());
+            psEmp.setInt(7, emp.getEmployeeId());
+
+            psEmp.executeUpdate();
+
+            String sqlAcc = "UPDATE account SET status = ? WHERE employee_id = ?";
+            psAcc = c.prepareStatement(sqlAcc);
+            psAcc.setInt(1, emp.getStatus());
+            psAcc.setInt(2, emp.getEmployeeId());
+
+            psAcc.executeUpdate();
+
+            c.commit();
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (c != null) {
+                try {
+                    c.rollback();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return false;
+        } finally {
+            try { if (psAcc != null) psAcc.close(); } catch (Exception e) {}
+            try { if (psEmp != null) psEmp.close(); } catch (Exception e) {}
+            try { if (c != null) { c.setAutoCommit(true); c.close(); } } catch (Exception e) {}
         }
-        return false;
     }
 
     public boolean isPhoneExist(String phone, int ignoreId) {
@@ -153,5 +180,29 @@ public class EmployeeDAO {
             ex.printStackTrace();
         }
         return false;
+    }
+
+    public List<EmployeeDTO> getEmployeesWithoutAccount() {
+        List<EmployeeDTO> list = new ArrayList<>();
+        String sql = "SELECT e.*, r.role_name FROM employee e " +
+                "JOIN role r ON e.role_id = r.role_id " +
+                "WHERE e.status = 1 AND e.employee_id NOT IN (SELECT employee_id FROM account)";
+
+        try (Connection c = DatabaseConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                EmployeeDTO emp = new EmployeeDTO();
+                emp.setEmployeeId(rs.getInt("employee_id"));
+                emp.setEmployeeName(rs.getString("employee_name"));
+                emp.setRoleId(rs.getInt("role_id"));
+                emp.setRoleName(rs.getString("role_name"));
+                list.add(emp);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

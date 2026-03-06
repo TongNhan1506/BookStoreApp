@@ -98,4 +98,18 @@ public class ImportBUS {
     public boolean cancelImport(int importId, int approverId) {
         return importDAO.updateStatus(importId, 0, approverId);
     }
+
+    public boolean importBooks(ImportTicketDTO importDTO, ImportDetailDTO[] details) {
+        int newImportID = importDAO.add(importDTO);
+        if (newImportID != -1) {
+            for (ImportDetailDTO detail : details) {
+                if (detail != null) {
+                    detail.setImportID(newImportID);
+                    detailDAO.add(detail);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
 }

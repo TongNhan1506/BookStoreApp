@@ -12,7 +12,6 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.bookstore.bus.*;
 import com.bookstore.dto.*;
 import com.bookstore.util.Refreshable;
-import com.bookstore.util.SharedData;
 
 public class PricePanel extends JPanel implements Refreshable {
     private List<PriceDTO> listPrices;
@@ -51,20 +50,6 @@ public class PricePanel extends JPanel implements Refreshable {
 
         searchCard.putClientProperty(FlatClientProperties.STYLE, "arc: 35");
         searchCard.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
-
-        JPanel titleBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        titleBox.setOpaque(false);
-        titleBox.setBorder(BorderFactory.createEmptyBorder(10, 10, 15, 0));
-        titleBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-        JLabel lblTitle = new JLabel("Giá bán");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        lblTitle.setForeground(new Color(17, 71, 50));
-        titleBox.add(lblTitle);
-
-        JSeparator line = new JSeparator();
-        line.setForeground(new Color(230, 230, 230));
-        line.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
-        line.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JPanel selectionBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
         selectionBox.setOpaque(false);
@@ -229,9 +214,6 @@ public class PricePanel extends JPanel implements Refreshable {
         searchBoxContainer.setMaximumSize(new Dimension(500, 45));
         searchBoxContainer.add(searchWrapper);
 
-        searchCard.add(titleBox);
-        searchCard.add(line);
-        searchCard.add(Box.createVerticalStrut(15));
         searchCard.add(selectionBox);
         searchCard.add(Box.createVerticalStrut(10));
         searchCard.add(searchBoxContainer);

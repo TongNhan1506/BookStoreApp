@@ -59,4 +59,8 @@ public class EmployeeBUS {
 
         return employeeDAO.insertEmployee(e) ? "Thêm nhân viên thành công!" : "Thêm thất bại!";
     }
+
+    public List<EmployeeDTO> getEmployeesWithoutAccount() {
+        return employeeDAO.getEmployeesWithoutAccount();
+    }
 }

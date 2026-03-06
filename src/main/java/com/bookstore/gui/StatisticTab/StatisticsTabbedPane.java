@@ -15,9 +15,9 @@ public class StatisticsTabbedPane extends JPanel{
     private void initUI(){
         setLayout(new BorderLayout());
         tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
-        tabbedPane.addTab("Doanh Thu", new RevenueStatisticPanel());
+        tabbedPane.addTab("Doanh Thu", new JPanel());
         tabbedPane.addTab("Sản Phẩm", new JPanel());
-        tabbedPane.addTab("Nhập Hàng", new ImportStatisticPanel());
+        tabbedPane.addTab("Nhập Hàng", new JPanel());
         tabbedPane.addTab("Chi phí", new JPanel());
 
         add(tabbedPane, BorderLayout.CENTER);

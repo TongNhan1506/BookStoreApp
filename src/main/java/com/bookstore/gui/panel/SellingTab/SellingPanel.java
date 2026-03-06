@@ -374,6 +374,7 @@ public class SellingPanel extends JPanel implements Refreshable {
         header.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 15));
         header.setPreferredSize(new Dimension(header.getWidth(), 40));
         header.setReorderingAllowed(false);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
         table.setRowHeight(35);
         table.setShowGrid(true);
@@ -383,8 +384,6 @@ public class SellingPanel extends JPanel implements Refreshable {
 
     private void setColumnWidth(JTable table, int columnIndex, int width) {
         table.getColumnModel().getColumn(columnIndex).setPreferredWidth(width);
-        table.getColumnModel().getColumn(columnIndex).setMinWidth(width);
-         table.getColumnModel().getColumn(columnIndex).setMaxWidth(width);
     }
 
     private void loadCategoriesToComBoBox() {

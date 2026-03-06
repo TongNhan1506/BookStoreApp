@@ -7,7 +7,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import com.bookstore.dto.*;
 import com.bookstore.bus.*;
@@ -61,12 +60,6 @@ public class PromotionPanel extends JPanel {
     }
 
     private void initHeader() {
-        JLabel lblTitle = new JLabel("Khuyến mãi");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        lblTitle.setForeground(new Color(17, 71, 50));
-        lblTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-        add(lblTitle, BorderLayout.NORTH);
-
         JPanel controlPanel = new JPanel(new BorderLayout());
         controlPanel.setOpaque(false);
         controlPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
