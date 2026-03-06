@@ -504,7 +504,7 @@ insert into promotion_detail (promotion_id, book_id)
 SELECT 3, book_id FROM book WHERE category_id = 4;
 
 insert into import_ticket (created_date, total_import_quantity, total_import_price, status, employee_id, supplier_id, approver_id)
-values ('2026-02-01 10:00:00', 500, 428000, 1, 1, 1, null);
+values ('2026-02-01 10:00:00', 500, 43066000, 1, 1, 1, null);
 
 insert into import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
 values (1, 1, 18, 52000);
@@ -525,7 +525,7 @@ insert into import_ticket_detail (import_ticket_id, book_id, import_quantity, im
 values (1, 29, 207, 110000);
 
 insert into import_ticket (created_date, total_import_quantity, total_import_price, status, employee_id, supplier_id, approver_id)
-values ('2026-03-01 3:00:00', 764, 437000, 1, 1, 2, null);
+values ('2026-03-01 3:00:00', 764, 42397000, 1, 1, 2, null);
 
 insert into import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
 values (2, 5, 33, 44000);
@@ -549,7 +549,7 @@ insert into import_ticket_detail (import_ticket_id, book_id, import_quantity, im
 values (2, 27, 122, 99000);
 
 insert into import_ticket (created_date, total_import_quantity, total_import_price, status, employee_id, supplier_id, approver_id)
-values ('2026-04-12 6:20:00', 430, 227, 1, 1, 4, null);
+values ('2026-04-12 6:20:00', 430, 22518000, 1, 1, 4, null);
 
 insert into import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
 values (3, 15, 116, 30000);
@@ -564,7 +564,7 @@ insert into import_ticket_detail (import_ticket_id, book_id, import_quantity, im
 values (3, 26, 77, 88000);
 
 insert into import_ticket (created_date, total_import_quantity, total_import_price, status, employee_id, supplier_id, approver_id)
-values ('2026-02-22 6:20:00', 286, 127000, 1, 1, 6, null);
+values ('2026-02-22 6:20:00', 286, 5810000, 1, 1, 6, null);
 
 insert into import_ticket_detail (import_ticket_id, book_id, import_quantity, import_price)
 values (4, 8, 90, 12000);
