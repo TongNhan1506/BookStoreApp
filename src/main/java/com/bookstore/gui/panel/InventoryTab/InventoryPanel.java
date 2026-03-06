@@ -64,16 +64,13 @@ public class InventoryPanel extends JPanel implements Refreshable {
     private JPanel createHeaderPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
-        JLabel lbTitle = new JLabel("QUẢN LÝ TỒN KHO");
+        JLabel lbTitle = new JLabel("THEO DÕI VÀ QUẢN LÝ TỒN KHO");
         lbTitle.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        lbTitle.setForeground(Color.decode("#062D1E"));
-        JLabel lbSubtitle = new JLabel("Theo dõi và quản lý tồn kho sách hiệu quả");
-        lbSubtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        lbSubtitle.setForeground(Color.GRAY);
+        lbTitle.setForeground(Color.BLACK);
         JPanel titleContainer = new JPanel(new GridLayout(2, 1));
         titleContainer.setBackground(Color.WHITE);
+        titleContainer.add(new JLabel());
         titleContainer.add(lbTitle);
-        titleContainer.add(lbSubtitle);
         panel.add(titleContainer, BorderLayout.WEST);
 
         JButton btnLog = new JButton("Biến Động Tồn Kho (Thẻ Kho)");
@@ -194,11 +191,6 @@ public class InventoryPanel extends JPanel implements Refreshable {
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createLineBorder(Color.decode("#EEEEEE")));
         panel.putClientProperty(FlatClientProperties.STYLE, "arc: 20;");
-
-        JLabel lbTitle = new JLabel("Danh sách tồn kho");
-        lbTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        lbTitle.setBorder(new EmptyBorder(20, 20, 10, 20));
-        panel.add(lbTitle, BorderLayout.NORTH);
 
         String[] columns = {"SÁCH", "DANH MỤC", "TÁC GIẢ", "TỒN KHO", "TRẠNG THÁI"};
         tableModel = new DefaultTableModel(columns, 0) {

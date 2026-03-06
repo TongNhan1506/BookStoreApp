@@ -67,16 +67,6 @@ public class ImportTicketPanel extends JPanel implements Refreshable {
     private JPanel createHeader() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
-        JPanel titlePanel = new JPanel(new GridLayout(2, 1));
-        titlePanel.setBackground(Color.WHITE);
-        JLabel lbTitle = new JLabel("QUẢN LÝ PHIẾU NHẬP");
-        lbTitle.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 28));
-        lbTitle.setForeground(Color.decode(AppConstant.GREEN_COLOR_CODE));
-        JLabel lbSubtitle = new JLabel("Danh sách các phiếu nhập hàng từ nhà cung cấp");
-        lbSubtitle.setForeground(Color.GRAY);
-        titlePanel.add(lbTitle); titlePanel.add(lbSubtitle);
-
-        panel.add(titlePanel, BorderLayout.WEST);
         return panel;
     }
 
