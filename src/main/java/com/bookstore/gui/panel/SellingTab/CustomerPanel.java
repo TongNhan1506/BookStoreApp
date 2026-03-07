@@ -78,13 +78,15 @@ public class CustomerPanel extends JPanel implements Refreshable {
         pSearchRow.add(txtSearch, BorderLayout.CENTER);
         pSearchRow.add(btnAddCustomer, BorderLayout.EAST);
 
-        JPanel pFilterRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
-        pFilterRow.setOpaque(false);
+        JPanel pFilterContainer = new JPanel(new GridLayout(2, 1, 0, 10));
+        pFilterContainer.setOpaque(false);
+
+        JPanel pFilters = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
+        pFilters.setOpaque(false);
 
         JPanel pRank = createFilterGroup("Hạng thành viên:");
         cboRank = new JComboBox<>();
         cboRank.addItem("Tất cả hạng");
-        // TODO: Load dữ liệu hạng từ DB vào đây sau
         cboRank.setPreferredSize(new Dimension(200, 35));
         cboRank.setBackground(Color.WHITE);
         pRank.add(cboRank);
@@ -98,6 +100,13 @@ public class CustomerPanel extends JPanel implements Refreshable {
         txtMaxPoint = new JTextField();
         txtMaxPoint.setPreferredSize(new Dimension(100, 35));
         pMaxPoint.add(txtMaxPoint);
+
+        pFilters.add(pRank);
+        pFilters.add(pMinPoint);
+        pFilters.add(pMaxPoint);
+
+        JPanel pActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
+        pActions.setOpaque(false);
 
         FlatSVGIcon.ColorFilter whiteFilter = new FlatSVGIcon.ColorFilter(color -> Color.WHITE);
 
@@ -131,30 +140,15 @@ public class CustomerPanel extends JPanel implements Refreshable {
         btnViewCustomer.setForeground(Color.WHITE);
         btnViewCustomer.putClientProperty(FlatClientProperties.STYLE, "arc: 5; hoverBackground: #64B5F6;");
 
-        JPanel pResetWrapper = new JPanel(new BorderLayout());
-        pResetWrapper.setOpaque(false);
-        pResetWrapper.setBorder(new EmptyBorder(22, 0, 0, 0));
-        pResetWrapper.add(btnResetFilter, BorderLayout.CENTER);
+        pActions.add(btnResetFilter);
+        pActions.add(btnEditCustomer);
+        pActions.add(btnViewCustomer);
 
-        JPanel pEditWrapper = new JPanel(new BorderLayout());
-        pEditWrapper.setOpaque(false);
-        pEditWrapper.setBorder(new EmptyBorder(22, 0, 0, 0));
-        pEditWrapper.add(btnEditCustomer, BorderLayout.CENTER);
-
-        JPanel pViewWrapper = new JPanel(new BorderLayout());
-        pViewWrapper.setOpaque(false);
-        pViewWrapper.setBorder(new EmptyBorder(22, 0, 0, 0));
-        pViewWrapper.add(btnViewCustomer, BorderLayout.CENTER);
-
-        pFilterRow.add(pRank);
-        pFilterRow.add(pMinPoint);
-        pFilterRow.add(pMaxPoint);
-        pFilterRow.add(pResetWrapper);
-        pFilterRow.add(pEditWrapper);
-        pFilterRow.add(pViewWrapper);
+        pFilterContainer.add(pFilters);
+        pFilterContainer.add(pActions);
 
         pTop.add(pSearchRow, BorderLayout.NORTH);
-        pTop.add(pFilterRow, BorderLayout.CENTER);
+        pTop.add(pFilterContainer, BorderLayout.CENTER);
 
         return pTop;
     }

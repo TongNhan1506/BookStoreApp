@@ -81,8 +81,11 @@ public class EmployeePanel extends JPanel implements Refreshable {
         pSearchRow.add(txtSearch, BorderLayout.CENTER);
         pSearchRow.add(btnAddEmployee, BorderLayout.EAST);
 
-        JPanel pFilterRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
-        pFilterRow.setOpaque(false);
+        JPanel pFilterContainer = new JPanel(new GridLayout(2, 1, 0, 10));
+        pFilterContainer.setOpaque(false);
+
+        JPanel pCombos = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
+        pCombos.setOpaque(false);
 
         JPanel pRole = createFilterGroup("Chức vụ:");
         cboRole = new JComboBox<>();
@@ -96,6 +99,12 @@ public class EmployeePanel extends JPanel implements Refreshable {
         cboStatus.setPreferredSize(new Dimension(150, 35));
         cboStatus.setBackground(Color.WHITE);
         pStatus.add(cboStatus);
+
+        pCombos.add(pRole);
+        pCombos.add(pStatus);
+
+        JPanel pActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
+        pActions.setOpaque(false);
 
         FlatSVGIcon.ColorFilter whiteFilter = new FlatSVGIcon.ColorFilter(color -> Color.WHITE);
 
@@ -129,14 +138,14 @@ public class EmployeePanel extends JPanel implements Refreshable {
         btnViewEmployee.setForeground(Color.WHITE);
         btnViewEmployee.putClientProperty(FlatClientProperties.STYLE, "arc: 5; hoverBackground: #64B5F6;");
 
-        pFilterRow.add(pRole);
-        pFilterRow.add(pStatus);
-        pFilterRow.add(createWrapper(btnResetFilter));
-        pFilterRow.add(createWrapper(btnEditEmployee));
-        pFilterRow.add(createWrapper(btnViewEmployee));
+        pActions.add(btnResetFilter);
+        pActions.add(btnEditEmployee);
+        pActions.add(btnViewEmployee);
 
+        pFilterContainer.add(pCombos);
+        pFilterContainer.add(pActions);
         pTop.add(pSearchRow, BorderLayout.NORTH);
-        pTop.add(pFilterRow, BorderLayout.CENTER);
+        pTop.add(pFilterContainer, BorderLayout.CENTER);
 
         return pTop;
     }
@@ -149,14 +158,6 @@ public class EmployeePanel extends JPanel implements Refreshable {
         label.setForeground(Color.DARK_GRAY);
         panel.add(label, BorderLayout.NORTH);
         return panel;
-    }
-
-    private JPanel createWrapper(JButton btn) {
-        JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.setOpaque(false);
-        wrapper.setBorder(new EmptyBorder(22, 0, 0, 0));
-        wrapper.add(btn, BorderLayout.CENTER);
-        return wrapper;
     }
 
     private JPanel createTablePanel() {

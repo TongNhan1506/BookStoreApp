@@ -12,7 +12,6 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.bookstore.bus.*;
 import com.bookstore.dto.*;
 import com.bookstore.util.Refreshable;
-import com.bookstore.util.SharedData;
 
 public class PricePanel extends JPanel implements Refreshable {
     private List<PriceDTO> listPrices;

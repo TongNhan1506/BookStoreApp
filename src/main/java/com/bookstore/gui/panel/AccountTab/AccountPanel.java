@@ -9,10 +9,11 @@ import com.bookstore.dto.EmployeeDTO;
 import com.bookstore.bus.*;
 import com.bookstore.dao.AccountDAO;
 import com.bookstore.dao.EmployeeDAO;
+import com.bookstore.util.Refreshable;
 
 import java.awt.*;
 
-public class AccountPanel extends JPanel {
+public class AccountPanel extends JPanel implements Refreshable {
     private List<AccountDTO> listAccountGoc;
     private DefaultTableModel model;
     private JTable table;
@@ -39,6 +40,12 @@ public class AccountPanel extends JPanel {
         add(box2, BorderLayout.CENTER);
 
         loadAdminData();
+    }
+
+    @Override
+    public void refresh() {
+        loadAdminData();
+        loadAccountData();
     }
 
     private void initAdminSection(WhiteBoxPanel box) {
@@ -141,7 +148,9 @@ public class AccountPanel extends JPanel {
         btnAdd.addActionListener(e -> {
             AccountFormDialog dialog = new AccountFormDialog(
                     (Frame) SwingUtilities.getWindowAncestor(this), this, null);
+            dialog.setDataToForm(null, null);
             dialog.setVisible(true);
+            loadAccountData();
         });
 
         gbc.gridx = 2; gbc.weightx = 0.0; gbc.fill = GridBagConstraints.NONE;
@@ -428,6 +437,8 @@ public class AccountPanel extends JPanel {
         listAccountGoc = accountDAO.selectAllAccounts();
         model.setRowCount(0);
 
+        String keyword = txtSearch.getText().toLowerCase().trim();
+
         for (AccountDTO acc : listAccountGoc) {
             if ("admin".equalsIgnoreCase(acc.getUsername())) {
                 continue;
@@ -439,7 +450,15 @@ public class AccountPanel extends JPanel {
             String empRole = (emp != null) ? emp.getRoleName() : "N/A";
             String statusStr = "N/A";
             if (emp != null) {
-                statusStr = (emp.getStatus() == 1) ? "Đang làm việc" : "Ngưng làm việc";
+                statusStr = (acc.getStatus() == 1) ? "Được phép hoạt động" : "Ngưng hoạt động";
+            }
+
+            if (!keyword.isEmpty()) {
+                if (!empName.toLowerCase().contains(keyword) &&
+                        !acc.getUsername().toLowerCase().contains(keyword) &&
+                        !statusStr.toLowerCase().contains(keyword)) {
+                    continue;
+                }
             }
 
             model.addRow(new Object[] {
@@ -454,6 +473,10 @@ public class AccountPanel extends JPanel {
     }
 
     private void openEditDialog(int row) {
+        if (table.isEditing()) {
+            table.getCellEditor().stopCellEditing();
+        }
+
         String user = table.getValueAt(row, 1).toString();
         AccountDTO acc = accountBUS.selectByUsername(user);
         EmployeeDTO emp = empDAO.selectById(acc.getEmployeeId());
@@ -461,6 +484,7 @@ public class AccountPanel extends JPanel {
         AccountFormDialog dialog = new AccountFormDialog((Frame) SwingUtilities.getWindowAncestor(this), this, acc);
         dialog.setDataToForm(acc, emp);
         dialog.setVisible(true);
-    }
 
+        loadAccountData();
+    }
 }

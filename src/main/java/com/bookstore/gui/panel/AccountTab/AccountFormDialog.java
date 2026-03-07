@@ -3,15 +3,21 @@ package com.bookstore.gui.panel.AccountTab;
 import javax.swing.*;
 
 import com.bookstore.bus.AccountBUS;
+import com.bookstore.bus.EmployeeBUS;
 import com.bookstore.dto.AccountDTO;
 import com.bookstore.dto.EmployeeDTO;
+import com.bookstore.util.AppConstant;
 
 import java.awt.*;
+import java.util.List;
 
 public class AccountFormDialog extends JDialog {
     private AccountBUS accountBUS = new AccountBUS();
+    private EmployeeBUS employeeBUS = new EmployeeBUS();
+
     private AccountPanel parentPanel;
-    private JTextField txtName, txtUsername, txtPassword, txtRole;
+    private JComboBox<EmployeeDTO> cboEmployee;
+    private JTextField txtUsername, txtPassword, txtRole;
     private JRadioButton radActive, radInactive;
     private JButton btnCreate, btnSave;
 
@@ -28,10 +34,40 @@ public class AccountFormDialog extends JDialog {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         mainPanel.setBackground(new Color(245, 245, 245));
 
-        txtName = new JTextField();
+        cboEmployee = new JComboBox<>();
+        cboEmployee.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof EmployeeDTO) {
+                    EmployeeDTO emp = (EmployeeDTO) value;
+                    if (emp.getEmployeeId() == -1) {
+                        setText(emp.getEmployeeName());
+                        setForeground(Color.GRAY);
+                        setFont(getFont().deriveFont(Font.ITALIC));
+                    } else {
+                        setText(emp.getEmployeeName() + " (" + emp.getRoleName() + ")");
+                        setForeground(Color.BLACK);
+                        setFont(getFont().deriveFont(Font.PLAIN));
+                    }
+                }
+                return this;
+            }
+        });
         txtUsername = new JTextField();
         txtPassword = new JTextField();
         txtRole = new JTextField();
+        txtRole.setEditable(false);
+        txtRole.setBackground(Color.decode("#EEEEEE"));
+
+        cboEmployee.addActionListener(e -> {
+            EmployeeDTO selectedEmp = (EmployeeDTO) cboEmployee.getSelectedItem();
+            if (selectedEmp != null) {
+                txtRole.setText(selectedEmp.getRoleName());
+            } else {
+                txtRole.setText("");
+            }
+        });
 
         radActive = new JRadioButton("Đang làm việc");
         radInactive = new JRadioButton("Ngưng làm việc");
@@ -43,8 +79,8 @@ public class AccountFormDialog extends JDialog {
         statusPanel.add(radActive);
         statusPanel.add(radInactive);
 
-        mainPanel.add(new JLabel("Tên nhân viên:"));
-        mainPanel.add(txtName);
+        mainPanel.add(new JLabel("Chọn nhân viên:"));
+        mainPanel.add(cboEmployee);
         mainPanel.add(new JLabel("Username:"));
         mainPanel.add(txtUsername);
         mainPanel.add(new JLabel("Password:"));
@@ -69,19 +105,34 @@ public class AccountFormDialog extends JDialog {
             bottomPanel.add(btnCreate);
         } else {
             bottomPanel.add(btnSave);
+            txtUsername.setEditable(false);
+            txtUsername.setBackground(Color.decode("#EEEEEE"));
         }
 
         btnCreate.addActionListener(e -> {
             AccountDTO newAcc = getDataFromForm();
+            if (newAcc == null) return;
 
             String message = accountBUS.addAccount(newAcc);
-
             if (message.equals("Thêm tài khoản thành công!")) {
                 JOptionPane.showMessageDialog(this, message);
                 this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, message, "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
-                if (parentPanel != null)
-                    parentPanel.loadAccountData();
+        btnSave.addActionListener(e -> {
+            AccountDTO updatedAcc = getDataFromForm();
+            if (updatedAcc == null) return;
+
+            String newPassword = txtPassword.getText().trim();
+            boolean isChangePassword = !newPassword.isEmpty();
+
+            String message = accountBUS.updateAccount(updatedAcc, isChangePassword);
+            if (message.equals("Cập nhật tài khoản thành công!")) {
+                JOptionPane.showMessageDialog(this, message);
+                this.dispose();
             } else {
                 JOptionPane.showMessageDialog(this, message, "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
@@ -92,52 +143,75 @@ public class AccountFormDialog extends JDialog {
 
         pack();
         setLocationRelativeTo(parent);
+    }
 
-        btnSave.addActionListener(e -> {
-            AccountDTO updatedAcc = getDataFromForm();
+    public void setDataToForm(AccountDTO acc, EmployeeDTO currentEmp) {
+        List<EmployeeDTO> availableEmps = employeeBUS.getEmployeesWithoutAccount();
+        cboEmployee.removeAllItems();
 
-            String newPassword = txtPassword.getText().trim();
-            boolean isChangePassword = !newPassword.isEmpty();
+        if (currentEmp != null) {
+            cboEmployee.addItem(currentEmp);
+        }
 
-            String message = accountBUS.updateAccount(updatedAcc, isChangePassword);
+        for (EmployeeDTO emp : availableEmps) {
+            cboEmployee.addItem(emp);
+        }
 
-            if (message.equals("Cập nhật tài khoản thành công!")) {
-                JOptionPane.showMessageDialog(this, message);
-                this.dispose();
+        if (cboEmployee.getItemCount() == 0) {
+            EmployeeDTO dummyEmp = new EmployeeDTO();
+            dummyEmp.setEmployeeId(-1);
+            dummyEmp.setEmployeeName("Tất cả NV đều đã có tài khoản");
 
-                if (parentPanel != null) {
-                    parentPanel.loadAccountData();
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, message, "Lỗi", JOptionPane.ERROR_MESSAGE);
+            cboEmployee.addItem(dummyEmp);
+            cboEmployee.setEnabled(false);
+
+            if (btnCreate != null) {
+                btnCreate.setEnabled(false);
+                btnCreate.setBackground(Color.GRAY);
             }
-        });
-    }
+        } else {
+            cboEmployee.setEnabled(true);
+            if (btnCreate != null) {
+                btnCreate.setEnabled(true);
+                btnCreate.setBackground(Color.BLACK);
+            }
+        }
 
-    public AccountDTO getDataFromForm() {
-        AccountDTO acc = new AccountDTO();
-        acc.setUsername(txtUsername.getText().trim());
-        acc.setPassword(txtPassword.getText().trim());
-
-        acc.setStatus(radActive.isSelected() ? 1 : 0);
-        return acc;
-    }
-
-    public void setDataToForm(AccountDTO acc, EmployeeDTO emp) {
         if (acc != null) {
             txtUsername.setText(acc.getUsername());
-            txtPassword.setText(acc.getPassword());
-
+            txtPassword.setText("");
             if (acc.getStatus() == 1) {
                 radActive.setSelected(true);
             } else {
                 radInactive.setSelected(true);
             }
+        } else {
+            radActive.setSelected(true);
         }
 
-        if (emp != null) {
-            txtName.setText(emp.getEmployeeName());
-            txtRole.setText(emp.getEmployeeName());
+        if (currentEmp != null) {
+            for (int i = 0; i < cboEmployee.getItemCount(); i++) {
+                if (cboEmployee.getItemAt(i).getEmployeeId() == currentEmp.getEmployeeId()) {
+                    cboEmployee.setSelectedIndex(i);
+                    break;
+                }
+            }
         }
+    }
+
+    public AccountDTO getDataFromForm() {
+        EmployeeDTO selectedEmp = (EmployeeDTO) cboEmployee.getSelectedItem();
+        if (selectedEmp == null || selectedEmp.getEmployeeId() == -1) {
+            JOptionPane.showMessageDialog(this, "Không có nhân viên hợp lệ để cấp tài khoản!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
+
+
+        AccountDTO acc = new AccountDTO();
+        acc.setEmployeeId(selectedEmp.getEmployeeId());
+        acc.setUsername(txtUsername.getText().trim());
+        acc.setPassword(txtPassword.getText().trim());
+        acc.setStatus(radActive.isSelected() ? 1 : 0);
+        return acc;
     }
 }
