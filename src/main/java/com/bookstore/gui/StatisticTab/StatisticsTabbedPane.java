@@ -1,15 +1,25 @@
 package com.bookstore.gui.StatisticTab;
 
+import com.bookstore.util.PermissionUtil;
+import com.bookstore.util.Refreshable;
 import com.formdev.flatlaf.FlatClientProperties;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class StatisticsTabbedPane extends JPanel{
+public class StatisticsTabbedPane extends JPanel implements Refreshable{
     JTabbedPane tabbedPane = new JTabbedPane();
 
     public StatisticsTabbedPane(){
         initUI();
+    }
+
+    @Override
+    public void refresh() {
+        Component selectedTab = tabbedPane.getSelectedComponent();
+        if (selectedTab instanceof Refreshable r) {
+            r.refresh();
+        }
     }
 
     private void initUI(){
@@ -17,10 +27,14 @@ public class StatisticsTabbedPane extends JPanel{
         tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
         tabbedPane.addTab("Doanh Thu", new JPanel());
         tabbedPane.addTab("Sản Phẩm", new JPanel());
-        tabbedPane.addTab("Nhập Hàng", new JPanel());
-        tabbedPane.addTab("Chi phí", new JPanel());
-
+        tabbedPane.addTab("Khách Hàng", new CustomerStatsPanel());
         add(tabbedPane, BorderLayout.CENTER);
 
+        tabbedPane.addChangeListener(e -> {
+            Component selectedTab = tabbedPane.getSelectedComponent();
+            if (selectedTab instanceof Refreshable r) {
+                r.refresh();
+            }
+        });
     }
 }
