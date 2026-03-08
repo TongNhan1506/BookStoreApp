@@ -1,6 +1,5 @@
-package com.bookstore.gui.StatisticTab;
+package com.bookstore.gui.panel.StatisticTab;
 
-import com.bookstore.util.PermissionUtil;
 import com.bookstore.util.Refreshable;
 import com.formdev.flatlaf.FlatClientProperties;
 
@@ -25,7 +24,7 @@ public class StatisticsTabbedPane extends JPanel implements Refreshable{
     private void initUI(){
         setLayout(new BorderLayout());
         tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
-        tabbedPane.addTab("Doanh Thu", new JPanel());
+        tabbedPane.addTab("Doanh Thu", new FinancialStatsPanel());
         tabbedPane.addTab("Sản Phẩm", new JPanel());
         tabbedPane.addTab("Khách Hàng", new CustomerStatsPanel());
         add(tabbedPane, BorderLayout.CENTER);

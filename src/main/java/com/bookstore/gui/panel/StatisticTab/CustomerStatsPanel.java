@@ -1,4 +1,4 @@
-package com.bookstore.gui.StatisticTab;
+package com.bookstore.gui.panel.StatisticTab;
 
 import javax.swing.*;
 
