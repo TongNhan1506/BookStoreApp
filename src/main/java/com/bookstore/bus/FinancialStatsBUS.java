@@ -4,9 +4,7 @@ import com.bookstore.dao.FinancialStatsDAO;
 import com.bookstore.dto.FinancialStatsDTO;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class FinancialStatsBUS {
     private final FinancialStatsDAO financialStatsDAO = new FinancialStatsDAO();
@@ -19,24 +17,42 @@ public class FinancialStatsBUS {
         return financialStatsDAO.getThongKeTheoThang(nam);
     }
 
+    public void validateThongKeTheoNgay(Date tuNgay, Date denNgay) {
+        if (tuNgay == null || denNgay == null) {
+            throw new IllegalArgumentException("Vui lòng chọn đầy đủ khoảng thời gian.");
+        }
+
+        if (tuNgay.after(denNgay)) {
+            throw new IllegalArgumentException("'Từ ngày' không được lớn hơn 'Đến ngày'.");
+        }
+    }
+
+    public void validateThongKeTheoNam(Date ngayChon) {
+        if (ngayChon == null) {
+            throw new IllegalArgumentException("Vui lòng chọn ngày để xác định năm thống kê.");
+        }
+    }
+
+    public int extractYear(Date ngayChon) {
+        return Integer.parseInt(new java.text.SimpleDateFormat("yyyy").format(ngayChon));
+    }
+
     public QuyDoanhThuSummary getQuyDoanhThuSummary(int nam) {
         List<FinancialStatsDTO> dataTheoThang = getThongKeTheoThang(nam);
         if (dataTheoThang.isEmpty()) {
             return null;
         }
 
-        Map<Integer, Double> doanhThuTheoQuy = new HashMap<>();
+        double[] doanhThuTheoQuy = new double[4];
+        boolean[] coDuLieuQuy = new boolean[4];
         for (FinancialStatsDTO item : dataTheoThang) {
             int thang = extractMonth(item.getThoiGian());
             if (thang <= 0) {
                 continue;
             }
-            int quy = ((thang - 1) / 3) + 1;
-            doanhThuTheoQuy.merge(quy, item.getDoanhThu(), Double::sum);
-        }
-
-        if (doanhThuTheoQuy.isEmpty()) {
-            return null;
+            int indexQuy = (thang - 1) / 3;
+            doanhThuTheoQuy[indexQuy] += item.getDoanhThu();
+            coDuLieuQuy[indexQuy] = true;
         }
 
         int quyMax = -1;
@@ -44,9 +60,14 @@ public class FinancialStatsBUS {
         double doanhThuMax = Double.NEGATIVE_INFINITY;
         double doanhThuMin = Double.POSITIVE_INFINITY;
 
-        for (Map.Entry<Integer, Double> entry : doanhThuTheoQuy.entrySet()) {
-            int quy = entry.getKey();
-            double doanhThu = entry.getValue();
+        for (int i = 0; i < 4; i++) {
+            if (!coDuLieuQuy[i]) {
+                continue;
+            }
+
+            double doanhThu = doanhThuTheoQuy[i];
+            int quy = i + 1;
+
 
             if (doanhThu > doanhThuMax) {
                 doanhThuMax = doanhThu;
@@ -57,6 +78,10 @@ public class FinancialStatsBUS {
                 doanhThuMin = doanhThu;
                 quyMin = quy;
             }
+        }
+
+         if (quyMax == -1 || quyMin == -1) {
+            return null;
         }
 
         return new QuyDoanhThuSummary(nam, quyMax, doanhThuMax, quyMin, doanhThuMin);

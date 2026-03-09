@@ -12,7 +12,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -192,25 +191,24 @@ public class FinancialStatsPanel extends JPanel implements Refreshable {
     private void loadThongKe() {
         Date tuNgay = dchTuNgay.getDate();
         Date denNgay = dchDenNgay.getDate();
-
-        if (tuNgay == null || denNgay == null) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn đầy đủ khoảng thời gian.", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        if (tuNgay.after(denNgay)) {
-            JOptionPane.showMessageDialog(this, "'Từ ngày' không được lớn hơn 'Đến ngày'.", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        int year = Integer.parseInt(new SimpleDateFormat("yyyy").format(tuNgay));
-
         String kieuThongKe = (String) cboThongKeTheo.getSelectedItem();
-        if ("Tháng".equals(kieuThongKe)) {
-            currentData = thongKeBus.getThongKeTheoThang(year);
-        } else {
-            currentData = thongKeBus.getThongKeTheoNgay(tuNgay, denNgay);
+
+         try {
+            if ("Ngày".equals(kieuThongKe)) {
+                thongKeBus.validateThongKeTheoNgay(tuNgay, denNgay);
+                currentData = thongKeBus.getThongKeTheoNgay(tuNgay, denNgay);
+            } else {
+                thongKeBus.validateThongKeTheoNam(tuNgay);
+                int year = thongKeBus.extractYear(tuNgay);
+                currentData = thongKeBus.getThongKeTheoThang(year);
+            }
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return;
         }
+
+        Date ngayChon = tuNgay == null ? new Date() : tuNgay;
+        int year = thongKeBus.extractYear(ngayChon);
 
         updateSummaryCards();
         updateQuarterSummary(year);
