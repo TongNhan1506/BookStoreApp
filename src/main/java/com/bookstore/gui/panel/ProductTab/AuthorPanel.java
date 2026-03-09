@@ -2,6 +2,8 @@ package com.bookstore.gui.panel.ProductTab;
 
 import com.bookstore.bus.AuthorBUS;
 import com.bookstore.dto.AuthorDTO;
+import com.bookstore.bus.BookBUS;
+import com.bookstore.dto.BookDTO;
 import com.bookstore.util.AppConstant;
 import com.bookstore.util.Refreshable;
 import com.formdev.flatlaf.FlatClientProperties;
@@ -26,6 +28,7 @@ public class AuthorPanel extends JPanel implements Refreshable{
     private static final Color BORDER_COLOR = Color.decode("#E0E0E0");
 
     private final AuthorBUS authorBUS;
+    private final BookBUS bookBUS;
 
     private JTextField searchField;
     private JComboBox<String> nationalityCombo;
@@ -40,12 +43,15 @@ public class AuthorPanel extends JPanel implements Refreshable{
 
     private List<AuthorDTO> allAuthors;
     private List<AuthorDTO> filteredAuthors;
+    private List<BookDTO> allBooks;
     private int selectedAuthorId = -1;
 
     public AuthorPanel() {
         authorBUS = new AuthorBUS();
+        bookBUS = new BookBUS();
         allAuthors = new ArrayList<>();
         filteredAuthors = new ArrayList<>();
+        allBooks = new ArrayList<>();
         loadAuthorData();
         initUI();
         loadCountriesToCombo();
@@ -232,6 +238,7 @@ public class AuthorPanel extends JPanel implements Refreshable{
 
     private void loadAuthorData() {
         allAuthors = authorBUS.selectAllAuthors();
+        allBooks = bookBUS.selectAllBooks();
     }
 
     private void loadCountriesToCombo() {
@@ -284,10 +291,20 @@ public class AuthorPanel extends JPanel implements Refreshable{
             tableModel.addRow(new Object[]{
                     author.getAuthorName(),
                     author.getNationality(),
-                    author.getBookCount(),
+                    countBooksByAuthorId(author.getAuthorId()),
                     "Sửa"
             });
         }
+    }
+
+    private int countBooksByAuthorId(int authorId) {
+        int count = 0;
+        for (BookDTO book : allBooks) {
+            if (book.getAuthorIdsList().contains(authorId)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private void saveAuthor() {

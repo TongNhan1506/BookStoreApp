@@ -1,7 +1,7 @@
     package com.bookstore.gui.main;
 
     import com.bookstore.dto.PermissionDTO;
-    import com.bookstore.gui.StatisticTab.StatisticsTabbedPane;
+    import com.bookstore.gui.panel.StatisticTab.StatisticsTabbedPane;
     import com.bookstore.gui.panel.AccountTab.AccountTabbedPane;
     import com.bookstore.gui.panel.BillTab.BillPanel;
     import com.bookstore.gui.panel.EmployeeTab.EmployeePanel;

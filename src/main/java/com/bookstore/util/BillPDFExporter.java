@@ -12,8 +12,7 @@ import java.util.List;
 public class BillPDFExporter {
     private static final String FONT_PATH = "C:\\Windows\\Fonts\\Arial.ttf";
 
-    public static boolean exportInvoice(String destPath, int billId, String customerName,
-                                        List<Object[]> cartItems, double totalAmount) {
+    public static boolean exportInvoice(String destPath, int billId, String customerName, List<Object[]> cartItems, double totalAmount) {
         Document document = new Document(PageSize.A5);
         try {
             PdfWriter.getInstance(document, new FileOutputStream(destPath));
