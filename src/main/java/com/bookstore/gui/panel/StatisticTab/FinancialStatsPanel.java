@@ -29,11 +29,12 @@ public class FinancialStatsPanel extends JPanel implements Refreshable {
     private final JLabel lblDoanhThuValue = new JLabel();
     private final JLabel lblChiPhiValue = new JLabel();
     private final JLabel lblLoiNhuanValue = new JLabel();
+    private final JLabel lblVonNhapHangValue = new JLabel();
     private final JLabel lblQuyCaoNhat = new JLabel("Quý doanh thu cao nhất: --");
     private final JLabel lblQuyThapNhat = new JLabel("Quý doanh thu thấp nhất: --");
 
     private final DefaultTableModel tableModel = new DefaultTableModel(
-            new Object[]{"Thời gian", "Doanh thu", "Chi phí", "Lợi nhuận"},
+            new Object[]{"Thời gian", "Doanh thu", "Lợi nhuận", "Chi phí", "Vốn nhập hàng"},
             0
     ) {
         @Override
@@ -99,12 +100,12 @@ public class FinancialStatsPanel extends JPanel implements Refreshable {
 
         JPanel pnlTop = new JPanel(new BorderLayout(0, 10));
 
-        JPanel pnlCards = new JPanel(new GridLayout(1, 3, 10, 0));
+        JPanel pnlCards = new JPanel(new GridLayout(2, 2, 10, 10));
         pnlCards.add(createSummaryCard("Doanh thu", lblDoanhThuValue, new Color(37, 99, 235)));
         pnlCards.add(createSummaryCard("Chi phí", lblChiPhiValue, new Color(220, 38, 38)));
         pnlCards.add(createSummaryCard("Lợi nhuận", lblLoiNhuanValue, new Color(22, 163, 74)));
-
-        JPanel pnlQuarterInfo = new JPanel(new GridLayout(1, 2, 12, 0));
+        pnlCards.add(createSummaryCard("Vốn nhập hàng", lblVonNhapHangValue, new Color(234, 88, 12)));
+        JPanel pnlQuarterInfo = new JPanel(new GridLayout(2, 1, 12, 10));
         pnlQuarterInfo.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         pnlQuarterInfo.setPreferredSize(new Dimension(0, QUARTER_CARD_HEIGHT + 18));
 
@@ -172,8 +173,9 @@ public class FinancialStatsPanel extends JPanel implements Refreshable {
         header.setReorderingAllowed(false);
 
         tblChiTiet.getColumnModel().getColumn(1).setCellRenderer(new CurrencyCellRenderer());
-        tblChiTiet.getColumnModel().getColumn(2).setCellRenderer(new CurrencyCellRenderer());
-        tblChiTiet.getColumnModel().getColumn(3).setCellRenderer(new ProfitCellRenderer());
+        tblChiTiet.getColumnModel().getColumn(2).setCellRenderer(new ProfitCellRenderer());
+        tblChiTiet.getColumnModel().getColumn(3).setCellRenderer(new CurrencyCellRenderer());
+        tblChiTiet.getColumnModel().getColumn(4).setCellRenderer(new CurrencyCellRenderer());
 
         JScrollPane scrollPane = new JScrollPane(tblChiTiet);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -219,10 +221,12 @@ public class FinancialStatsPanel extends JPanel implements Refreshable {
         double tongDoanhThu = currentData.stream().mapToDouble(FinancialStatsDTO::getDoanhThu).sum();
         double tongChiPhi = currentData.stream().mapToDouble(FinancialStatsDTO::getChiPhi).sum();
         double tongLoiNhuan = currentData.stream().mapToDouble(FinancialStatsDTO::getLoiNhuan).sum();
+        double tongVonNhapHang = currentData.stream().mapToDouble(FinancialStatsDTO::getVonNhapHang).sum();
 
         lblDoanhThuValue.setText(formatCurrency(tongDoanhThu));
         lblChiPhiValue.setText(formatCurrency(tongChiPhi));
         lblLoiNhuanValue.setText(formatCurrency(tongLoiNhuan));
+        lblVonNhapHangValue.setText(formatCurrency(tongVonNhapHang));
         lblLoiNhuanValue.setForeground(tongLoiNhuan < 0 ? new Color(198, 40, 40) : new Color(22, 163, 74));
     }
 
@@ -246,8 +250,9 @@ public class FinancialStatsPanel extends JPanel implements Refreshable {
             tableModel.addRow(new Object[]{
                     item.getThoiGian(),
                     item.getDoanhThu(),
+                    item.getLoiNhuan(),
                     item.getChiPhi(),
-                    item.getLoiNhuan()
+                    item.getVonNhapHang()
             });
         }
     }

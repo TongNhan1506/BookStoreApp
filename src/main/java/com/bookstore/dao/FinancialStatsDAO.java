@@ -16,14 +16,29 @@ public class FinancialStatsDAO {
 
     public List<FinancialStatsDTO> getThongKeTheoNgay(Date tuNgay, Date denNgay) {
         List<FinancialStatsDTO> list = new ArrayList<>();
-        String sql = "SELECT x.thoi_gian, SUM(x.doanh_thu) AS doanh_thu, SUM(x.chi_phi) AS chi_phi " +
+        String sql = "SELECT x.thoi_gian, SUM(x.doanh_thu) AS doanh_thu, SUM(x.chi_phi) AS chi_phi, SUM(x.von_nhap_hang) AS von_nhap_hang " +
                 "FROM (" +
-                "  SELECT DATE(b.created_date) AS thoi_gian, SUM(b.total_bill_price) AS doanh_thu, 0 AS chi_phi " +
+                "  SELECT DATE(b.created_date) AS thoi_gian, " +
+                "         SUM(b.total_bill_price) AS doanh_thu, " +
+                "         SUM(bd.quantity * COALESCE((" +
+                "             SELECT itd.import_price " +
+                "             FROM import_ticket it " +
+                "             JOIN import_ticket_detail itd ON itd.import_ticket_id = it.import_ticket_id " +
+                "             WHERE it.status = 2 " +
+                "               AND it.approved_date IS NOT NULL " +
+                "               AND itd.book_id = bd.book_id " +
+                "               AND it.approved_date <= b.created_date " +
+                "             ORDER BY it.approved_date DESC, it.import_ticket_id DESC " +
+                "             LIMIT 1" +
+                "         ), 0)) AS chi_phi, " +
+                "         0 AS von_nhap_hang " +
                 "  FROM bill b " +
+                "  JOIN bill_detail bd ON bd.bill_id = b.bill_id " +
                 "  WHERE DATE(b.created_date) BETWEEN ? AND ? " +
                 "  GROUP BY DATE(b.created_date) " +
                 "  UNION ALL " +
-                "  SELECT DATE(i.approved_date) AS thoi_gian, 0 AS doanh_thu, SUM(d.import_quantity * d.import_price) AS chi_phi " +
+                "  SELECT DATE(i.approved_date) AS thoi_gian, 0 AS doanh_thu, 0 AS chi_phi, " +
+                "         SUM(d.import_quantity * d.import_price) AS von_nhap_hang " +
                 "  FROM import_ticket i " +
                 "  JOIN import_ticket_detail d ON d.import_ticket_id = i.import_ticket_id " +
                 "  WHERE i.status = 2 AND i.approved_date IS NOT NULL AND DATE(i.approved_date) BETWEEN ? AND ? " +
@@ -48,7 +63,8 @@ public class FinancialStatsDAO {
                     Date thoiGian = rs.getDate("thoi_gian");
                     double doanhThu = rs.getDouble("doanh_thu");
                     double chiPhi = rs.getDouble("chi_phi");
-                    list.add(new FinancialStatsDTO(viewFormat.format(thoiGian), doanhThu, chiPhi));
+                    double vonNhapHang = rs.getDouble("von_nhap_hang");
+                    list.add(new FinancialStatsDTO(viewFormat.format(thoiGian), doanhThu, chiPhi, vonNhapHang));
                 }
             }
         } catch (SQLException e) {
@@ -60,14 +76,29 @@ public class FinancialStatsDAO {
 
     public List<FinancialStatsDTO> getThongKeTheoThang(int nam) {
         List<FinancialStatsDTO> list = new ArrayList<>();
-        String sql = "SELECT x.thang, SUM(x.doanh_thu) AS doanh_thu, SUM(x.chi_phi) AS chi_phi " +
+         String sql = "SELECT x.thang, SUM(x.doanh_thu) AS doanh_thu, SUM(x.chi_phi) AS chi_phi, SUM(x.von_nhap_hang) AS von_nhap_hang " +
                 "FROM (" +
-                "  SELECT MONTH(b.created_date) AS thang, SUM(b.total_bill_price) AS doanh_thu, 0 AS chi_phi " +
+                "  SELECT MONTH(b.created_date) AS thang, " +
+                "         SUM(b.total_bill_price) AS doanh_thu, " +
+                "         SUM(bd.quantity * COALESCE((" +
+                "             SELECT itd.import_price " +
+                "             FROM import_ticket it " +
+                "             JOIN import_ticket_detail itd ON itd.import_ticket_id = it.import_ticket_id " +
+                "             WHERE it.status = 2 " +
+                "               AND it.approved_date IS NOT NULL " +
+                "               AND itd.book_id = bd.book_id " +
+                "               AND it.approved_date <= b.created_date " +
+                "             ORDER BY it.approved_date DESC, it.import_ticket_id DESC " +
+                "             LIMIT 1" +
+                "         ), 0)) AS chi_phi, " +
+                "         0 AS von_nhap_hang " +
                 "  FROM bill b " +
+                "  JOIN bill_detail bd ON bd.bill_id = b.bill_id " +
                 "  WHERE YEAR(b.created_date) = ? " +
                 "  GROUP BY MONTH(b.created_date) " +
                 "  UNION ALL " +
-                "  SELECT MONTH(i.approved_date) AS thang, 0 AS doanh_thu, SUM(d.import_quantity * d.import_price) AS chi_phi " +
+                 "  SELECT MONTH(i.approved_date) AS thang, 0 AS doanh_thu, 0 AS chi_phi, " +
+                "         SUM(d.import_quantity * d.import_price) AS von_nhap_hang " +
                 "  FROM import_ticket i " +
                 "  JOIN import_ticket_detail d ON d.import_ticket_id = i.import_ticket_id " +
                 "  WHERE i.status = 2 AND i.approved_date IS NOT NULL AND YEAR(i.approved_date) = ? " +
@@ -86,7 +117,8 @@ public class FinancialStatsDAO {
                     int thang = rs.getInt("thang");
                     double doanhThu = rs.getDouble("doanh_thu");
                     double chiPhi = rs.getDouble("chi_phi");
-                    list.add(new FinancialStatsDTO("Tháng " + thang + "/" + nam, doanhThu, chiPhi));
+                    double vonNhapHang = rs.getDouble("von_nhap_hang");
+                    list.add(new FinancialStatsDTO("Tháng " + thang + "/" + nam, doanhThu, chiPhi, vonNhapHang));
                 }
             }
         } catch (SQLException e) {
