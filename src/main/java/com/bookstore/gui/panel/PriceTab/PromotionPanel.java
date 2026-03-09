@@ -60,12 +60,9 @@ public class PromotionPanel extends JPanel {
     }
 
     private void initHeader() {
-        JPanel controlPanel = new JPanel(new BorderLayout());
+        JPanel controlPanel = new JPanel(new GridBagLayout());
         controlPanel.setOpaque(false);
         controlPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
-
-        JPanel leftGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
-        leftGroup.setOpaque(false);
 
         JPanel filterBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         filterBox.setOpaque(false);
@@ -87,13 +84,7 @@ public class PromotionPanel extends JPanel {
         filterBox.add(rbPhanTram);
         filterBox.add(rbThoiGian);
 
-        leftGroup.add(filterBox);
-        leftGroup.add(createSearchWrapper());
-
-        controlPanel.add(leftGroup, BorderLayout.WEST);
-
         JButton btnAdd = new JButton("+ Thêm Khuyến Mãi") {
-
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -134,7 +125,37 @@ public class PromotionPanel extends JPanel {
         btnAdd.setBackground(new Color(35, 90, 180));
         btnAdd.setForeground(Color.WHITE);
         btnAdd.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        controlPanel.add(btnAdd, BorderLayout.EAST);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+
+
+        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.weightx = 0.0;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.insets = new Insets(0, 0, 0, 60);
+        controlPanel.add(filterBox, gbc);
+
+
+        gbc.gridx = 1;
+        gbc.weightx = 0.0;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        controlPanel.add(createSearchWrapper(), gbc);
+
+
+        gbc.gridx = 2;
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JPanel spacer = new JPanel();
+        spacer.setOpaque(false);
+        controlPanel.add(spacer, gbc);
+
+
+        gbc.gridx = 3;
+        gbc.weightx = 0.0;
+        gbc.fill = GridBagConstraints.NONE;
+        controlPanel.add(btnAdd, gbc);
 
         whiteBox = new WhiteBoxPanel();
         whiteBox.setLayout(new BorderLayout(0, 15));
@@ -144,12 +165,14 @@ public class PromotionPanel extends JPanel {
 
         add(whiteBox, BorderLayout.CENTER);
 
+
     }
 
     private JPanel createSearchWrapper() {
-        JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, -1, 0));
+        //JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, -1, 0));
+        JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setOpaque(false);
-        wrapper.setPreferredSize(new Dimension(450, 45));
+        //wrapper.setPreferredSize(new Dimension(450, 45));
 
         JPanel iconBox = new JPanel(new GridBagLayout()) {
             @Override
@@ -205,13 +228,13 @@ public class PromotionPanel extends JPanel {
             }
         };
         inputBackground.setOpaque(false);
-        inputBackground.setPreferredSize(new Dimension(300, 42));
+        //inputBackground.setPreferredSize(new Dimension(300, 42));
         inputBackground.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 15));
 
         inputBackground.add(cardPanel, BorderLayout.CENTER);
 
-        wrapper.add(iconBox);
-        wrapper.add(inputBackground);
+        wrapper.add(iconBox, BorderLayout.WEST);
+        wrapper.add(inputBackground, BorderLayout.CENTER);
         return wrapper;
     }
 

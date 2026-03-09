@@ -99,8 +99,7 @@ public class PricePanel extends JPanel implements Refreshable {
         });
 
         searchWrapper.setOpaque(false);
-        searchWrapper.setPreferredSize(new Dimension(500, 45));
-        searchWrapper.setMaximumSize(new Dimension(500, 45));
+        searchWrapper.setMaximumSize(new Dimension(800, 45));
 
         JPanel leftBox = new JPanel(new GridBagLayout()) {
             @Override
@@ -321,6 +320,7 @@ public class PricePanel extends JPanel implements Refreshable {
                 g2.setColor(getBackground());
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
                 g2.dispose();
+                super.paintComponent(g);
             }
         };
         whiteBox.setOpaque(false);

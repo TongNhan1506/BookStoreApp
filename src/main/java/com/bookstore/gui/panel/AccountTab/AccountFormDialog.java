@@ -20,6 +20,7 @@ public class AccountFormDialog extends JDialog {
     private JTextField txtUsername, txtPassword, txtRole;
     private JRadioButton radActive, radInactive;
     private JButton btnCreate, btnSave;
+    private JPanel statusPanel, bottomPanel;
 
     private AccountDTO account;
 
@@ -30,14 +31,11 @@ public class AccountFormDialog extends JDialog {
 
         setLayout(new BorderLayout());
 
-        JPanel mainPanel = new JPanel(new GridLayout(6, 2, 15, 15));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        mainPanel.setBackground(new Color(245, 245, 245));
-
         cboEmployee = new JComboBox<>();
         cboEmployee.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+                                                          boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof EmployeeDTO) {
                     EmployeeDTO emp = (EmployeeDTO) value;
@@ -54,6 +52,7 @@ public class AccountFormDialog extends JDialog {
                 return this;
             }
         });
+
         txtUsername = new JTextField();
         txtPassword = new JTextField();
         txtRole = new JTextField();
@@ -74,21 +73,11 @@ public class AccountFormDialog extends JDialog {
         ButtonGroup group = new ButtonGroup();
         group.add(radActive);
         group.add(radInactive);
-        JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         statusPanel.setOpaque(false);
         statusPanel.add(radActive);
         statusPanel.add(radInactive);
-
-        mainPanel.add(new JLabel("Chọn nhân viên:"));
-        mainPanel.add(cboEmployee);
-        mainPanel.add(new JLabel("Username:"));
-        mainPanel.add(txtUsername);
-        mainPanel.add(new JLabel("Password:"));
-        mainPanel.add(txtPassword);
-        mainPanel.add(new JLabel("Chức vụ:"));
-        mainPanel.add(txtRole);
-        mainPanel.add(new JLabel("Trạng thái:"));
-        mainPanel.add(statusPanel);
 
         btnCreate = new JButton("Tạo mới");
         btnCreate.setBackground(Color.BLACK);
@@ -99,8 +88,8 @@ public class AccountFormDialog extends JDialog {
         btnSave.setBackground(Color.BLACK);
         btnSave.setForeground(Color.WHITE);
         btnSave.setPreferredSize(new Dimension(100, 35));
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
+        bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         if (account == null) {
             bottomPanel.add(btnCreate);
         } else {
@@ -109,9 +98,36 @@ public class AccountFormDialog extends JDialog {
             txtUsername.setBackground(Color.decode("#EEEEEE"));
         }
 
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainPanel.setBackground(new Color(245, 245, 245));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        autoAdd(mainPanel, new JLabel("Chọn nhân viên:"), 0, 0, 0, gbc);
+        autoAdd(mainPanel, cboEmployee, 1, 0, 1.0, gbc);
+
+        autoAdd(mainPanel, new JLabel("Username:"), 0, 1, 0, gbc);
+        autoAdd(mainPanel, txtUsername, 1, 1, 1.0, gbc);
+
+        autoAdd(mainPanel, new JLabel("Password:"), 0, 2, 0, gbc);
+        autoAdd(mainPanel, txtPassword, 1, 2, 1.0, gbc);
+
+        autoAdd(mainPanel, new JLabel("Chức vụ:"), 0, 3, 0, gbc);
+        autoAdd(mainPanel, txtRole, 1, 3, 1.0, gbc);
+
+        autoAdd(mainPanel, new JLabel("Trạng thái:"), 0, 4, 0, gbc);
+        autoAdd(mainPanel, statusPanel, 1, 4, 1.0, gbc);
+
+        add(mainPanel, BorderLayout.CENTER);
+        add(bottomPanel, BorderLayout.SOUTH);
+
         btnCreate.addActionListener(e -> {
             AccountDTO newAcc = getDataFromForm();
-            if (newAcc == null) return;
+            if (newAcc == null)
+                return;
 
             String message = accountBUS.addAccount(newAcc);
             if (message.equals("Thêm tài khoản thành công!")) {
@@ -124,7 +140,8 @@ public class AccountFormDialog extends JDialog {
 
         btnSave.addActionListener(e -> {
             AccountDTO updatedAcc = getDataFromForm();
-            if (updatedAcc == null) return;
+            if (updatedAcc == null)
+                return;
 
             String newPassword = txtPassword.getText().trim();
             boolean isChangePassword = !newPassword.isEmpty();
@@ -138,10 +155,8 @@ public class AccountFormDialog extends JDialog {
             }
         });
 
-        add(mainPanel, BorderLayout.CENTER);
-        add(bottomPanel, BorderLayout.SOUTH);
-
         pack();
+        setMinimumSize(new Dimension(450, 420));
         setLocationRelativeTo(parent);
     }
 
@@ -202,10 +217,10 @@ public class AccountFormDialog extends JDialog {
     public AccountDTO getDataFromForm() {
         EmployeeDTO selectedEmp = (EmployeeDTO) cboEmployee.getSelectedItem();
         if (selectedEmp == null || selectedEmp.getEmployeeId() == -1) {
-            JOptionPane.showMessageDialog(this, "Không có nhân viên hợp lệ để cấp tài khoản!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Không có nhân viên hợp lệ để cấp tài khoản!", "Cảnh báo",
+                    JOptionPane.WARNING_MESSAGE);
             return null;
         }
-
 
         AccountDTO acc = new AccountDTO();
         acc.setEmployeeId(selectedEmp.getEmployeeId());
@@ -213,5 +228,12 @@ public class AccountFormDialog extends JDialog {
         acc.setPassword(txtPassword.getText().trim());
         acc.setStatus(radActive.isSelected() ? 1 : 0);
         return acc;
+    }
+
+    private void autoAdd(JPanel p, Component c, int x, int y, double weightx, GridBagConstraints gbc) {
+        gbc.gridx = x;
+        gbc.gridy = y;
+        gbc.weightx = weightx;
+        p.add(c, gbc);
     }
 }

@@ -25,7 +25,7 @@ public class StatisticsTabbedPane extends JPanel implements Refreshable{
         setLayout(new BorderLayout());
         tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
         tabbedPane.addTab("Doanh Thu", new FinancialStatsPanel());
-        tabbedPane.addTab("Sản Phẩm", new JPanel());
+        tabbedPane.addTab("Sản Phẩm", new ProductStatsPanel());
         tabbedPane.addTab("Khách Hàng", new CustomerStatsPanel());
         add(tabbedPane, BorderLayout.CENTER);
 

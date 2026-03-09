@@ -25,19 +25,34 @@ public class AccountPanel extends JPanel implements Refreshable {
     private String currentAdminPassword = "";
 
     public AccountPanel() {
-        setLayout(new BorderLayout(0, 20));
+        setLayout(new GridBagLayout());
         setOpaque(false);
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.weightx = 1.0;
 
         WhiteBoxPanel box1 = new WhiteBoxPanel();
         box1.setLayout(new BorderLayout());
         initAdminSection(box1);
-        add(box1, BorderLayout.NORTH);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weighty = 0.25;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(0, 0, 20, 0);
+        add(box1, gbc);
 
         WhiteBoxPanel box2 = new WhiteBoxPanel();
         box2.setLayout(new BorderLayout(0, 15));
         initTableSection(box2);
-        add(box2, BorderLayout.CENTER);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weighty = 0.75;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        add(box2, gbc);
 
         loadAdminData();
     }
@@ -49,7 +64,7 @@ public class AccountPanel extends JPanel implements Refreshable {
     }
 
     private void initAdminSection(WhiteBoxPanel box) {
-        JPanel adminPanel = new JPanel(new GridBagLayout());
+        JPanel adminPanel = new JPanel(new BorderLayout(0, 10));
         adminPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder(BorderFactory.createLineBorder(new Color(17, 71, 50)),
                         "Tài khoản Admin", 0, 0, new Font("Segoe UI", Font.BOLD, 14), new Color(17, 71, 50)),
@@ -74,7 +89,7 @@ public class AccountPanel extends JPanel implements Refreshable {
         header.setBackground(Color.BLACK);
         header.setForeground(Color.WHITE);
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        header.setPreferredSize(new Dimension(adminTable.getWidth(), 30));
+
 
         adminTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
@@ -101,18 +116,10 @@ public class AccountPanel extends JPanel implements Refreshable {
 
         JScrollPane scrollPane = new JScrollPane(adminTable);
         scrollPane.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.GRAY));
-        scrollPane.setPreferredSize(new Dimension(800, 72));
+        scrollPane.setPreferredSize(new Dimension(0, 60));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 1.0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        adminPanel.add(scrollPane, gbc);
-
-        gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.EAST;
-        adminPanel.add(btnP, gbc);
+        adminPanel.add(scrollPane, BorderLayout.CENTER);
+        adminPanel.add(btnP, BorderLayout.SOUTH);
 
         box.add(adminPanel, BorderLayout.NORTH);
     }
@@ -121,7 +128,6 @@ public class AccountPanel extends JPanel implements Refreshable {
         box.removeAll();
         box.setLayout(new BorderLayout(0, 15));
 
-
         JPanel searchPanel = new JPanel(new GridBagLayout());
         searchPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -129,15 +135,17 @@ public class AccountPanel extends JPanel implements Refreshable {
         JLabel lblSearch = new JLabel("Tìm kiếm:");
         lblSearch.setFont(new Font("Segoe UI", Font.BOLD, 18));
         lblSearch.setForeground(new Color(17, 71, 50));
-        gbc.gridx = 0; gbc.gridy = 0; gbc.insets = new Insets(0, 20, 0, 15);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(0, 20, 0, 15);
         searchPanel.add(lblSearch, gbc);
 
         txtSearch = new RoundedTextField(20, 15);
-        txtSearch.setPreferredSize(new Dimension(300, 35));
-        gbc.gridx = 1; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(0, 40, 0, 50);
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 0, 20);
         searchPanel.add(txtSearch, gbc);
-
 
         JButton btnAdd = new JButton("Thêm tài khoản");
         btnAdd.setBackground(new Color(17, 71, 50));
@@ -153,7 +161,9 @@ public class AccountPanel extends JPanel implements Refreshable {
             loadAccountData();
         });
 
-        gbc.gridx = 2; gbc.weightx = 0.0; gbc.fill = GridBagConstraints.NONE;
+        gbc.gridx = 2;
+        gbc.weightx = 0.0;
+        gbc.fill = GridBagConstraints.NONE;
         searchPanel.add(btnAdd, gbc);
 
         box.add(searchPanel, BorderLayout.NORTH);
@@ -217,7 +227,8 @@ public class AccountPanel extends JPanel implements Refreshable {
                 loadAccountData();
             } else {
                 for (AccountDTO acc : listAccountGoc) {
-                    if ("admin".equalsIgnoreCase(acc.getUsername())) continue;
+                    if ("admin".equalsIgnoreCase(acc.getUsername()))
+                        continue;
 
                     EmployeeDTO emp = empDAO.selectById(acc.getEmployeeId());
                     String name = (emp != null) ? emp.getEmployeeName() : "N/A";
@@ -234,7 +245,6 @@ public class AccountPanel extends JPanel implements Refreshable {
                 }
             }
         });
-
 
         JPanel tablePanel = new JPanel(new BorderLayout(5, 5));
         tablePanel.setOpaque(false);
@@ -394,8 +404,7 @@ public class AccountPanel extends JPanel implements Refreshable {
                     txtUser.getText().trim(),
                     txtPass.getText().trim(),
                     0,
-                    1
-            );
+                    1);
 
             String newPassword = txtPass.getText().trim();
             boolean isChangePassword = !newPassword.isEmpty();
