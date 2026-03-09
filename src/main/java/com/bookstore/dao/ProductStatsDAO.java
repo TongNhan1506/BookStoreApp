@@ -211,6 +211,7 @@ public class ProductStatsDAO {
                 AND YEAR(b.created_date) = ?
                 AND QUARTER(b.created_date) = ?
                 GROUP BY bk.book_id
+                HAVING SUM(bd.quantity) > 0
                 ORDER BY so_luong ASC
                 LIMIT 3
                 """;

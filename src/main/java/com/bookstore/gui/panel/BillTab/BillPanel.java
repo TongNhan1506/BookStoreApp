@@ -1,6 +1,8 @@
 package com.bookstore.gui.panel.BillTab;
 import com.bookstore.util.AppConstant;
 import com.bookstore.util.MoneyFormatter;
+import com.bookstore.gui.panel.BillTab.BillDetailDialog;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -116,10 +118,17 @@ public class BillPanel extends JPanel implements Refreshable {
         btnFilter.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD,16));
         btnFilter.setBackground(MAIN_GREEN);
         btnFilter.setForeground(Color.white);
+
         JButton btnReset = new JButton("Làm mới");
         btnReset.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
         btnReset.setBackground(Color.decode("#5674ff"));
         btnReset.setForeground(Color.WHITE);
+
+        JButton btnViewDetail = new JButton("Xem chi tiết");
+        btnViewDetail.setBackground(Color.decode(AppConstant.GREEN_COLOR_CODE));
+        btnViewDetail.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
+        btnViewDetail.setForeground(Color.WHITE);
+
 
         filterPanel.add(lbFrom);
         filterPanel.add(spFrom);
@@ -128,6 +137,7 @@ public class BillPanel extends JPanel implements Refreshable {
         filterPanel.add(txtSearch);
         filterPanel.add(btnFilter);
         filterPanel.add(btnReset);
+        filterPanel.add(btnViewDetail);
 
         panel.add(filterPanel, BorderLayout.NORTH);
 
@@ -139,6 +149,14 @@ public class BillPanel extends JPanel implements Refreshable {
             }
         };
         table = new JTable(model);
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for(int i = 0; i < table.getColumnCount(); i++){
+            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
+
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.getTableHeader().setReorderingAllowed(false);
         table.setShowGrid(true);
@@ -178,6 +196,8 @@ public class BillPanel extends JPanel implements Refreshable {
         table.getColumnModel().getColumn(4).setCellRenderer(new DefaultTableCellRenderer(){
             @Override
             protected void setValue(Object value){
+                setHorizontalAlignment(JLabel.CENTER);
+
                 if(value instanceof Number){
                     setText(MoneyFormatter.toVND(((Number)value).doubleValue()));
                 }else{
@@ -197,6 +217,22 @@ public class BillPanel extends JPanel implements Refreshable {
 
         panel.add(scrollPane, BorderLayout.CENTER);
 
+
+        btnViewDetail.addActionListener(e->{
+            int selectedRow = table.getSelectedRow();
+
+            if(selectedRow == -1){
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn hóa đơn");
+                return;
+            }
+            int modelRow = table.convertRowIndexToModel(selectedRow);
+            int billId = (int) model.getValueAt(modelRow, 0);
+
+            BillDetailDialog dialog = new BillDetailDialog(billId);
+            dialog.setLocationRelativeTo(this);
+            dialog.setVisible(true);
+        });
+
         btnReset.addActionListener(e->{
             Date today = new Date();
             spFrom.setValue(today);
@@ -211,7 +247,7 @@ public class BillPanel extends JPanel implements Refreshable {
 
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss - d/M/yyyy");
 
-            sorter.setRowFilter(new RowFilter<>(){
+            sorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>(){
                 @Override
                 public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry){
                     try{

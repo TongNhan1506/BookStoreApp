@@ -235,6 +235,7 @@ public class ImportPanel extends JPanel implements Refreshable {
     private JButton createActionButton(String text, String colorHex) {
         JButton btn = new JButton(text);
         btn.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 14));
+        btn.setPreferredSize(new Dimension(100, 50));
         btn.setForeground(Color.WHITE); btn.setBackground(Color.decode(colorHex));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.putClientProperty(FlatClientProperties.STYLE, "arc: 10;");
