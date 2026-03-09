@@ -36,4 +36,9 @@ public class AuthorDTO {
     public void setNationality(String nationality) {
         this.nationality = nationality;
     }
+
+    @Override
+    public String toString() {
+        return this.authorName;
+    }
 }
