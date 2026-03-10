@@ -756,10 +756,16 @@ public class BookFormDialog extends JDialog {
         translatorField.setText(book.getTranslator() != null ? book.getTranslator() : "");
         descriptionArea.setText(book.getDescription() != null ? book.getDescription() : "");
         if (book.getImage() != null && !book.getImage().trim().isEmpty()) {
-            File imageFile = new File(book.getImage());
+            String imageString = book.getImage();
+            File imageFile = new File(imageString);
+
+            if (!imageFile.exists()) {
+                imageFile = new File("data/book_covers/" + imageString);
+            }
+
             if (imageFile.exists()) {
-                selectedImagePath = imageFile.getAbsolutePath();
                 setSelectedImage(imageFile);
+                selectedImagePath = imageString;
             }
         }
 

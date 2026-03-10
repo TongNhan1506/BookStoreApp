@@ -25,7 +25,6 @@ WHERE book_id IN (SELECT book_id FROM import_ticket_detail WHERE import_ticket_i
 
 
 
-
 UPDATE bill SET created_date = '2026-01-05 10:15:00' WHERE bill_id = 1;
 UPDATE inventory_log SET created_date = '2026-01-05 10:15:00' WHERE reference_id = 1 AND action = 'Bán hàng';
 

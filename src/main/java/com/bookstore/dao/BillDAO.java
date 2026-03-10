@@ -192,4 +192,70 @@ public class BillDAO {
         }
         return list;
     }
+
+    public BillDTO getBillById(int billId) {
+        String sql = "SELECT b.*, employee_name, customer_name, payment_method_name " +
+                "FROM bill b " +
+                "JOIN employee e ON e.employee_id = b.employee_id " +
+                "LEFT JOIN customer c ON c.customer_id = b.customer_id " +
+                "JOIN payment_method pm ON pm.payment_method_id = b.payment_method_id " +
+                "WHERE b.bill_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, billId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new BillDTO(
+                            rs.getInt("bill_id"),
+                            rs.getTimestamp("created_date"),
+                            rs.getDouble("total_bill_price"),
+                            rs.getDouble("tax"),
+                            rs.getInt("employee_id"),
+                            rs.getString("employee_name"),
+                            rs.getInt("customer_id"),
+                            rs.getString("customer_name"),
+                            rs.getInt("payment_method_id"),
+                            rs.getString("payment_method_name"),
+                            rs.getInt("earned_points")
+                    );
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public List<BillDetailDTO> getBillDetailsByBillId(int billId) {
+        List<BillDetailDTO> list = new ArrayList<>();
+        String sql = "SELECT bd.bill_id, bd.book_id, b.book_name, bd.quantity, bd.unit_price " +
+                "FROM bill_detail bd " +
+                "JOIN book b ON bd.book_id = b.book_id " +
+                "WHERE bd.bill_id = ? " +
+                "ORDER BY bd.book_id";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, billId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new BillDetailDTO(
+                            rs.getInt("bill_id"),
+                            rs.getInt("book_id"),
+                            rs.getString("book_name"),
+                            rs.getInt("quantity"),
+                            rs.getDouble("unit_price")
+                    ));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
 }
