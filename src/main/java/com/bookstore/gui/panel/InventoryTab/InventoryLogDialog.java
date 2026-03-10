@@ -139,15 +139,15 @@ public class InventoryLogDialog extends JDialog {
         try {
             if (!dateFromStr.isEmpty()) {
                 fromDate = sdf.parse(dateFromStr);
-                System.out.println("Parse Từ ngày thành công: " + fromDate); // Debug
+                System.out.println("Parse Từ ngày thành công: " + fromDate);
             }
             if (!dateToStr.isEmpty()) {
                 toDate = sdf.parse(dateToStr);
                 toDate.setTime(toDate.getTime() + (24 * 60 * 60 * 1000) - 1);
-                System.out.println("Parse Đến ngày thành công: " + toDate); // Debug
+                System.out.println("Parse Đến ngày thành công: " + toDate);
             }
         } catch (Exception e) {
-            System.out.println("LỖI PARSE NGÀY: Bạn đã nhập sai định dạng!"); // Debug
+            System.out.println("LỖI PARSE NGÀY: Bạn đã nhập sai định dạng!");
             txtDateFrom.setText("");
             txtDateTo.setText("");
         }

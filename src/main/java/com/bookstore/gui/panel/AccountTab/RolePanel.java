@@ -152,13 +152,11 @@ public class RolePanel extends JPanel implements Refreshable {
 
     private void addEvents() {
         btnAddRole.addActionListener(e -> {
-            // Truyền ID = 0 và Tên rỗng để báo hiệu cho Dialog biết đây là Thêm Mới
             RoleDTO newRole = new RoleDTO(0, "");
 
             RoleFormDialog dialog = new RoleFormDialog((JFrame) SwingUtilities.getWindowAncestor(this), newRole);
             dialog.setVisible(true);
 
-            // Nếu Lưu thành công thì refresh lại bảng để thấy Role mới
             if (dialog.isSaved()) {
                 refresh();
             }
@@ -175,11 +173,9 @@ public class RolePanel extends JPanel implements Refreshable {
             String roleName = (String) tblRole.getValueAt(selectedRow, 1);
             RoleDTO selectedRole = new RoleDTO(roleId, roleName);
 
-            // Mở form Sửa
             RoleFormDialog dialog = new RoleFormDialog((JFrame) SwingUtilities.getWindowAncestor(this), selectedRole);
             dialog.setVisible(true);
 
-            // Cập nhật lại bảng nếu có Lưu thành công
             if (dialog.isSaved()) {
                 refresh();
             }

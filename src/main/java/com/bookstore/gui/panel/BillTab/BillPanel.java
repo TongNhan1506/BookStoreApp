@@ -1,7 +1,6 @@
 package com.bookstore.gui.panel.BillTab;
 import com.bookstore.util.AppConstant;
 import com.bookstore.util.MoneyFormatter;
-import com.bookstore.gui.panel.BillTab.BillDetailDialog;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -129,7 +128,6 @@ public class BillPanel extends JPanel implements Refreshable {
         btnViewDetail.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 16));
         btnViewDetail.setForeground(Color.WHITE);
 
-
         filterPanel.add(lbFrom);
         filterPanel.add(spFrom);
         filterPanel.add(lbTo);
@@ -155,7 +153,6 @@ public class BillPanel extends JPanel implements Refreshable {
         for(int i = 0; i < table.getColumnCount(); i++){
             table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
-
 
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.getTableHeader().setReorderingAllowed(false);
@@ -217,7 +214,6 @@ public class BillPanel extends JPanel implements Refreshable {
 
         panel.add(scrollPane, BorderLayout.CENTER);
 
-
         btnViewDetail.addActionListener(e->{
             int selectedRow = table.getSelectedRow();
 
@@ -240,31 +236,49 @@ public class BillPanel extends JPanel implements Refreshable {
             applyTodayFilter();
         });
 
-        btnFilter.addActionListener(e->{
-            Date fromDate = (Date) spFrom.getValue();
-            Date toDate = (Date) spTo.getValue();
-            String keyword = txtSearch.getText().trim();
+        btnFilter.addActionListener(e -> {
+            Date rawFromDate = (Date) spFrom.getValue();
+            Date rawToDate = (Date) spTo.getValue();
+            String keyword = txtSearch.getText().trim().toLowerCase();
+
+            Calendar calFrom = Calendar.getInstance();
+            calFrom.setTime(rawFromDate);
+            calFrom.set(Calendar.HOUR_OF_DAY, 0);
+            calFrom.set(Calendar.MINUTE, 0);
+            calFrom.set(Calendar.SECOND, 0);
+            calFrom.set(Calendar.MILLISECOND, 0);
+            Date fromDate = calFrom.getTime();
+
+            Calendar calTo = Calendar.getInstance();
+            calTo.setTime(rawToDate);
+            calTo.set(Calendar.HOUR_OF_DAY, 23);
+            calTo.set(Calendar.MINUTE, 59);
+            calTo.set(Calendar.SECOND, 59);
+            calTo.set(Calendar.MILLISECOND, 999);
+            Date toDate = calTo.getTime();
 
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss - d/M/yyyy");
 
-            sorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>(){
+            sorter.setRowFilter(new RowFilter<>() {
                 @Override
-                public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry){
-                    try{
+                public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
+                    try {
                         String dateStr = entry.getStringValue(1);
                         Date billDate = sdf.parse(dateStr);
 
                         boolean matchDate = !billDate.before(fromDate) && !billDate.after(toDate);
-
-                        String keyword = txtSearch.getText().toLowerCase();
-                        boolean matchSearch = keyword.isEmpty() || entry.getStringValue(0).toLowerCase().contains(keyword) || entry.getStringValue(3).toLowerCase().contains(keyword);
+                        boolean matchSearch = keyword.isEmpty()
+                                || entry.getStringValue(0).toLowerCase().contains(keyword)
+                                || entry.getStringValue(2).toLowerCase().contains(keyword)
+                                || entry.getStringValue(3).toLowerCase().contains(keyword);
 
                         return matchDate && matchSearch;
-                    }catch(ParseException ex){
+                    } catch (ParseException ex) {
                         return true;
                     }
                 }
             });
+
             updateStatistics();
         });
 

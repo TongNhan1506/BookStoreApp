@@ -31,7 +31,7 @@ public class PromotionBUS {
         String lowerKeyword = keyword.toLowerCase();
 
         for (PromotionDTO p : all) {
-            boolean match = false;
+            boolean match;
             switch (type) {
                 case "Tên":
                     match = p.getPromotionName().toLowerCase().contains(lowerKeyword);

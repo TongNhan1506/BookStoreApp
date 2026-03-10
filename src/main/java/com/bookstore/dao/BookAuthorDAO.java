@@ -3,12 +3,11 @@ package com.bookstore.dao;
 import com.bookstore.util.DatabaseConnection;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class BookAuthorDAO {
 
-    public boolean addAuthorsToBook(int bookId, List<Integer> authorIds) {
+    public void addAuthorsToBook(int bookId, List<Integer> authorIds) {
         String sql = "INSERT INTO book_author (book_id, author_id) VALUES (?, ?)";
 
         try (Connection c = DatabaseConnection.getConnection();
@@ -21,10 +20,8 @@ public class BookAuthorDAO {
             }
 
             ps.executeBatch();
-            return true;
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
     }
 
@@ -41,25 +38,5 @@ public class BookAuthorDAO {
             e.printStackTrace();
             return false;
         }
-    }
-
-    public List<Integer> getAuthorIdsByBookId(int bookId) {
-        List<Integer> authorIds = new ArrayList<>();
-        String sql = "SELECT author_id FROM book_author WHERE book_id = ?";
-
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-
-            ps.setInt(1, bookId);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                authorIds.add(rs.getInt("author_id"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return authorIds;
     }
 }

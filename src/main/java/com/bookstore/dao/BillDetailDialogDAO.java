@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bookstore.dto.BillDetailDTO;
 import com.bookstore.dto.BillDetailDialogDTO;
 import com.bookstore.util.DatabaseConnection;
 
@@ -52,6 +51,4 @@ public class BillDetailDialogDAO {
 
         return list;
     }
-
-
 }

@@ -6,6 +6,7 @@ import com.bookstore.util.DatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,16 +33,16 @@ public class RoleDAO {
         return list;
     }
 
-    public int insertRole(com.bookstore.dto.RoleDTO role) {
+    public int insertRole(RoleDTO role) {
         String sql = "INSERT INTO role (role_name) VALUES (?)";
-        try (java.sql.Connection conn = com.bookstore.util.DatabaseConnection.getConnection();
-             java.sql.PreparedStatement ps = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, role.getRoleName());
             int affectedRows = ps.executeUpdate();
 
             if (affectedRows > 0) {
-                try (java.sql.ResultSet rs = ps.getGeneratedKeys()) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (rs.next()) {
                         return rs.getInt(1);
                     }

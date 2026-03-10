@@ -67,20 +67,6 @@ public class CustomerDAO {
         return list;
     }
 
-    public void updatePointAndRank(int customerId, int newTotalPoint, int newRankId) {
-        String sql = "UPDATE customer SET point = ?, rank_id = ? WHERE customer_id = ?";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-
-            ps.setInt(1, newTotalPoint);
-            ps.setInt(2, newRankId);
-            ps.setInt(3, customerId);
-            ps.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public boolean updateCustomerInfo(CustomerDTO c) {
         String sql = "UPDATE customer SET customer_name = ?, customer_phone = ? WHERE customer_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();

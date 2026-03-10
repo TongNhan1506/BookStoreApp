@@ -739,7 +739,7 @@ public class BookFormDialog extends JDialog {
             book.setBookName(nameField.getText().trim());
             book.setTranslator(translatorField.getText().trim().isEmpty() ? null : translatorField.getText().trim());
             book.setDescription(descriptionArea.getText().trim().isEmpty() ? null : descriptionArea.getText().trim());
-            book.setStatus(activeRadio.isSelected() ? 1 : 0);  // int: 1 = Đang bán, 0 = Ngừng bán
+            book.setStatus(activeRadio.isSelected() ? 1 : 0);
             book.setCategoryId(categories.get(categoryCombo.getSelectedIndex() - 1).getCategoryId());
             book.setSupplierId(suppliers.get(supplierCombo.getSelectedIndex() - 1).getSupplierId());
             book.setTagDetail(selectedTags.isEmpty() ? null : String.join(",", selectedTags));
@@ -788,10 +788,9 @@ public class BookFormDialog extends JDialog {
             inactiveRadio.setSelected(true);
         }
 
-        // Tags
         if (book.getTagDetail() != null && !book.getTagDetail().isEmpty()) {
             selectedTags.addAll(Arrays.asList(book.getTagDetail().split(",")));
-            // Trim tags
+
             Set<String> trimmed = new HashSet<>();
             for (String tag : selectedTags) {
                 trimmed.add(tag.trim());

@@ -75,58 +75,6 @@ public class SupplierDAO {
         return false;
     }
 
-    public boolean exists(String supplierName){
-        String sql = "SELECT * FROM supplier WHERE supplier_name = ?";
-        try(Connection c = DatabaseConnection.getConnection();
-            PreparedStatement ps = c.prepareStatement(sql);){
-            ps.setString(1, supplierName);
-            try(ResultSet rs = ps.executeQuery()){
-                return rs.next();
-            }
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public List<SupplierDTO> searchByName(String suppliername){
-        List<SupplierDTO> list = new ArrayList<>();
-        String sql = "SELECT * FROM supplier WHERE supplier_name LIKE ?";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);){
-            ps.setString(1, "%" + suppliername + "%");
-            try(ResultSet rs = ps.executeQuery()){
-                while (rs.next()){
-                    list.add(new SupplierDTO(
-                            rs.getInt("supplier_id"),
-                            rs.getString("supplier_name"),
-                            rs.getString("supplier_address"),
-                            rs.getString("supplier_phone")
-                    ));
-                }
-            }
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public String searchByPhone(String supplierPhone){
-        String sql = "SELECT * FROM supplier WHERE supplier_phone = ?";
-        try (Connection c = DatabaseConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);){
-            ps.setString(1, supplierPhone);
-            try (ResultSet rs = ps.executeQuery()){
-                if(rs.next()){
-                    return rs.getString("supplier_name");
-                }
-            }
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     public SupplierDTO getBySupplierId(int supplierId){
         String sql = "SELECT * FROM supplier WHERE supplier_id = ?";
         try (Connection c = DatabaseConnection.getConnection();

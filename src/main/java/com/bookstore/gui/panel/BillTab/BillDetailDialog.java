@@ -110,9 +110,6 @@ public class BillDetailDialog extends JDialog{
         return panel;
     }
 
-
-
-
     private void loadTable(int billId){
         model.setRowCount(0);
 
@@ -132,9 +129,6 @@ public class BillDetailDialog extends JDialog{
             });
         }
     }
-
-
-
 
     private void loadBillInfo(int billId){
 
@@ -170,5 +164,4 @@ public class BillDetailDialog extends JDialog{
             e.printStackTrace();
         }
     }
-
 }

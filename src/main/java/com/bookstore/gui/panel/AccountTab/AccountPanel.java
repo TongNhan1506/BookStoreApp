@@ -358,22 +358,6 @@ public class AccountPanel extends JPanel implements Refreshable {
         }
     }
 
-    class ActionEditor extends DefaultCellEditor {
-        private final JButton btn = new JButton("Sửa");
-
-        public ActionEditor() {
-            super(new JCheckBox());
-            btn.setBackground(new Color(240, 173, 78));
-            btn.setForeground(Color.WHITE);
-            btn.addActionListener(e -> fireEditingStopped());
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable t, Object v, boolean s, int r, int c) {
-            return btn;
-        }
-    }
-
     private void showEditAdminDialog() {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Sửa Admin", true);
         dialog.setLayout(new BorderLayout(10, 10));

@@ -186,10 +186,10 @@ create table import_ticket_detail (
 );
 
 create table price (
-    price_id INT AUTO_INCREMENT primary key,
+    price_id INT auto_increment primary key,
     book_id INT not null,
     base_price DECIMAL(15, 0) not null,
-    profit_rate DECIMAL(5, 2) default 25.0 not null,
+    profit_rate DECIMAL(5, 2) default 40.0 not null,
     selling_price DECIMAL(15, 0) not null,
     effective_date DATETIME default current_timestamp,
     end_date DATETIME default null,
@@ -476,23 +476,24 @@ insert into membership_rank(rank_name, min_point, discount_percent) values
 ('Bạch Kim', 20000, 15);
 
 insert into customer(customer_name, customer_phone, point, rank_id) values
-("nquyleee", "0909901421", 2100, 2),
-("Lê Ngọc Quý", "0934129959", 0, 1);
+('Ý Vy', '0909901421', 2100, 2),
+('Tòng Nhân', '0909901422', 0, 1),
+('Hồng Anh', '0909909233', 7500, 3),
+('Lê Ngọc Quý', '0934129959', 0, 1);
 
 insert into payment_method(payment_method_name) values
 ('Tiền mặt'),
 ('Chuyển khoản ngân hàng'),
-('Thẻ tín dụng/Ghi nợ'),
-('Ví điện tử (Momo/ZaloPay)');
+('Thẻ tín dụng/Ghi nợ');
 
 insert into system_parameter(param_key, param_value, description) values
 ('VAT', '8', 'Thuế giá trị gia tăng mặc định (8%)'),
 ('EARNED_POINTS_PER_10K', '100', 'Số điểm nhận được trên mỗi 10K mua');
 
 insert into promotion (promotion_name, percent, start_date, end_date, status) values
-('Mừng Xuân 2026 - Giảm giá Văn học', 20.00, '2026-03-01 00:00:00', '2026-04-01 23:59:59', 1),
-('Xả kho Truyện Tranh - Flash Sale', 50.00, '2026-02-10 00:00:00', '2026-02-15 23:59:59', 1),
-('Tuần lễ Kỹ Năng Sống', 15.00, '2026-03-01 00:00:00', '2026-03-07 23:59:59', 1);
+('Mừng Xuân 2026 - Giảm giá Văn học', 10.00, '2026-03-01 00:00:00', '2026-04-01 23:59:59', 1),
+('Xả kho Truyện Tranh - Flash Sale', 30.00, '2026-02-10 00:00:00', '2026-03-01 23:59:59', 0),
+('Tuần lễ Kỹ Năng Sống', 10.00, '2026-03-01 00:00:00', '2026-04-01 23:59:59', 0);
 
 insert into promotion_detail (promotion_id, book_id)
 SELECT 1, book_id FROM book WHERE category_id = 1;
