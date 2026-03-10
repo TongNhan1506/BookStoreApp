@@ -113,7 +113,10 @@ public class CustomerSearchDialog extends JDialog {
             this.selectedCustomer = customer;
             lbName.setText("Tên khách hàng: " + customer.getCustomerName());
             lbName.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 14));
-            lbRank.setText("Hạng thành viên: " + getRankByPoint(customer.getPoint()));
+
+            String rankName = customer.getRankName() != null ? customer.getRankName() : "Chưa cập nhật";
+            lbRank.setText("Hạng thành viên: " + rankName);
+
             lbRank.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 14));
             lbPoints.setText("Điểm tích lũy: " + customer.getPoint());
             lbPoints.setFont(new Font(AppConstant.FONT_NAME, Font.PLAIN, 14));
@@ -128,12 +131,6 @@ public class CustomerSearchDialog extends JDialog {
             lbPoints.setText("Điểm tích lũy: -");
             btnSelect.setEnabled(false);
         }
-    }
-
-    private String getRankByPoint(int point) {
-        if (point >= 1000) return "Vàng";
-        if (point >= 500) return "Bạc";
-        return "Thành viên";
     }
 
     private JLabel createResultLabel(String text) {

@@ -42,32 +42,27 @@ public class PermissionDAO {
         Connection conn = null;
         try {
             conn = DatabaseConnection.getConnection();
-            // 1. TẮT AUTO COMMIT ĐỂ BẮT ĐẦU TRANSACTION
             conn.setAutoCommit(false);
 
-            // 2. Xóa sạch quyền cũ
             try (PreparedStatement psDelete = conn.prepareStatement(deleteSql)) {
                 psDelete.setInt(1, roleId);
                 psDelete.executeUpdate();
             }
 
-            // 3. Insert loạt quyền mới
             try (PreparedStatement psInsert = conn.prepareStatement(insertSql)) {
                 for (int i = 0; i < newPerms.size(); i++) {
                     com.bookstore.dto.PermissionDTO perm = newPerms.get(i);
-                    // Chỉ lưu những quyền có ít nhất 1 dấu tick
                     if (perm.isView() || perm.isAction()) {
                         psInsert.setInt(1, roleId);
-                        psInsert.setInt(2, actionIds.get(i)); // ID của action tương ứng
+                        psInsert.setInt(2, actionIds.get(i));
                         psInsert.setBoolean(3, perm.isView());
                         psInsert.setBoolean(4, perm.isAction());
-                        psInsert.addBatch(); // Gom lệnh lại để chạy siêu tốc
+                        psInsert.addBatch();
                     }
                 }
-                psInsert.executeBatch(); // Thực thi một loạt
+                psInsert.executeBatch();
             }
 
-            // 4. MỌI THỨ ỔN THỎA -> CHỐT DỮ LIỆU
             conn.commit();
             return true;
 
@@ -75,14 +70,14 @@ public class PermissionDAO {
             e.printStackTrace();
             if (conn != null) {
                 try {
-                    conn.rollback(); // CÓ LỖI -> QUAY XE CỨU DỮ LIỆU
+                    conn.rollback();
                 } catch (Exception ex) { ex.printStackTrace(); }
             }
             return false;
         } finally {
             if (conn != null) {
                 try {
-                    conn.setAutoCommit(true); // Trả lại trạng thái mặc định
+                    conn.setAutoCommit(true);
                     conn.close();
                 } catch (Exception ex) { ex.printStackTrace(); }
             }

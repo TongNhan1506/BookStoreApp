@@ -3,7 +3,7 @@ package com.bookstore.bus;
 import com.bookstore.dao.SystemParameterDAO;
 
 public class SystemParameterBUS {
-    private final SystemParameterDAO parameterDAO = new SystemParameterDAO();
+    private SystemParameterDAO parameterDAO = new SystemParameterDAO();
 
     public double getVAT() {
         String value = parameterDAO.getValueByKey("VAT");

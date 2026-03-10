@@ -2,6 +2,7 @@ package com.bookstore.gui.panel.StatisticTab;
 
 import com.bookstore.bus.CustomerBUS;
 import com.bookstore.bus.CustomerStatsBUS;
+import com.bookstore.dto.CustomerHistoryDTO;
 import com.bookstore.dto.CustomerStatsDTO;
 import com.bookstore.util.AppConstant;
 import com.bookstore.util.MoneyFormatter;
@@ -14,6 +15,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class CustomerStatsPanel extends JPanel implements Refreshable {
     private JDateChooser dcFrom, dcTo;
@@ -215,8 +220,8 @@ public class CustomerStatsPanel extends JPanel implements Refreshable {
 
     private void addEvents() {
         btnFilterDate.addActionListener(e -> {
-            java.util.Date dFrom = dcFrom.getDate();
-            java.util.Date dTo = dcTo.getDate();
+            Date dFrom = dcFrom.getDate();
+            Date dTo = dcTo.getDate();
 
             if (dFrom == null || dTo == null) {
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn đầy đủ ngày 'Từ' và 'Đến'!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
@@ -227,14 +232,19 @@ public class CustomerStatsPanel extends JPanel implements Refreshable {
                 return;
             }
 
-            java.util.Calendar cal = java.util.Calendar.getInstance();
-            cal.setTime(dTo);
-            cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
-            cal.set(java.util.Calendar.MINUTE, 59);
-            cal.set(java.util.Calendar.SECOND, 59);
+            Calendar calFrom = Calendar.getInstance();
+            calFrom.setTime(dFrom);
+            calFrom.set(Calendar.HOUR_OF_DAY, 0);
+            calFrom.set(Calendar.MINUTE, 0);
+            calFrom.set(Calendar.SECOND, 0);
+            Timestamp tsFrom = new Timestamp(calFrom.getTimeInMillis());
 
-            java.sql.Timestamp tsFrom = new java.sql.Timestamp(dFrom.getTime());
-            java.sql.Timestamp tsTo = new java.sql.Timestamp(cal.getTimeInMillis());
+            Calendar calTo = java.util.Calendar.getInstance();
+            calTo.setTime(dTo);
+            calTo.set(Calendar.HOUR_OF_DAY, 23);
+            calTo.set(Calendar.MINUTE, 59);
+            calTo.set(Calendar.SECOND, 59);
+            Timestamp tsTo = new Timestamp(calTo.getTimeInMillis());
 
             java.util.List<CustomerStatsDTO> topQtyList = customerStatsBUS.getTopCustomersByQuantity(tsFrom, tsTo);
             java.util.List<CustomerStatsDTO> topSpentList = customerStatsBUS.getTopCustomersBySpending(tsFrom, tsTo);
@@ -253,6 +263,66 @@ public class CustomerStatsPanel extends JPanel implements Refreshable {
 
             if (topQtyList.isEmpty() && topSpentList.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Không có giao dịch nào trong khoảng thời gian này.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        btnViewHistory.addActionListener(e -> {
+            CustomerStatsDTO selectedCustomer = null;
+            if (listTopQuantity.getSelectedIndex() != -1) {
+                selectedCustomer = listTopQuantity.getSelectedValue();
+            } else if (listTopSpent.getSelectedIndex() != -1) {
+                selectedCustomer = listTopSpent.getSelectedValue();
+            }
+
+            if (selectedCustomer == null) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn một khách hàng từ danh sách Top 3!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Date dFrom = dcFrom.getDate();
+            Date dTo = dcTo.getDate();
+
+            if (dFrom == null || dTo == null) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn đầy đủ ngày 'Từ' và 'Đến'!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            if (dFrom.after(dTo)) {
+                JOptionPane.showMessageDialog(this, "Ngày 'Từ' không được lớn hơn ngày 'Đến'!", "Lỗi logic", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            java.util.Calendar calFrom = java.util.Calendar.getInstance();
+            calFrom.setTime(dFrom);
+            calFrom.set(Calendar.HOUR_OF_DAY, 0);
+            calFrom.set(Calendar.MINUTE, 0);
+            calFrom.set(Calendar.SECOND, 0);
+            Timestamp tsFrom = new java.sql.Timestamp(calFrom.getTimeInMillis());
+
+            Calendar calTo = Calendar.getInstance();
+            calTo.setTime(dTo);
+            calTo.set(Calendar.HOUR_OF_DAY, 23);
+            calTo.set(Calendar.MINUTE, 59);
+            calTo.set(Calendar.SECOND, 59);
+            Timestamp tsTo = new Timestamp(calTo.getTimeInMillis());
+
+            java.util.List<CustomerHistoryDTO> historyList = customerStatsBUS.getCustomerHistory(selectedCustomer.getCustomerId(), tsFrom, tsTo);
+
+            modelHistory.setRowCount(0);
+            java.text.SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+
+            for (CustomerHistoryDTO h : historyList) {
+                modelHistory.addRow(new Object[]{
+                        h.getBillId(),
+                        sdf.format(h.getCreatedDate()),
+                        h.getCustomerName(),
+                        h.getCustomerPhone(),
+                        h.getTotalQuantity(),
+                        MoneyFormatter.toVND(h.getTotalPrice())
+                });
+            }
+
+            if (historyList.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy dữ liệu hóa đơn chi tiết!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
             }
         });
     }

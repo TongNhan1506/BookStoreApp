@@ -77,7 +77,7 @@ public class InventoryPanel extends JPanel implements Refreshable {
         btnLog.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 14));
         btnLog.setForeground(Color.WHITE);
         btnLog.setBackground(Color.decode("#1976D2"));
-        btnLog.putClientProperty(FlatClientProperties.STYLE, "arc: 10; margin: 5,15,5,15; borderWidth: 0;");
+        btnLog.putClientProperty(FlatClientProperties.STYLE, "arc: 10; margin: 5,10,5,10; borderWidth: 0;");
         btnLog.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnLog.addActionListener(e -> {
             new InventoryLogDialog(SwingUtilities.getWindowAncestor(this)).setVisible(true);

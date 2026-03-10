@@ -3,7 +3,6 @@ package com.bookstore.bus;
 import com.bookstore.dao.AuthorDAO;
 import com.bookstore.dto.AuthorDTO;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AuthorBUS {
@@ -38,21 +37,5 @@ public class AuthorBUS {
             return "Cập nhật tác giả thành công!";
         }
         return "Cập nhật tác giả thất bại!";
-    }
-
-    public List<AuthorDTO> search(String name) {
-        List<AuthorDTO> allAuthors = authorDAO.selectAllAuthors();
-        List<AuthorDTO> result = new ArrayList<>();
-
-        for (AuthorDTO a : allAuthors) {
-            if (a.getAuthorName().toLowerCase().contains(name.toLowerCase())) {
-                result.add(a);
-            }
-        }
-        return result;
-    }
-
-    public AuthorDTO getById(int id) {
-        return authorDAO.getAuthorById(id);
     }
 }

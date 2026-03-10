@@ -4,7 +4,6 @@ import com.bookstore.dao.BookAuthorDAO;
 import com.bookstore.dao.BookDAO;
 import com.bookstore.dto.BookDTO;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class BookBUS {
@@ -93,23 +92,6 @@ public class BookBUS {
 
     private String normalizeText(String value) {
         return value == null ? "" : value.trim().toLowerCase();
-    }
-
-    public List<BookDTO> search(String name) {
-        List<BookDTO> allBooks = bookDAO.selectAllBooks();
-        List<BookDTO> result = new ArrayList<>();
-        String searchName = normalizeText(name);
-
-        for (BookDTO b : allBooks) {
-            if (normalizeText(b.getBookName()).contains(searchName)) {
-                result.add(b);
-            }
-        }
-        return result;
-    }
-
-    public BookDTO getBookById(int bookId) {
-        return bookDAO.getBookbyId(bookId);
     }
 
     public void addAuthorsToBook(int bookId, List<Integer> authorIds) {

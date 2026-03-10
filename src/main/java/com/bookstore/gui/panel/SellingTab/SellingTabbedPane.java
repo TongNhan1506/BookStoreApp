@@ -10,6 +10,7 @@ public class SellingTabbedPane extends JPanel implements Refreshable{
     private JTabbedPane tabbedPane = new JTabbedPane();
     private SellingPanel sellingPanel;
     private CustomerPanel customerPanel;
+    private MembershipRankPanel membershipRankPanel;
 
     public SellingTabbedPane() {
         initUI();
@@ -34,7 +35,9 @@ public class SellingTabbedPane extends JPanel implements Refreshable{
 
         if (PermissionUtil.hasViewPermission("MANAGE_CUSTOMER")) {
             customerPanel = new CustomerPanel();
+            membershipRankPanel = new MembershipRankPanel();
             tabbedPane.addTab("Khách Hàng", customerPanel);
+            tabbedPane.addTab("Hạng Thành Viên", membershipRankPanel);
         }
 
         add(tabbedPane, BorderLayout.CENTER);

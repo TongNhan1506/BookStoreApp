@@ -169,10 +169,8 @@ public class PromotionPanel extends JPanel {
     }
 
     private JPanel createSearchWrapper() {
-        //JPanel wrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, -1, 0));
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setOpaque(false);
-        //wrapper.setPreferredSize(new Dimension(450, 45));
 
         JPanel iconBox = new JPanel(new GridBagLayout()) {
             @Override
@@ -228,7 +226,6 @@ public class PromotionPanel extends JPanel {
             }
         };
         inputBackground.setOpaque(false);
-        //inputBackground.setPreferredSize(new Dimension(300, 42));
         inputBackground.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 15));
 
         inputBackground.add(cardPanel, BorderLayout.CENTER);
@@ -376,7 +373,6 @@ public class PromotionPanel extends JPanel {
     }
 
     public void loadData() {
-
         listPromotions = bus.selectAllPromotions();
         capNhatBang(listPromotions);
     }

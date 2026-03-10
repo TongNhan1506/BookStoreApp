@@ -4,12 +4,14 @@ public class FinancialStatsDTO {
     private String thoiGian;
     private double doanhThu;
     private double chiPhi;
+    private double vonNhapHang;
     private double loiNhuan;
 
-    public FinancialStatsDTO(String thoiGian, double doanhThu, double chiPhi) {
+    public FinancialStatsDTO(String thoiGian, double doanhThu, double chiPhi, double vonNhapHang) {
         this.thoiGian = thoiGian;
         this.doanhThu = doanhThu;
         this.chiPhi = chiPhi;
+        this.vonNhapHang = vonNhapHang;
         this.loiNhuan = doanhThu - chiPhi;
     }
 
@@ -37,6 +39,14 @@ public class FinancialStatsDTO {
     public void setChiPhi(double chiPhi) {
         this.chiPhi = chiPhi;
         this.loiNhuan = this.doanhThu - this.chiPhi;
+    }
+
+    public double getVonNhapHang() {
+        return vonNhapHang;
+    }
+
+    public void setVonNhapHang(double vonNhapHang) {
+        this.vonNhapHang = vonNhapHang;
     }
 
     public double getLoiNhuan() {

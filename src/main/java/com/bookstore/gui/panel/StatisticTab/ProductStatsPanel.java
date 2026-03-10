@@ -7,6 +7,7 @@ import com.bookstore.util.Refreshable;
 import com.toedter.calendar.JDateChooser;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
@@ -62,6 +63,12 @@ public class ProductStatsPanel extends JPanel implements Refreshable{
         add(createMainPanel(), BorderLayout.CENTER);
     }
 
+
+
+
+
+
+
     private JPanel createFilterPanel(){
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15,10));
 
@@ -71,10 +78,10 @@ public class ProductStatsPanel extends JPanel implements Refreshable{
         dchTuNgay.setDateFormatString("dd/MM/yyyy");
         dchDenNgay.setDateFormatString("dd/MM/yyyy");
 
-        cboThongKeTheo.setPreferredSize(new Dimension(140,40));
-        dchTuNgay.setPreferredSize(new Dimension(150,40));
-        dchDenNgay.setPreferredSize(new Dimension(150,40));
-        btnThongKe.setPreferredSize(new Dimension(130,40));
+        cboThongKeTheo.setPreferredSize(new Dimension(120,30));
+        dchTuNgay.setPreferredSize(new Dimension(120,30));
+        dchDenNgay.setPreferredSize(new Dimension(120,30));
+        btnThongKe.setPreferredSize(new Dimension(110,30));
 
         cboThongKeTheo.setFont(filterFont);
         dchTuNgay.setFont(filterFont);
@@ -93,6 +100,12 @@ public class ProductStatsPanel extends JPanel implements Refreshable{
 
         return panel;
     }
+
+
+
+
+
+
 
     private JPanel createMainPanel(){
         JPanel panel = new JPanel(new BorderLayout(10,10));
@@ -118,6 +131,14 @@ public class ProductStatsPanel extends JPanel implements Refreshable{
         return panel;
     }
 
+
+
+
+
+
+
+
+
     private JScrollPane createTablePanel(){
         table.setRowHeight(40);
         table.setShowGrid(false);
@@ -128,11 +149,24 @@ public class ProductStatsPanel extends JPanel implements Refreshable{
         header.setForeground(Color.WHITE);
         header.setFont(new Font(AppConstant.FONT_NAME, Font.BOLD, 13));
 
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        table.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+        table.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+
         JScrollPane scroll = new JScrollPane(table);
         scroll.getVerticalScrollBar().setUnitIncrement(16);
 
         return scroll;
     }
+
+
+
+
+
+
+
+
 
     private void bindEvents(){
         btnThongKe.addActionListener(e-> loadThongKe());
@@ -171,6 +205,13 @@ public class ProductStatsPanel extends JPanel implements Refreshable{
         updateTopProducts(year);
     }
 
+
+
+
+
+
+
+
     private void updateTable(){
         tableModel.setRowCount(0);
         for(ProductStatsDTO item : currentData){
@@ -193,22 +234,29 @@ public class ProductStatsPanel extends JPanel implements Refreshable{
         List<ProductStatsDTO> topBanChay = bus.getTop3BanChayTheoQuy(year, quarter);
         List<ProductStatsDTO> topBanIt = bus.getTop3BanItTheoQuy(year, quarter);
 
-        StringBuilder banChay = new StringBuilder("Top 3 bán chạy: ");
-        StringBuilder banIt = new StringBuilder("Top 3 bán ít: ");
+        StringBuilder banChay = new StringBuilder("<html><b>Top 3 bán chạy:</b><br>");
+        StringBuilder banIt = new StringBuilder("<html><b>Top 3 bán ít:</b><br>");
 
         for(ProductStatsDTO p : topBanChay){
-            banChay.append(p.getTenSach())
-                    .append("(")
+            banChay.append("- ")
+                    .append(p.getTenSach())
+                    .append(" (")
                     .append(p.getSoLuongBan())
-                    .append("), ");
+                    .append(")")
+                    .append("<br>");
         }
 
         for(ProductStatsDTO p : topBanIt){
-            banIt.append(p.getTenSach())
-                    .append("(")
+            banIt.append("- ")
+                    .append(p.getTenSach())
+                    .append(" (")
                     .append(p.getSoLuongBan())
-                    .append("), ");
+                    .append(")")
+                    .append("<br>");
         }
+
+        banChay.append("</html>");
+        banIt.append("</html");
 
         lblTopBanChay.setText(banChay.toString());
         lblTopBanIt.setText(banIt.toString());

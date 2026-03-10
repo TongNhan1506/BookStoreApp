@@ -1,6 +1,7 @@
 package com.bookstore.bus;
 
 import com.bookstore.dao.CustomerStatsDAO;
+import com.bookstore.dto.CustomerHistoryDTO;
 import com.bookstore.dto.CustomerStatsDTO;
 
 import java.sql.Timestamp;
@@ -15,5 +16,9 @@ public class CustomerStatsBUS {
 
     public List<CustomerStatsDTO> getTopCustomersBySpending(Timestamp fromDate, Timestamp toDate) {
         return customerStatsDAO.getTopCustomersBySpending(fromDate, toDate);
+    }
+
+    public List<CustomerHistoryDTO> getCustomerHistory(int customerId, java.sql.Timestamp fromDate, java.sql.Timestamp toDate) {
+        return customerStatsDAO.getCustomerHistory(customerId, fromDate, toDate);
     }
 }

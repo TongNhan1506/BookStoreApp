@@ -11,5 +11,4 @@ public class ActionBUS {
     public List<ActionDTO> selectAllActions() {
         return actionDAO.selectAllActions();
     }
-
 }

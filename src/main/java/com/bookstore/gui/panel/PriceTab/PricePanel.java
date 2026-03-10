@@ -229,7 +229,7 @@ public class PricePanel extends JPanel implements Refreshable {
         else if (rbCategory.isSelected())
             type = "Thể loại";
 
-        String input = "";
+        String input;
 
         if (type.equals("Giá")) {
             String minStr = txtMinPrice.getText().trim();

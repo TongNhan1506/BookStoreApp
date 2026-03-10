@@ -9,7 +9,7 @@ import com.bookstore.dto.ImportDetailDTO;
 import com.bookstore.dto.InventoryLogDTO;
 import com.bookstore.dto.PriceDTO;
 
-import java.util.List; // <--- QUAN TRỌNG: Thêm dòng này để sửa lỗi 'cannot find symbol class List'
+import java.util.List;
 
 public class ImportBUS {
 
@@ -65,7 +65,7 @@ public class ImportBUS {
                     }
                 } else {
                     double initialImportPrice = d.getPrice();
-                    double defaultProfitRate = 0.25; // Lợi nhuận mặc định 25% (Hoặc lấy từ System Parameter)
+                    double defaultProfitRate = 0.4;
                     double initialSellingPrice = initialImportPrice * (1 + defaultProfitRate);
 
                     PriceDTO newPriceObj = new PriceDTO();

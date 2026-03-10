@@ -6,7 +6,6 @@ import com.bookstore.bus.AccountBUS;
 import com.bookstore.bus.EmployeeBUS;
 import com.bookstore.dto.AccountDTO;
 import com.bookstore.dto.EmployeeDTO;
-import com.bookstore.util.AppConstant;
 
 import java.awt.*;
 import java.util.List;
@@ -90,7 +89,7 @@ public class AccountFormDialog extends JDialog {
         btnSave.setPreferredSize(new Dimension(100, 35));
 
         bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        if (account == null) {
+        if (this.account == null) {
             bottomPanel.add(btnCreate);
         } else {
             bottomPanel.add(btnSave);
